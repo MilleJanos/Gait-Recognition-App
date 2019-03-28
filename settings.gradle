@@ -1,1 +1,1 @@
-include ':app'
+include ':app', ':lib', ':feature_extractor', ':model_builder', ':commonjars'
