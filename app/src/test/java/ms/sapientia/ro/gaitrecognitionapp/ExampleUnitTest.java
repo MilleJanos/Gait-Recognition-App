@@ -1,4 +1,4 @@
-package ms.sapientia.gaitrecognitionapp;
+package ms.sapientia.ro.gaitrecognitionapp;
 
 import org.junit.Test;
 

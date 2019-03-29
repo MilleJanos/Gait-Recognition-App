@@ -1,4 +1,4 @@
-package ms.sapientia.gaitrecognitionapp;
+package ms.sapientia.ro.gaitrecognitionapp;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
