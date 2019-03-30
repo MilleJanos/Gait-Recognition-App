@@ -49,7 +49,7 @@ public class MyService extends Service {
                     pausePretendLongRunningTask();
                 }else{
                     Log.d(TAG, "run: progress: "+mProgress);
-                    mProgress += 100;
+                    mProgress += 10;
                     mHandler.postDelayed(this, 100);
                 }
             }
@@ -86,6 +86,6 @@ public class MyService extends Service {
     public void onTaskRemoved(Intent rootIntent) {
         super.onTaskRemoved(rootIntent);
         // Stops when the application has been closed:
-        stopSelf();
+        //stopSelf();
     }
 }

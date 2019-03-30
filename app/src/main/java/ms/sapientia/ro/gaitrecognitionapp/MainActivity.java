@@ -151,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void bindService(){
         Intent serviceIntent = new Intent(this, MyService.class);
-        bindService(serviceIntent, mViewModel.getServiceConnection(), Context.BIND_AUTO_CREATE);
+        bindService(serviceIntent, mViewModel.getServiceConnection(), Context.BIND_ABOVE_CLIENT);    //Context.BIND_AUTO_CREATE
     }
 
     private void BindViews() {
