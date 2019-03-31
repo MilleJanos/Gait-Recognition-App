@@ -1,4 +1,4 @@
-package ms.sapientia.ro.gaitrecognitionapp;
+package ms.sapientia.ro.gaitrecognitionapp.old;
 
 import android.app.Service;
 import android.content.Intent;
