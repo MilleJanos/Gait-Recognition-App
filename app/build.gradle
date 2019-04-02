@@ -26,23 +26,25 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     //androidTestImplementation 'com.android.support.test:runner:1.0.2'
     //androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-
+    //
     // Modules
     api fileTree(include: ['weka.jar'], dir: '../commonjars/libs')
     implementation project(':feature_extractor')
     implementation project(':model_builder')
-
+    //
     // Lifecycle components:
     def archLifecycleVersion = "1.1.1"
     implementation "android.arch.lifecycle:extensions:$archLifecycleVersion"
     annotationProcessor "android.arch.lifecycle:compiler:$archLifecycleVersion"
-
+    //
     // Firebase
     implementation 'com.google.firebase:firebase-storage:16.1.0'
     implementation 'com.google.firebase:firebase-auth:16.2.0'
     implementation 'com.google.firebase:firebase-core:16.0.8'
     //implementation 'com.androidhuman.rxfirebase2:firebase-core:16.0.5.0'
     implementation 'com.google.firebase:firebase-core:16.0.8'
-
+    //
+    //api fileTree(include: ['Accelerometer.java'], dir: '../commonclasses/src/main/java/ms/sapientia/ro/commonclasses')
+    implementation project(':commonclasses')
 }
 apply plugin: 'com.google.gms.google-services'

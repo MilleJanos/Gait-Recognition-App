@@ -1,4 +1,4 @@
-package ms.sapientia.ro.gaitrecognitionapp.model;
+package ms.sapientia.ro.commonclasses;
 
 public class Accelerometer {
     /*
@@ -44,22 +44,6 @@ public class Accelerometer {
 
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
-    }
-
-    public void setX(double x) {
-        this.x = x;
-    }
-
-    public void setY(double y) {
-        this.y = y;
-    }
-
-    public void setZ(double z) {
-        this.z = z;
-    }
-
-    public void setStep(int step) {
-        this.step = step;
     }
 
     @Override

@@ -1,9 +1,11 @@
 apply plugin: 'java-library'
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     api fileTree(include: ['wekaSTRIPPED.jar'], dir: '../commonjars/libs')
-    compile project(path: ':feature_extractor')//
+    compile project(path: ':feature_extractor')
+    //
+    implementation project(':commonclasses')
 }
 
 sourceCompatibility = "7"

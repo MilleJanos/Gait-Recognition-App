@@ -1,8 +1,8 @@
 package ms.sapientia.ro.model_builder;
 
-import ms.sapientia.ro.feature_extractor.Accelerometer;
+import ms.sapientia.ro.FeatureExtractor;
+import ms.sapientia.ro.commonclasses.Accelerometer;
 import ms.sapientia.ro.feature_extractor.Feature;
-import ms.sapientia.ro.feature_extractor.FeatureExtractor;
 import ms.sapientia.ro.feature_extractor.FeatureExtractorException;
 import ms.sapientia.ro.feature_extractor.IUtil;
 import ms.sapientia.ro.feature_extractor.Settings;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static ms.sapientia.ro.feature_extractor.FeatureExtractor.extractFeaturesFromArrayListToArrayListOfFeatures;
+import static ms.sapientia.ro.FeatureExtractor.extractFeaturesFromArrayListToArrayListOfFeatures;
 
 
 public class GaitVerification implements IGaitVerification {

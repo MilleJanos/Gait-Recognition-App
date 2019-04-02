@@ -1,10 +1,17 @@
-package ms.sapientia.ro.feature_extractor;
+package ms.sapientia.ro;
 
 import java.util.ArrayList;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
+import java.util.List;
 import java.util.Scanner;
+
+import ms.sapientia.ro.commonclasses.Accelerometer;
+import ms.sapientia.ro.feature_extractor.Feature;
+import ms.sapientia.ro.feature_extractor.FeatureExtractorException;
+import ms.sapientia.ro.feature_extractor.Settings;
+import ms.sapientia.ro.feature_extractor.Util;
 
 /**
  * This is a class with static methods meant to extract features from a dataset
@@ -33,29 +40,29 @@ public class FeatureExtractor {
      * @param dataset ArrayList containing the data as Accelerometer object
      * @param userId subject Id
      * @return ArrayList containing the resulting Feature objects
-     * @throws FeatureExtractorException if userId is
+     * @throws FeatureExtractorLibrary.FeatureExtractorException if userId is
      * empty
-     * @throws FeatureExtractorException if Settings are
+     * @throws FeatureExtractorLibrary.FeatureExtractorException if Settings are
      * not properly given
-     * @throws FeatureExtractorException if dataset is
+     * @throws FeatureExtractorLibrary.FeatureExtractorException if dataset is
      * empty
      * @since 23 ‎July, ‎2018
      */
-    public static ArrayList<Feature> extractFeaturesFromArrayListToArrayListOfFeatures(ArrayList<Accelerometer> dataset, String userId) throws ms.sapientia.ro.feature_extractor.FeatureExtractorException {
+    public static ArrayList<Feature> extractFeaturesFromArrayListToArrayListOfFeatures(ArrayList<Accelerometer> dataset, String userId) throws FeatureExtractorException {
         if (dataset.isEmpty()) {
-            throw new ms.sapientia.ro.feature_extractor.FeatureExtractorException(TAG + "empty dataset");
+            throw new FeatureExtractorException(TAG + "empty dataset");
         }
         if (userId.isEmpty()) {
-            throw new ms.sapientia.ro.feature_extractor.FeatureExtractorException(TAG + "invalid or empty userID");
+            throw new FeatureExtractorException(TAG + "invalid or empty userID");
         }
-        if (ms.sapientia.ro.feature_extractor.Settings.settingsAreSet()) {
-            if (ms.sapientia.ro.feature_extractor.Settings.isUsingCycles()) {
+        if (Settings.settingsAreSet()) {
+            if (Settings.isUsingCycles()) {
                 return extractFeaturesFromArrayListToArrayListOfFeaturesUsingCycles(dataset, userId);
             } else {
                 return extractFeaturesFromArrayListToArrayListOfFeaturesUsingFrames(dataset, userId);
             }
         } else {
-            throw new ms.sapientia.ro.feature_extractor.FeatureExtractorException(TAG + "Settings are not set correctly");
+            throw new FeatureExtractorException(TAG + "Settings are not set correctly");
         }
     }
 
@@ -78,24 +85,24 @@ public class FeatureExtractor {
      * empty
      * @since 23 ‎July, ‎2018
      */
-    public static void extractFeaturesFromArrayListToFile(ArrayList<Accelerometer> dataset, String userId, String filename) throws ms.sapientia.ro.feature_extractor.FeatureExtractorException {
+    public static void extractFeaturesFromArrayListToFile(ArrayList<Accelerometer> dataset, String userId, String filename) throws FeatureExtractorException {
         if (dataset.isEmpty()) {
-            throw new ms.sapientia.ro.feature_extractor.FeatureExtractorException(TAG + "empty dataset");
+            throw new FeatureExtractorException(TAG + "empty dataset");
         }
         if (userId.isEmpty()) {
-            throw new ms.sapientia.ro.feature_extractor.FeatureExtractorException(TAG + "invalid userID");
+            throw new FeatureExtractorException(TAG + "invalid userID");
         }
         if (filename.isEmpty()) {
-            throw new ms.sapientia.ro.feature_extractor.FeatureExtractorException(TAG + "incorrect filename");
+            throw new FeatureExtractorException(TAG + "incorrect filename");
         }
-        if (ms.sapientia.ro.feature_extractor.Settings.settingsAreSet()) {
-            if (ms.sapientia.ro.feature_extractor.Settings.isUsingCycles()) {
-                extractFeaturesFromArrayListToFileUsingCycles(dataset, userId, filename + (ms.sapientia.ro.feature_extractor.Settings.getOutputFileType() == ms.sapientia.ro.feature_extractor.Settings.FileType.ARFF ? ".arff" : ".csv"));
+        if (Settings.settingsAreSet()) {
+            if (Settings.isUsingCycles()) {
+                extractFeaturesFromArrayListToFileUsingCycles(dataset, userId, filename + (Settings.getOutputFileType() == Settings.FileType.ARFF ? ".arff" : ".csv"));
             } else {
-                extractFeaturesFromArrayListToFileUsingFrames(dataset, userId, filename + (ms.sapientia.ro.feature_extractor.Settings.getOutputFileType() == ms.sapientia.ro.feature_extractor.Settings.FileType.ARFF ? ".arff" : ".csv"));
+                extractFeaturesFromArrayListToFileUsingFrames(dataset, userId, filename + (Settings.getOutputFileType() == Settings.FileType.ARFF ? ".arff" : ".csv"));
             }
         } else {
-            throw new ms.sapientia.ro.feature_extractor.FeatureExtractorException(TAG + "Settings are not set correctly");
+            throw new FeatureExtractorException(TAG + "Settings are not set correctly");
         }
     }
 
@@ -113,22 +120,22 @@ public class FeatureExtractor {
      * empty
      * @since 23 ‎July, ‎2018
      */
-    public static ArrayList<Feature> extractFeaturesFromCsvFileToArrayListOfFeatures(String inputFileName) throws ms.sapientia.ro.feature_extractor.FeatureExtractorException {
-        if (ms.sapientia.ro.feature_extractor.Settings.settingsAreSet()) {
-            String userId = ms.sapientia.ro.feature_extractor.Settings.getDefaultUserId();
+    public static ArrayList<Feature> extractFeaturesFromCsvFileToArrayListOfFeatures(String inputFileName) throws FeatureExtractorException {
+        if (Settings.settingsAreSet()) {
+            String userId = Settings.getDefaultUserId();
             if (inputFileName.matches("[A-Za-z0-9]+_[A-Za-z0-9]+_.*")) {
                 userId = inputFileName.substring(inputFileName.indexOf('_') + 1, inputFileName.indexOf('_', inputFileName.indexOf('_') + 1));
             }
-            if (ms.sapientia.ro.feature_extractor.Settings.isUsingCycles()) {
+            if (Settings.isUsingCycles()) {
                 return extractFeaturesFromCsvFileToArrayListOfFeaturesUsingCycles(inputFileName, userId);
             } else {
                 return extractFeaturesFromCsvFileToArrayListOfFeaturesUsingFrames(inputFileName, userId);
             }
         } else {
             if (inputFileName.isEmpty()) {
-                throw new ms.sapientia.ro.feature_extractor.FeatureExtractorException(TAG + "incorrect filename");
+                throw new FeatureExtractorException(TAG + "incorrect filename");
             }
-            throw new ms.sapientia.ro.feature_extractor.FeatureExtractorException(TAG + "Settings are not set correctly");
+            throw new FeatureExtractorException(TAG + "Settings are not set correctly");
         }
     }
 
@@ -146,27 +153,31 @@ public class FeatureExtractor {
      * empty
      * @since 23 ‎July, ‎2018
      */
-    public static void extractFeaturesFromCsvFileToFile(String inputFileName, String outputFileName) throws ms.sapientia.ro.feature_extractor.FeatureExtractorException {
-        if (ms.sapientia.ro.feature_extractor.Settings.settingsAreSet() && !inputFileName.isEmpty() && !outputFileName.isEmpty()) {
-            String userId = ms.sapientia.ro.feature_extractor.Settings.getDefaultUserId();
+    public static void extractFeaturesFromCsvFileToFile(String inputFileName, String outputFileName) throws FeatureExtractorException {
+        if (Settings.settingsAreSet() && !inputFileName.isEmpty() && !outputFileName.isEmpty()) {
+            String userId = Settings.getDefaultUserId();
             if (inputFileName.matches("[A-Za-z0-9]+_[A-Za-z0-9]+_.*")) {
                 userId = inputFileName.substring(inputFileName.indexOf('_') + 1, inputFileName.indexOf('_', inputFileName.indexOf('_') + 1));
                 System.out.println(userId);
             }
-            if (ms.sapientia.ro.feature_extractor.Settings.isUsingCycles()) {
-                extractFeaturesFromCsvFileToFileUsingCycles(inputFileName, outputFileName + (ms.sapientia.ro.feature_extractor.Settings.getOutputFileType() == ms.sapientia.ro.feature_extractor.Settings.FileType.ARFF ? ".arff" : ".csv"), userId);
+            if (Settings.isUsingCycles()) {
+                extractFeaturesFromCsvFileToFileUsingCycles(inputFileName, outputFileName + (Settings.getOutputFileType() == Settings.FileType.ARFF ? ".arff" : ".csv"), userId);
             } else {
-                extractFeaturesFromCsvFileToFileUsingFrames(inputFileName, outputFileName + (ms.sapientia.ro.feature_extractor.Settings.getOutputFileType() == ms.sapientia.ro.feature_extractor.Settings.FileType.ARFF ? ".arff" : ".csv"), userId);
+                extractFeaturesFromCsvFileToFileUsingFrames(inputFileName, outputFileName + (Settings.getOutputFileType() == Settings.FileType.ARFF ? ".arff" : ".csv"), userId);
             }
         } else {
             if (inputFileName.isEmpty() || outputFileName.isEmpty()) {
-                throw new ms.sapientia.ro.feature_extractor.FeatureExtractorException(TAG + "incorrect filename");
+                throw new FeatureExtractorException(TAG + "incorrect filename");
             }
-            throw new ms.sapientia.ro.feature_extractor.FeatureExtractorException(TAG + "Settings are not set correctly");
+            throw new FeatureExtractorException(TAG + "Settings are not set correctly");
         }
     }
 
-    private static ArrayList<Feature> extractFeaturesFromArrayListToArrayListOfFeaturesUsingFrames(ArrayList<Accelerometer> dataset, String userId) throws ms.sapientia.ro.feature_extractor.FeatureExtractorException {
+    private static ArrayList<Feature> extractFeaturesFromArrayListToArrayListOfFeaturesUsingFrames(List<Accelerometer> dataset, String userId) throws FeatureExtractorException {
+        if(Settings.isUsingPreprocessing()){
+            dataset = preprocess(dataset);
+        }
+
         ArrayList<Feature> features = new ArrayList<>();
 
         double[] cordX = {};
@@ -178,9 +189,9 @@ public class FeatureExtractor {
         final int bins = 10;
         int position = 0;  //indicates the position in the cordX,cordY,... arrays
 
-        WINSIZE = ms.sapientia.ro.feature_extractor.Settings.getFrameSize();
+        WINSIZE = Settings.getFrameSize();
 
-        int skippedDataPointsCount = ms.sapientia.ro.feature_extractor.Settings.getNumFramesIgnored() * ms.sapientia.ro.feature_extractor.Settings.getFrameSize();
+        int skippedDataPointsCount = Settings.getNumFramesIgnored() * Settings.getFrameSize();
         for (int i = skippedDataPointsCount; i < dataset.size() - skippedDataPointsCount; ++i) { //skipping first and last N frames
             if (dataset.size() - skippedDataPointsCount - i < WINSIZE) { //skip the part frames (last acceptable frame)
                 break;
@@ -197,7 +208,7 @@ public class FeatureExtractor {
                 cordX[position] = dataset.get(i).getX();
                 cordY[position] = dataset.get(i).getY();
                 cordZ[position] = dataset.get(i).getZ();
-                Amag[position] = Math.sqrt(cordX[position] * cordX[position] + cordY[position] * cordY[position] + cordZ[position] * cordZ[position]);
+                Amag[position] = calculateMagnitude(cordX[position], cordY[position], cordZ[position]);
 
                 //zero crossing
                 if (position > 0) {
@@ -219,7 +230,7 @@ public class FeatureExtractor {
                     //-------FEATURES
                     //min
                     if (cordX.length <= 0) {
-                        throw new ms.sapientia.ro.feature_extractor.FeatureExtractorException(TAG + "negative array length");
+                        throw new FeatureExtractorException(TAG + "negative array length");
                     }
                     minX = min(cordX, position);
                     minY = min(cordY, position);
@@ -231,7 +242,7 @@ public class FeatureExtractor {
                     meanZ = mean(cordZ, position);
                     meanA = mean(Amag, position);
                     if (Double.isNaN(meanX)) {
-                        throw new ms.sapientia.ro.feature_extractor.FeatureExtractorException(TAG + "NANerror " + position + "," + dataset.get(i).getStep());
+                        throw new FeatureExtractorException(TAG + "NANerror " + position + "," + dataset.get(i).getStep());
                     }
 
                     //adding features
@@ -240,8 +251,8 @@ public class FeatureExtractor {
                             stddev(cordX, position, meanX), stddev(cordY, position, meanY), stddev(cordZ, position, meanZ), stddev(Amag, position, meanA),
                             absdif(cordX, position, meanX), absdif(cordY, position, meanY), absdif(cordZ, position, meanZ), absdif(Amag, position, meanA),
                             (double) zero[0] / position, (double) zero[1] / position, (double) zero[2] / position,
-                            histogram(cordX, position, -1.5 * 9.8, 1.5 * 9.8, bins), histogram(cordY, position, -1.5 * 9.8, 1.5 * 9.8, bins), histogram(cordZ, position, -1.5 * 9.8, 1.5 * 9.8, bins), histogram(Amag, position, 0, 3 * 9.8, bins),
-                            userId));
+                            histogram(cordX, position, -Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins), histogram(cordY, position, Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins), histogram(cordZ, position, -Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins), histogram(Amag, position, 0, 2 * Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins),
+                            userId));                   ///-Settings.c_G*G, Settings.c_G*G                                                                                                                                      0, 2*Settings.c_G*G
 
                     zero[0] = zero[1] = zero[2] = 0;
                     cordX = new double[WINSIZE + 1];
@@ -256,7 +267,11 @@ public class FeatureExtractor {
         return features;
     }
 
-    private static ArrayList<Feature> extractFeaturesFromArrayListToArrayListOfFeaturesUsingCycles(ArrayList<Accelerometer> dataset, String userId) throws ms.sapientia.ro.feature_extractor.FeatureExtractorException {
+    private static ArrayList<Feature> extractFeaturesFromArrayListToArrayListOfFeaturesUsingCycles(List<Accelerometer> dataset, String userId) throws FeatureExtractorException {
+        if(Settings.isUsingPreprocessing()){
+            dataset = preprocess(dataset);
+        }
+
         ArrayList<Feature> features = new ArrayList<>();
 
         double[] cordX = {};
@@ -291,11 +306,11 @@ public class FeatureExtractor {
         cyclometer = dataset.get(0).getStep();
 
         int i = 0;
-        while (dataset.get(i).getStep() <= cyclometer+ ms.sapientia.ro.feature_extractor.Settings.getNumStepsIgnored()) { //skipping first N steps
+        while (dataset.get(i).getStep() <= cyclometer + Settings.getNumStepsIgnored()) { //skipping first N steps
             ++i;
         }
 
-        int lastStep = dataset.get(dataset.size() - 1).getStep() - ms.sapientia.ro.feature_extractor.Settings.getNumStepsIgnored(); //first step that is not accepted anymore
+        int lastStep = dataset.get(dataset.size() - 1).getStep() - Settings.getNumStepsIgnored(); //first step that is not accepted anymore
         cyclometer++;
         for (; i < dataset.size(); ++i) {
             //using the biggest WINSIZE at declaration
@@ -307,7 +322,7 @@ public class FeatureExtractor {
                 cordX[position] = dataset.get(i).getX();
                 cordY[position] = dataset.get(i).getY();
                 cordZ[position] = dataset.get(i).getZ();
-                Amag[position] = Math.sqrt(cordX[position] * cordX[position] + cordY[position] * cordY[position] + cordZ[position] * cordZ[position]);
+                Amag[position] = calculateMagnitude(cordX[position], cordY[position], cordZ[position]);
 
                 //zero crossing
                 if (position > 0) {
@@ -332,7 +347,7 @@ public class FeatureExtractor {
                     //-------FEATURES
                     //min
                     if (cordX.length <= 0) {
-                        throw new ms.sapientia.ro.feature_extractor.FeatureExtractorException(TAG + "negative array length");
+                        throw new FeatureExtractorException(TAG + "negative array length");
                     }
                     minX = min(cordX, position);
                     minY = min(cordY, position);
@@ -344,7 +359,7 @@ public class FeatureExtractor {
                     meanZ = mean(cordZ, position);
                     meanA = mean(Amag, position);
                     if (Double.isNaN(meanX)) {
-                        throw new ms.sapientia.ro.feature_extractor.FeatureExtractorException(TAG + "NANerror " + cyclometer + "," + counter + ", step " + dataset.get(i).getStep());
+                        throw new FeatureExtractorException(TAG + "NANerror " + cyclometer + "," + counter + ", step " + dataset.get(i).getStep());
                     }
 
                     //adding features
@@ -353,7 +368,7 @@ public class FeatureExtractor {
                             stddev(cordX, position, meanX), stddev(cordY, position, meanY), stddev(cordZ, position, meanZ), stddev(Amag, position, meanA),
                             absdif(cordX, position, meanX), absdif(cordY, position, meanY), absdif(cordZ, position, meanZ), absdif(Amag, position, meanA),
                             (double) zero[0] / position, (double) zero[1] / position, (double) zero[2] / position,
-                            histogram(cordX, position, -1.5 * 9.8, 1.5 * 9.8, bins), histogram(cordY, position, -1.5 * 9.8, 1.5 * 9.8, bins), histogram(cordZ, position, -1.5 * 9.8, 1.5 * 9.8, bins), histogram(Amag, position, 0, 3 * 9.8, bins),
+                            histogram(cordX, position, -Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins), histogram(cordY, position, -Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins), histogram(cordZ, position, -Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins), histogram(Amag, position, 0, 2 * Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins),
                             userId));
 
                     zero[0] = zero[1] = zero[2] = 0;
@@ -371,7 +386,11 @@ public class FeatureExtractor {
         return features;
     }
 
-    private static void extractFeaturesFromArrayListToFileUsingCycles(ArrayList<Accelerometer> dataset, String userId, String filename) throws ms.sapientia.ro.feature_extractor.FeatureExtractorException {
+    private static void extractFeaturesFromArrayListToFileUsingCycles(List<Accelerometer> dataset, String userId, String filename) throws FeatureExtractorException {
+        if(Settings.isUsingPreprocessing()){
+            dataset = preprocess(dataset);
+        }
+
         double[] cordX = {};
         double[] cordZ = {};
         double[] cordY = {};
@@ -384,11 +403,11 @@ public class FeatureExtractor {
         int position = 0;  //indicates the position in the cordX,cordY,... arrays
         //search the biggest WINSIZE
         try (PrintStream writer = generateOutputFile(filename)) {
-            if (ms.sapientia.ro.feature_extractor.Settings.getOutputHasHeader()) {//adding header to output
-                if (ms.sapientia.ro.feature_extractor.Settings.getOutputFileType() == ms.sapientia.ro.feature_extractor.Settings.FileType.CSV) {
+            if (Settings.getOutputHasHeader()) {//adding header to output
+                if (Settings.getOutputFileType() == Settings.FileType.CSV) {
                     writer.print(generateCsvHeader());
                 }
-                if (ms.sapientia.ro.feature_extractor.Settings.getOutputFileType() == ms.sapientia.ro.feature_extractor.Settings.FileType.ARFF) {
+                if (Settings.getOutputFileType() == Settings.FileType.ARFF) {
                     writer.print(generateArffHeader(userId));
                 }
             }
@@ -413,11 +432,11 @@ public class FeatureExtractor {
             counter = 0;
             cyclometer = dataset.get(0).getStep();
             int i = 0;
-            while (dataset.get(i).getStep() <= cyclometer+ ms.sapientia.ro.feature_extractor.Settings.getNumStepsIgnored()) { //skipping first N steps
+            while (dataset.get(i).getStep() <= cyclometer + Settings.getNumStepsIgnored()) { //skipping first N steps
                 ++i;
             }
 
-            int lastStep = dataset.get(dataset.size() - 1).getStep() - ms.sapientia.ro.feature_extractor.Settings.getNumStepsIgnored(); //first step that is not accepted anymore
+            int lastStep = dataset.get(dataset.size() - 1).getStep() - Settings.getNumStepsIgnored(); //first step that is not accepted anymore
             cyclometer++;
             for (; i < dataset.size(); ++i) {
                 //using the biggest WINSIZE at declaration
@@ -425,13 +444,13 @@ public class FeatureExtractor {
                 cordZ = new double[WINSIZE + 1];
                 cordY = new double[WINSIZE + 1];
                 Amag = new double[WINSIZE + 1];
-                counter=i;
+                counter = i;
 
                 while (cyclometer == dataset.get(i).getStep() && position < WINSIZE) { //while it is in the same step
                     cordX[position] = dataset.get(i).getX();
                     cordY[position] = dataset.get(i).getY();
                     cordZ[position] = dataset.get(i).getZ();
-                    Amag[position] = Math.sqrt(cordX[position] * cordX[position] + cordY[position] * cordY[position] + cordZ[position] * cordZ[position]);
+                    Amag[position] = calculateMagnitude(cordX[position], cordY[position], cordZ[position]);
 
                     //zero crossing
                     if (position > 0) {
@@ -456,7 +475,7 @@ public class FeatureExtractor {
                         //-------FEATURES
                         //min
                         if (cordX.length <= 0) {
-                            throw new ms.sapientia.ro.feature_extractor.FeatureExtractorException(TAG + "negative array length");
+                            throw new FeatureExtractorException(TAG + "negative array length");
                         }
                         minX = min(cordX, position);
                         minY = min(cordY, position);
@@ -476,7 +495,7 @@ public class FeatureExtractor {
                         meanZ = mean(cordZ, position);
                         meanA = mean(Amag, position);
                         if (Double.isNaN(meanX)) {
-                            throw new ms.sapientia.ro.feature_extractor.FeatureExtractorException(TAG + "NANerror " + cyclometer + "," + counter + ", step " + dataset.get(i).getStep());
+                            throw new FeatureExtractorException(TAG + "NANerror " + cyclometer + "," + counter + ", step " + dataset.get(i).getStep());
                         }
                         dataString.append(meanX);
                         dataString.append(",");
@@ -512,13 +531,13 @@ public class FeatureExtractor {
                         dataString.append((double) zero[2] / position);
                         dataString.append(",");
 
-                        dataString.append(histoToString(histogram(cordX, position, -1.5 * 9.8, 1.5 * 9.8, bins), bins));
+                        dataString.append(histoToString(histogram(cordX, position, -Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins), bins));
                         dataString.append(",");
-                        dataString.append(histoToString(histogram(cordY, position, -1.5 * 9.8, 1.5 * 9.8, bins), bins));
+                        dataString.append(histoToString(histogram(cordY, position, -Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins), bins));
                         dataString.append(",");
-                        dataString.append(histoToString(histogram(cordZ, position, -1.5 * 9.8, 1.5 * 9.8, bins), bins));
+                        dataString.append(histoToString(histogram(cordZ, position, -Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins), bins));
                         dataString.append(",");
-                        dataString.append(histoToString(histogram(Amag, position, 0, 3 * 9.8, bins), bins));
+                        dataString.append(histoToString(histogram(Amag, position, 0, 2 * Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins), bins));
                         dataString.append(",");
 
                         dataString.append(userId);
@@ -541,7 +560,11 @@ public class FeatureExtractor {
         }
     }
 
-    private static void extractFeaturesFromArrayListToFileUsingFrames(ArrayList<Accelerometer> dataset, String userId, String filename) throws FeatureExtractorException {
+    private static void extractFeaturesFromArrayListToFileUsingFrames(List<Accelerometer> dataset, String userId, String filename) throws FeatureExtractorException {
+        if(Settings.isUsingPreprocessing()){
+            dataset = preprocess(dataset);
+        }
+
         double[] cordX = {};
         double[] cordZ = {};
         double[] cordY = {};
@@ -578,7 +601,7 @@ public class FeatureExtractor {
                     cordX[position] = dataset.get(i).getX();
                     cordY[position] = dataset.get(i).getY();
                     cordZ[position] = dataset.get(i).getZ();
-                    Amag[position] = Math.sqrt(cordX[position] * cordX[position] + cordY[position] * cordY[position] + cordZ[position] * cordZ[position]);
+                    Amag[position] = calculateMagnitude(cordX[position], cordY[position], cordZ[position]);
 
                     //zero crossing
                     if (position > 0) {
@@ -656,13 +679,13 @@ public class FeatureExtractor {
                         dataString.append((double) zero[2] / position);
                         dataString.append(",");
 
-                        dataString.append(histoToString(histogram(cordX, position, -1.5 * 9.8, 1.5 * 9.8, bins), bins));
+                        dataString.append(histoToString(histogram(cordX, position, -Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins), bins));
                         dataString.append(",");
-                        dataString.append(histoToString(histogram(cordY, position, -1.5 * 9.8, 1.5 * 9.8, bins), bins));
+                        dataString.append(histoToString(histogram(cordY, position, -Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins), bins));
                         dataString.append(",");
-                        dataString.append(histoToString(histogram(cordZ, position, -1.5 * 9.8, 1.5 * 9.8, bins), bins));
+                        dataString.append(histoToString(histogram(cordZ, position, -Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins), bins));
                         dataString.append(",");
-                        dataString.append(histoToString(histogram(Amag, position, 0, 3 * 9.8, bins), bins));
+                        dataString.append(histoToString(histogram(Amag, position, 0, 2 * Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins), bins));
                         dataString.append(",");
 
                         dataString.append(userId);
@@ -698,7 +721,7 @@ public class FeatureExtractor {
             scanner.nextLine();
         }
 
-        ArrayList<Accelerometer> dataset = new ArrayList<>();
+        List<Accelerometer> dataset = new ArrayList<>();
         while (scanner.hasNextLine()) {  //lines starting the first index in cycles.txt
 
             String line = scanner.nextLine().trim();
@@ -715,6 +738,10 @@ public class FeatureExtractor {
                     Double.parseDouble(items[2]),
                     Double.parseDouble(items[3]),
                     Integer.parseInt(items[4])));
+        }
+
+        if(Settings.isUsingPreprocessing()){
+            dataset = preprocess(dataset);
         }
 
         double[] cordX = {};
@@ -749,7 +776,7 @@ public class FeatureExtractor {
         counter = 0;
 
         int i = 0;
-        while (dataset.get(i).getStep() <= cyclometer+Settings.getNumStepsIgnored()) { //skipping first N steps
+        while (dataset.get(i).getStep() <= cyclometer + Settings.getNumStepsIgnored()) { //skipping first N steps
             ++i;
         }
 
@@ -760,13 +787,13 @@ public class FeatureExtractor {
             cordZ = new double[WINSIZE + 1];
             cordY = new double[WINSIZE + 1];
             Amag = new double[WINSIZE + 1];
-            counter=i;
+            counter = i;
 
             while (cyclometer == dataset.get(i).getStep() && position < WINSIZE) { //while it is in the same step
                 cordX[position] = dataset.get(i).getX();
                 cordY[position] = dataset.get(i).getY();
                 cordZ[position] = dataset.get(i).getZ();
-                Amag[position] = Math.sqrt(cordX[position] * cordX[position] + cordY[position] * cordY[position] + cordZ[position] * cordZ[position]);
+                Amag[position] = calculateMagnitude(cordX[position], cordY[position], cordZ[position]);
 
                 //zero crossing
                 if (position > 0) {
@@ -812,7 +839,7 @@ public class FeatureExtractor {
                             stddev(cordX, position, meanX), stddev(cordY, position, meanY), stddev(cordZ, position, meanZ), stddev(Amag, position, meanA),
                             absdif(cordX, position, meanX), absdif(cordY, position, meanY), absdif(cordZ, position, meanZ), absdif(Amag, position, meanA),
                             (double) zero[0] / position, (double) zero[1] / position, (double) zero[2] / position,
-                            histogram(cordX, position, -1.5 * 9.8, 1.5 * 9.8, bins), histogram(cordY, position, -1.5 * 9.8, 1.5 * 9.8, bins), histogram(cordZ, position, -1.5 * 9.8, 1.5 * 9.8, bins), histogram(Amag, position, 0, 3 * 9.8, bins),
+                            histogram(cordX, position, -Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins), histogram(cordY, position, -Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins), histogram(cordZ, position, -Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins), histogram(Amag, position, 0, 2 * Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins),
                             userId));
 
                     zero[0] = zero[1] = zero[2] = 0;
@@ -845,7 +872,7 @@ public class FeatureExtractor {
             scanner.nextLine();
         }
 
-        ArrayList<Accelerometer> dataset = new ArrayList<>();
+        List<Accelerometer> dataset = new ArrayList<>();
         while (scanner.hasNextLine()) {  //lines starting the first index in cycles.txt
 
             String line = scanner.nextLine().trim();
@@ -862,6 +889,10 @@ public class FeatureExtractor {
                     Double.parseDouble(items[2]),
                     Double.parseDouble(items[3]),
                     Integer.parseInt(items[4])));
+        }
+
+        if(Settings.isUsingPreprocessing()){
+            dataset = preprocess(dataset);
         }
 
         WINSIZE = Settings.getFrameSize();
@@ -891,7 +922,7 @@ public class FeatureExtractor {
                 cordX[position] = dataset.get(i).getX();
                 cordY[position] = dataset.get(i).getY();
                 cordZ[position] = dataset.get(i).getZ();
-                Amag[position] = Math.sqrt(cordX[position] * cordX[position] + cordY[position] * cordY[position] + cordZ[position] * cordZ[position]);
+                Amag[position] = calculateMagnitude(cordX[position], cordY[position], cordZ[position]);
 
                 //zero crossing
                 if (position > 0) {
@@ -937,7 +968,7 @@ public class FeatureExtractor {
                             stddev(cordX, position, meanX), stddev(cordY, position, meanY), stddev(cordZ, position, meanZ), stddev(Amag, position, meanA),
                             absdif(cordX, position, meanX), absdif(cordY, position, meanY), absdif(cordZ, position, meanZ), absdif(Amag, position, meanA),
                             (double) zero[0] / position, (double) zero[1] / position, (double) zero[2] / position,
-                            histogram(cordX, position, -1.5 * 9.8, 1.5 * 9.8, bins), histogram(cordY, position, -1.5 * 9.8, 1.5 * 9.8, bins), histogram(cordZ, position, -1.5 * 9.8, 1.5 * 9.8, bins), histogram(Amag, position, 0, 3 * 9.8, bins),
+                            histogram(cordX, position, -Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins), histogram(cordY, position, -Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins), histogram(cordZ, position, -Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins), histogram(Amag, position, 0, 2 * Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins),
                             userId));
 
                     zero[0] = zero[1] = zero[2] = 0;
@@ -962,7 +993,7 @@ public class FeatureExtractor {
             throw new FeatureExtractorException(TAG + "Unable to open file " + inputFileName);
         }
 
-        ArrayList<Accelerometer> dataset = new ArrayList<>();
+        List<Accelerometer> dataset = new ArrayList<>();
 
         if (Settings.getInputHasHeader() && scanner.hasNextLine()) {
             scanner.nextLine(); //skipping header
@@ -984,6 +1015,10 @@ public class FeatureExtractor {
                     Double.parseDouble(items[2]),
                     Double.parseDouble(items[3]),
                     Integer.parseInt(items[4])));
+        }
+
+        if(Settings.isUsingPreprocessing()){
+            dataset = preprocess(dataset);
         }
 
         double[] cordX = {};
@@ -1026,7 +1061,7 @@ public class FeatureExtractor {
             }
 
             counter = 0;
-            cyclometer = dataset.get(0).getStep()+Settings.getNumStepsIgnored();
+            cyclometer = dataset.get(0).getStep() + Settings.getNumStepsIgnored();
 
             int i = 0;
             while (dataset.get(i).getStep() < cyclometer) { //skipping first N steps
@@ -1041,14 +1076,14 @@ public class FeatureExtractor {
                 cordZ = new double[WINSIZE + 1];
                 cordY = new double[WINSIZE + 1];
                 Amag = new double[WINSIZE + 1];
-                counter=i;
+                counter = i;
 
                 //System.out.println(i+ " < "+ dataset.size()+ " && " +cyclometer +" == " +dataset.get(i).getStep());
                 while (i < dataset.size() && cyclometer == dataset.get(i).getStep()) { //while it is in the same step
                     cordX[position] = dataset.get(i).getX();
                     cordY[position] = dataset.get(i).getY();
                     cordZ[position] = dataset.get(i).getZ();
-                    Amag[position] = Math.sqrt(cordX[position] * cordX[position] + cordY[position] * cordY[position] + cordZ[position] * cordZ[position]);
+                    Amag[position] = calculateMagnitude(cordX[position], cordY[position], cordZ[position]);
 
                     //zero crossing
                     if (position > 0) {
@@ -1130,13 +1165,13 @@ public class FeatureExtractor {
                         dataString.append((double) zero[2] / position);
                         dataString.append(",");
 
-                        dataString.append(histoToString(histogram(cordX, position, -1.5 * 9.8, 1.5 * 9.8, bins), bins));
+                        dataString.append(histoToString(histogram(cordX, position, -Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins), bins));
                         dataString.append(",");
-                        dataString.append(histoToString(histogram(cordY, position, -1.5 * 9.8, 1.5 * 9.8, bins), bins));
+                        dataString.append(histoToString(histogram(cordY, position, -Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins), bins));
                         dataString.append(",");
-                        dataString.append(histoToString(histogram(cordZ, position, -1.5 * 9.8, 1.5 * 9.8, bins), bins));
+                        dataString.append(histoToString(histogram(cordZ, position, -Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins), bins));
                         dataString.append(",");
-                        dataString.append(histoToString(histogram(Amag, position, 0, 3 * 9.8, bins), bins));
+                        dataString.append(histoToString(histogram(Amag, position, 0, 2 * Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins), bins));
                         dataString.append(",");
 
                         dataString.append(userId);
@@ -1170,7 +1205,7 @@ public class FeatureExtractor {
             scanner.nextLine();
         }
 
-        ArrayList<Accelerometer> dataset = new ArrayList<>();
+        List<Accelerometer> dataset = new ArrayList<>();
         while (scanner.hasNextLine()) {  //lines starting the first index in cycles.txt
 
             String line = scanner.nextLine().trim();
@@ -1187,6 +1222,10 @@ public class FeatureExtractor {
                     Double.parseDouble(items[2]),
                     Double.parseDouble(items[3]),
                     Integer.parseInt(items[4])));
+        }
+
+        if(Settings.isUsingPreprocessing()){
+            dataset = preprocess(dataset);
         }
 
         double[] cordX = {};
@@ -1210,7 +1249,7 @@ public class FeatureExtractor {
 
             WINSIZE = Settings.getFrameSize();
 
-            int skippedDataPointsCount = Settings.getNumFramesIgnored()  * Settings.getFrameSize();
+            int skippedDataPointsCount = Settings.getNumFramesIgnored() * Settings.getFrameSize();
             for (int i = skippedDataPointsCount; i < dataset.size() - skippedDataPointsCount; ++i) { //skipping first and last N frames
                 if (dataset.size() - skippedDataPointsCount - i < WINSIZE) { //skip the part frames (last acceptable frame)
                     break;
@@ -1227,7 +1266,7 @@ public class FeatureExtractor {
                     cordX[position] = dataset.get(i).getX();
                     cordY[position] = dataset.get(i).getY();
                     cordZ[position] = dataset.get(i).getZ();
-                    Amag[position] = Math.sqrt(cordX[position] * cordX[position] + cordY[position] * cordY[position] + cordZ[position] * cordZ[position]);
+                    Amag[position] = calculateMagnitude(cordX[position], cordY[position], cordZ[position]);
 
                     //zero crossing
                     if (position > 0) {
@@ -1305,13 +1344,13 @@ public class FeatureExtractor {
                         dataString.append((double) zero[2] / position);
                         dataString.append(",");
 
-                        dataString.append(histoToString(histogram(cordX, position, -1.5 * 9.8, 1.5 * 9.8, bins), bins));
+                        dataString.append(histoToString(histogram(cordX, position, -Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins), bins));
                         dataString.append(",");
-                        dataString.append(histoToString(histogram(cordY, position, -1.5 * 9.8, 1.5 * 9.8, bins), bins));
+                        dataString.append(histoToString(histogram(cordY, position, -Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins), bins));
                         dataString.append(",");
-                        dataString.append(histoToString(histogram(cordZ, position, -1.5 * 9.8, 1.5 * 9.8, bins), bins));
+                        dataString.append(histoToString(histogram(cordZ, position, -Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins), bins));
                         dataString.append(",");
-                        dataString.append(histoToString(histogram(Amag, position, 0, 3 * 9.8, bins), bins));
+                        dataString.append(histoToString(histogram(Amag, position, 0, 2 * Settings.getHistogramGravityMultiplier() * Settings.GRAVITY, bins), bins));
                         dataString.append(",");
 
                         dataString.append(userId);
@@ -1435,6 +1474,14 @@ public class FeatureExtractor {
         return header.toString();
     }
 
+    private static double calculateMagnitude(double cordX, double cordY, double cordZ) {
+        return Math.sqrt(cordX * cordX + cordY * cordY + cordZ * cordZ);
+    }
+
+    private static double calculateMagnitude(Accelerometer dataPoint) {
+        return Math.sqrt(dataPoint.getX() * dataPoint.getX() + dataPoint.getY() * dataPoint.getY() + dataPoint.getZ() * dataPoint.getZ());
+    }
+
     private static double min(double[] arr, int length) {
         double m = arr[0];
         for (int i = 0; i < length; ++i) {
@@ -1520,5 +1567,54 @@ public class FeatureExtractor {
         return str;
     }
 
-}
+    private static List<Accelerometer> preprocess(List<Accelerometer> inputData) {
+//        if (Settings.isUsingDynamicPreprocessingThreshold()) {
+//            Settings.setPreprocessingThreshold(magnitudeMean(inputData));        
+//        }
+//
+//        List<Accelerometer> outputData = new ArrayList<>();
+//
+//        int incrementationValue = Settings.getPreprocessingInterval() / 10;
+//        for (int i = 0; i < inputData.size(); i += incrementationValue) { //making bigger steps for faster performance
+//            if (shouldEliminateInterval(inputData, i)) {
+//                //System.out.print(i+" ");
+//                i += Settings.getPreprocessingInterval(); //skipping the useless data
+//                i -= incrementationValue;
+//            } else { //keeping the useful data
+//                for (int j = i; j < i + incrementationValue; ++j) {
+//                    outputData.add(inputData.get(j));
+//                }
+//            }
+//        }
+//
+//        return outputData;
+        return (new Util()).preprocess(inputData);
+    }
 
+//    private static boolean shouldEliminateInterval(List<Accelerometer> data, int startIndex) {
+//        int intervalSize;
+//        if (data.size() - startIndex > Settings.getPreprocessingInterval()) {
+//            intervalSize = Settings.getPreprocessingInterval();
+//        } else {
+//            intervalSize = data.size() - startIndex;
+//        }
+//
+//        for (int i = startIndex; i < startIndex + intervalSize; ++i) {
+//            if (calculateMagnitude(data.get(i)) > Settings.getPreprocessingThreshold()) {
+//                return false;
+//            }
+//        }
+//
+//        return true;
+//    }
+//
+//    private static double magnitudeMean(List<Accelerometer> data) {
+//        double sum = 0.0;
+//
+//        for (Accelerometer accel : data) {
+//            sum += calculateMagnitude(accel);
+//        }
+//
+//        return sum / data.size();
+//    }
+}

@@ -1,15 +1,21 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package ms.sapientia.ro.feature_extractor;
-
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import ms.sapientia.ro.FeatureExtractor;
+import ms.sapientia.ro.commonclasses.Accelerometer;
 import ms.sapientia.ro.feature_extractor.FeatureExtractorException;
 
 /**
@@ -24,7 +30,8 @@ public class FeatureExtractorLibraryMainTest {
 
     /**
      * This is the function that contains invocations of the FeatureExtractor
-     * class functions with the specified settings
+     * class functions with the specified settings, also containing a more
+     * detailed usage example
      *
      * @author Krisztian Nemeth
      * @version 1.0
@@ -32,40 +39,35 @@ public class FeatureExtractorLibraryMainTest {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        //preprocessingTest();
+
 
         //THESE ARE ALL JUST TEST
         //THEY CAN GIVE YOU INSIGHT ABOUT THE LIBRARY'S USAGE
 
         //String IOFolder = "../FeatureExtractorLibrary_IO_files/";
-        String current = null;
-        try {
-            current = new File( "." ).getCanonicalPath();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        System.out.println("Current dir:"+current);
-        String currentDir = System.getProperty("user.dir");
-        System.out.println("Current dir using System:" +currentDir);
-
-        //**************
-        String IOFolder = "./data/";
+        String IOFolder = "data/";
         String inputFileName = "data_ttJMxBAjuHNVLCKhaXNvBTFDbIc2_20181122_161810.csv";
         String outputFileName = "features_ttJMxBAjuHNVLCKhaXNvBTFDbIc2_20181122_161810";
-
+        
         //settings regarding the input and output files
-        ms.sapientia.ro.feature_extractor.Settings.setInputHasHeader(true); //input has a header that has to be skipped
-        ms.sapientia.ro.feature_extractor.Settings.setOutputHasHeader(true); //output will have a header
-        ms.sapientia.ro.feature_extractor.Settings.setOutputFileType(ms.sapientia.ro.feature_extractor.Settings.FileType.ARFF); //output will be an .arff file
-        ms.sapientia.ro.feature_extractor.Settings.setDefaultUserId("dummy");
+        Settings.setInputHasHeader(true); //input has a header that has to be skipped
+        Settings.setOutputHasHeader(true); //output will have a header
+        Settings.setOutputFileType(Settings.FileType.ARFF); //output will be an .arff file
+        Settings.setDefaultUserId("dummy");
 
         //if we would like to use walking cycles based feature extraction
-        //Settings.usingCycles();
+        //Settings.usingCycles(); 
         //Settings.setNumStepsIgnored(1); //ignoring first and last step
-
+        
         //if we would like to use walking cycles based feature extraction
-        ms.sapientia.ro.feature_extractor.Settings.usingFrames(128); //using frames made of 128 datapoints
-        ms.sapientia.ro.feature_extractor.Settings.setNumFramesIgnored(2); //ignoring first and last 2 frames (256 datapoints in this scenario)
+        Settings.usingFrames(128); //using frames made of 128 datapoints
+        Settings.setNumFramesIgnored(2); //ignoring first and last 2 frames (256 datapoints in this scenario)
 
+        Settings.usingPreprocessing(true);
+        Settings.setUseDynamicPreprocessingThreshold(true);
+        Settings.setPreprocessingInterval(128);
+        
         //now based on the previous settings we are extracting features from the input file
         try {
             //extracting into a file
@@ -88,12 +90,12 @@ public class FeatureExtractorLibraryMainTest {
             System.exit(1);
         }
 
-        if (ms.sapientia.ro.feature_extractor.Settings.getInputHasHeader() && scanner.hasNextLine()) {
+        if (Settings.getInputHasHeader() && scanner.hasNextLine()) {
             scanner.nextLine();
         }
 
         ArrayList<Accelerometer> dataset = new ArrayList<>();
-        while (scanner.hasNextLine()) {  //lines starting the first index
+        while (scanner.hasNextLine()) {  //lines starting the first index 
 
             String line = scanner.nextLine().trim();
 
@@ -115,13 +117,97 @@ public class FeatureExtractorLibraryMainTest {
         //exract features from the dataset
         try {
             //extracting into a file
-            FeatureExtractor.extractFeaturesFromArrayListToFile(dataset, outputFileName, ms.sapientia.ro.feature_extractor.Settings.getDefaultUserId());
+            FeatureExtractor.extractFeaturesFromArrayListToFile(dataset, outputFileName, Settings.getDefaultUserId());
 
             //extracting into a list
-            List<Feature> featureList2 = FeatureExtractor.extractFeaturesFromArrayListToArrayListOfFeatures(dataset, ms.sapientia.ro.feature_extractor.Settings.getDefaultUserId());
+            List<Feature> featureList2 = FeatureExtractor.extractFeaturesFromArrayListToArrayListOfFeatures(dataset, Settings.getDefaultUserId());
             //System.out.println(featureList2);
         } catch (FeatureExtractorException ex) {
             Logger.getLogger(FeatureExtractorLibraryMainTest.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
+    private static void preprocessingTest() {
+        String IOFolder = "../FeatureExtractorLibrary_IO_files/";
+        String inputFileName = "rawdata_complex_sample.csv";
+        String outputFileName = "test_features_complex_sample";
+        String preprocessedInputFileName = "preprocessed_rawdata_complex_sample.csv";
+        String preprocessedOutputFileName = "test_features_preprocessed_complex_sample";
+
+        Settings.setInputHasHeader(false); //input has a header that has to be skipped
+        Settings.setOutputHasHeader(true); //output will have a header
+        Settings.setOutputFileType(Settings.FileType.CSV); //output will be an .csv file
+        Settings.setDefaultUserId("dummy");
+
+        Settings.usingFrames(128); //using frames made of 128 datapoints
+        //Settings.setNumFramesIgnored(2); //ignoring first and last 2 frames (256 datapoints in this scenario)
+
+        //preprocessing
+        Settings.usingPreprocessing(true);
+        //Settings.setPreprocessingThreshold(10);
+        Settings.setUseDynamicPreprocessingThreshold(true);
+        //Settings.setPreprocessingThreshold(10);
+        Settings.setPreprocessingInterval(128);
+
+        //preprocessJustTheFile(IOFolder, inputFileName, preprocessedInputFileName);
+
+        //extracting features from the input file
+        /*try {
+            FeatureExtractor.extractFeaturesFromCsvFileToFile(IOFolder + inputFileName, IOFolder + outputFileName);
+            
+            Settings.usingPreprocessing(false);
+            FeatureExtractor.extractFeaturesFromCsvFileToFile(IOFolder + preprocessedInputFileName, IOFolder + preprocessedOutputFileName);
+        } catch (FeatureExtractorException ex) {
+            Logger.getLogger(FeatureExtractorLibraryMainTest.class.getName()).log(Level.SEVERE, null, ex);
+        }*/
+    }
+
+    //in order to use this, you must change "preprocess" function's visibility modifier to public in FeatureExtractor
+//    private static void preprocessJustTheFile(String IOFolder, String inputFileName, String outputFileName) {
+//        Scanner scanner = null;
+//        try {
+//            scanner = new Scanner(new File(IOFolder + inputFileName));
+//        } catch (FileNotFoundException ex) {
+//            System.out.println("Unable to open file " + IOFolder + inputFileName);
+//            System.exit(1);
+//        }
+//
+//        if (Settings.getInputHasHeader() && scanner.hasNextLine()) {
+//            scanner.nextLine();
+//        }
+//
+//        List<Accelerometer> dataset = new ArrayList<>();
+//        while (scanner.hasNextLine()) {  //lines starting the first index 
+//
+//            String line = scanner.nextLine().trim();
+//
+//            if (line.isEmpty()) {
+//                continue;
+//            }
+//            String items[] = line.split(",");
+//            if (items.length != 5) {
+//                System.out.println("Corrupted input file error");
+//                return;
+//            }
+//            dataset.add(new Accelerometer(Long.parseLong(items[0]), //timesptamp
+//                    Double.parseDouble(items[1]), //X
+//                    Double.parseDouble(items[2]), //Y
+//                    Double.parseDouble(items[3]), //Z
+//                    Integer.parseInt(items[4])));                    //stepNumber
+//        }
+//
+//        dataset = FeatureExtractor.preprocess(dataset);
+//
+//        PrintStream writer = null;
+//
+//        try {
+//            writer = new PrintStream(IOFolder + outputFileName);
+//        } catch (FileNotFoundException ex) {
+//            ex.printStackTrace();
+//        }
+//
+//        for (Accelerometer accel : dataset) {
+//            writer.println(accel.getTimeStamp() + "," + accel.getX() + "," + accel.getY() + "," + accel.getZ() + "," + accel.getStep());
+//        }
+//    }
 }

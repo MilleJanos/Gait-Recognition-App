@@ -1,5 +1,9 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package ms.sapientia.ro.feature_extractor;
-
 
 import java.util.Arrays;
 
@@ -107,13 +111,13 @@ public class Feature {
      * @since 23 ‎July, ‎2018
      */
     public Feature(double min[],
-                   double avgAcceleration[],
-                   double stdDev[],
-                   double avgAbsDiff[],
-                   double zeroCrossing[],
-                   int noOfBins,
-                   double bins[],
-                   String userID) {
+            double avgAcceleration[],
+            double stdDev[],
+            double avgAbsDiff[],
+            double zeroCrossing[],
+            int noOfBins,
+            double bins[],
+            String userID) {
 
         minX = min[0];
         minY = min[1];
@@ -182,12 +186,12 @@ public class Feature {
      * @since 23 ‎July, ‎2018
      */
     public Feature(double minX, double minY, double minZ, double minMag,
-                   double avgAccelerationX, double avgAccelerationY, double avgAccelerationZ, double avgAccelerationMag,
-                   double stdDevX, double stdDevY, double stdDevZ, double stdDevMag,
-                   double avgAbsDiffX, double avgAbsDiffY, double avgAbsDiffZ, double avgAbsDiffMag,
-                   double zeroCrossingX, double zeroCrossingY, double zeroCrossingZ,
-                   double binsX[], double binsY[], double binsZ[], double binsMag[],
-                   String userID) {
+            double avgAccelerationX, double avgAccelerationY, double avgAccelerationZ, double avgAccelerationMag,
+            double stdDevX, double stdDevY, double stdDevZ, double stdDevMag,
+            double avgAbsDiffX, double avgAbsDiffY, double avgAbsDiffZ, double avgAbsDiffMag,
+            double zeroCrossingX, double zeroCrossingY, double zeroCrossingZ,
+            double binsX[], double binsY[], double binsZ[], double binsMag[],
+            String userID) {
         this.minX = minX;
         this.minY = minY;
         this.minZ = minZ;
@@ -293,25 +297,25 @@ public class Feature {
         header.append("@data");
     }
 
-    public String getHeader(ms.sapientia.ro.feature_extractor.Settings.FileType filetype){
-        if(filetype == ms.sapientia.ro.feature_extractor.Settings.FileType.ARFF){
+    public String getHeader(Settings.FileType filetype){
+        if(filetype == Settings.FileType.ARFF){
             if(header.length()<1){
                 generateHeader();
             }
             return header.toString();
         }
         return "minimum_for_axis_X,minimum_for_axis_Y,minimum_for_axis_Z,minimum_for_magnitude,"
-                + "average_acceleration_for_axis_X,average_acceleration_for_axis_Y,average_acceleration_for_axis_Z,average_acceleration_for_magnitude,"
-                + "standard_deviation_for_axis_X,standard_deviation_for_axis_Y,standard_deviation_for_axis_Z,standard_deviation_for_magnitude,"
-                + "average_absolute_difference_for_axis_X,average_absolute_difference_for_axis_Y,average_absolute_difference_for_axis_Z,average_absolute_difference_for_magnitude,"
-                + "zero_crossing_rate_for_axis_X,zero_crossing_rate_for_axis_Y,zero_crossing_rate_for_axis_Z,"
-                + "bin0_X,bin1_X,bin2_X,bin3_X,bin4_X,bin5_X,bin6_X,bin7_X,bin8_X,bin9_X,"
-                + "bin0_Y,bin1_Y,bin2_Y,bin3_Y,bin4_Y,bin5_Y,bin6_Y,bin7_Y,bin8_Y,bin9_Y,"
-                + "bin0_Z,bin1_Z,bin2_Z,bin3_Z,bin4_Z,bin5_Z,bin6_Z,bin7_Z,bin8_Z,bin9_Z,"
-                + "bin0_magnitude,bin1_magnitude,bin2_magnitude,bin3_magnitude,bin4_magnitude,bin5_magnitude,bin6_magnitude,bin7_magnitude,bin8_magnitude,bin9_magnitude,"
-                + "userID\n";
+            + "average_acceleration_for_axis_X,average_acceleration_for_axis_Y,average_acceleration_for_axis_Z,average_acceleration_for_magnitude,"
+            + "standard_deviation_for_axis_X,standard_deviation_for_axis_Y,standard_deviation_for_axis_Z,standard_deviation_for_magnitude,"
+            + "average_absolute_difference_for_axis_X,average_absolute_difference_for_axis_Y,average_absolute_difference_for_axis_Z,average_absolute_difference_for_magnitude,"
+            + "zero_crossing_rate_for_axis_X,zero_crossing_rate_for_axis_Y,zero_crossing_rate_for_axis_Z,"
+            + "bin0_X,bin1_X,bin2_X,bin3_X,bin4_X,bin5_X,bin6_X,bin7_X,bin8_X,bin9_X,"
+            + "bin0_Y,bin1_Y,bin2_Y,bin3_Y,bin4_Y,bin5_Y,bin6_Y,bin7_Y,bin8_Y,bin9_Y,"
+            + "bin0_Z,bin1_Z,bin2_Z,bin3_Z,bin4_Z,bin5_Z,bin6_Z,bin7_Z,bin8_Z,bin9_Z,"
+            + "bin0_magnitude,bin1_magnitude,bin2_magnitude,bin3_magnitude,bin4_magnitude,bin5_magnitude,bin6_magnitude,bin7_magnitude,bin8_magnitude,bin9_magnitude,"
+            + "userID\n";
     }
-
+    
     @Override
     public String toString() {
         return "Feature{" + minX + "," + minY + "," + minZ + "," + minMag + "," + avgAccelerationX + "," + avgAccelerationY + "," + avgAccelerationZ + "," + avgAccelerationMag + "," + stdDevX + "," + stdDevY + "," + stdDevZ + "," + stdDevMag + "," + avgAbsDiffX + "," + avgAbsDiffY + "," + avgAbsDiffZ + "," + avgAbsDiffMag + "," + zeroCrossingX + "," + zeroCrossingY + "," + zeroCrossingZ + "," + Arrays.toString(binsX) + "," + Arrays.toString(binsY) + "," + Arrays.toString(binsZ) + "," + Arrays.toString(binsMag) + "," + userId + "}\n";
@@ -444,9 +448,9 @@ public class Feature {
         int binMag = binsX.length+binsY.length+binsZ.length;
         for (int i = 0; i < binsX.length; ++i) {
 //            arr[counter + i] = binsX[i];
-//
-//
-//
+//            
+//            
+//            
             arr[counter + i] = binsX[i];
             arr[counter + binY + i] = binsY[i];
             arr[counter + binZ + i] = binsZ[i];
@@ -460,4 +464,3 @@ public class Feature {
         return arr;
     }
 }
-

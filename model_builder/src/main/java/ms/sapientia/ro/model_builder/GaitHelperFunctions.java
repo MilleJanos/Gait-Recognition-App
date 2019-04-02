@@ -1,6 +1,7 @@
 package ms.sapientia.ro.model_builder;
 
-import ms.sapientia.ro.feature_extractor.FeatureExtractor;
+import ms.sapientia.ro.FeatureExtractor;
+//import ms.sapientia.ro.feature_extractor.FeatureExtractor;
 import ms.sapientia.ro.feature_extractor.Settings;
 import weka.classifiers.Classifier;
 import weka.classifiers.trees.RandomForest;

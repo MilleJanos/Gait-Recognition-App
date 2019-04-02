@@ -1,5 +1,14 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package ms.sapientia.ro.feature_extractor;
+
 import java.util.ArrayList;
+import java.util.List;
+
+import ms.sapientia.ro.commonclasses.Accelerometer;
 import weka.core.Instances;
 
 /**
@@ -18,4 +27,6 @@ public interface IUtil {
      * @since 23 ‎July, ‎2018
      */
     public Instances arrayListOfFeaturesToInstances(ArrayList<Feature> features);
+
+    public List<Accelerometer> preprocess(List<Accelerometer> inputData);
 }

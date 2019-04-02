@@ -2,7 +2,7 @@ package ms.sapientia.ro.model_builder;
 
 
 
-import ms.sapientia.ro.feature_extractor.Accelerometer;
+import ms.sapientia.ro.commonclasses.Accelerometer;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
 
