@@ -1,15 +1,25 @@
 package ms.sapientia.ro.gaitrecognitionapp;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
+
+import com.google.firebase.FirebaseApp;
+
+import java.io.File;
 
 import ms.sapientia.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.service.BackgroundService;
-import ms.sapientia.ro.gaitrecognitionapp.service.Common;
+import ms.sapientia.ro.gaitrecognitionapp.service.FirebaseUtils;
+import ms.sapientia.ro.gaitrecognitionapp.service.Utils;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,6 +38,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        FirebaseApp.initializeApp(this);
+        FirebaseUtils.Init( MainActivity.this );
+
         BindViews();
         BindClickListeners();
     }
@@ -42,7 +55,16 @@ public class MainActivity extends AppCompatActivity {
         mStartServiceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startService(v);
+
+                if (checkCallingOrSelfPermission("android.permission.INTERNET") != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.INTERNET}, 212);
+
+                    Log.e(TAG, "No Internet Permission!");
+                    Toast.makeText(MainActivity.this,"No Internet Permission!", Toast.LENGTH_LONG).show();
+
+                }else{
+                    startService(v);
+                }
             }
         });
 
@@ -61,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
         String input = mEditText.getText().toString();
 
         Intent serviceIntent = new Intent(this, BackgroundService.class);
-        //serviceIntent.putExtra(Common.INPUT_EXTRA_KEY, input);
+        //serviceIntent.putExtra(Utils.INPUT_EXTRA_KEY, input);
 
         startService(serviceIntent);
     }
@@ -72,4 +94,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Internal Saving Location for ALL hidden files:
+        Utils.internalFilesRoot = new File(getFilesDir().toString());
+        Log.i(TAG, "Utils.internalFilesRoot.getAbsolutePath() = " + Utils.internalFilesRoot.getAbsolutePath());
+    }
 }

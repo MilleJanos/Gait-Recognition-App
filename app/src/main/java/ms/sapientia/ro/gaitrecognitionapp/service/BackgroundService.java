@@ -13,6 +13,9 @@ import ms.sapientia.ro.gaitrecognitionapp.MainActivity;
 
 public class BackgroundService extends Service {
 
+    // Vars
+    Recorder mRecorder;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -22,12 +25,12 @@ public class BackgroundService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //String input = intent.getStringExtra(Common.INPUT_EXTRA_KEY);
+        //String input = intent.getStringExtra(Utils.INPUT_EXTRA_KEY);
 
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent,  0);
 
-        Notification notification = new NotificationCompat.Builder(this, Common.CHANNEL_ID_01)
+        Notification notification = new NotificationCompat.Builder(this, Utils.CHANNEL_ID_01)
                 .setContentTitle("Running")
                 .setContentText("Tap to open application")
                 .setSmallIcon(R.drawable.ic_assignment)
@@ -36,6 +39,8 @@ public class BackgroundService extends Service {
         startForeground(1, notification); // id >= 1
 
         // Do heavy work
+        mRecorder = new Recorder(this);
+        mRecorder.startRecording();
 
         //stopSelf();
 
@@ -45,6 +50,8 @@ public class BackgroundService extends Service {
 
     @Override
     public void onDestroy() {
+        mRecorder.stopRecording();
+        //mRecorder.resetRecording();
         super.onDestroy();
     }
 
@@ -53,5 +60,7 @@ public class BackgroundService extends Service {
     public IBinder onBind(Intent intent) {
         return null;
     }
+
+
 
 }
