@@ -1,7 +1,10 @@
 package ms.sapientia.ro.gaitrecognitionapp.service;
 
+import android.app.Activity;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,6 +17,7 @@ import java.util.Date;
 import java.util.List;
 
 import ms.sapientia.ro.commonclasses.Accelerometer;
+import ms.sapientia.ro.gaitrecognitionapp.MainActivity;
 
 public class Utils {
 
@@ -25,23 +29,24 @@ public class Utils {
     public final static String INPUT_EXTRA_KEY = "inputextra";
     public final static String CHANNEL_ID_01 = "channel_01";
 
-    // File paths
-    public static String rawdata_user_path = "";
-    public static String feature_user_path = "";
-    public static String model_user_path = "";
-    public static String feature_negative_dummy_path = "";
     // File vars
     public static File rawdataUserFile;
     public static File featureUserFile;
     public static File modelUserFile;
-    public static  File featureNegativeDummyFile;
+    public static File featureNegativeDummyFile;
+    //region HELP
+        // get full path:           file.getAbsolutePath()
+        // get parent folder path:  file.getParentFile().getAbsolutePath()
+        // get file name:           file.getName()
+    //endregion
 
+    public static boolean downloadingNegativeDummyFile = false;
 
     // Rawdata Default header
     public static final String RAWDATA_DEFAULT_HEADER = "timestamp,accx,accy,accz,stepnum";
 
     // Vars
-
+    public static Date lastUsedDate = new Date();
 
     // stored internal files location
     public static File internalFilesRoot;
@@ -101,16 +106,25 @@ public class Utils {
 
     public static String getCurrentDateFormatted(){
         Date date = new Date();
+        lastUsedDate = date;
+        return DateFormat.format("yyyyMMdd_HHmmss", date.getTime()).toString();
+    }
+
+    public static String formatDate(Date date){
         return DateFormat.format("yyyyMMdd_HHmmss", date.getTime()).toString();
     }
 
 
-    public static File createInternalFileByPath(String path, String file_name){
+    public static void createFileIfNotExists(File file){
         //File myInternalFilesRoot = new File(Utils.internalFilesRoot.getAbsolutePath() /*+ customDIR*/);
         //if (!myInternalFilesRoot.exists()) {
         //    myInternalFilesRoot.mkdirs();
         //    Log.i(TAG, "Path not exists (" + myInternalFilesRoot.getAbsolutePath() + ") --> .mkdirs()");
         //}
+
+        String path = file.getParentFile().getAbsolutePath();
+        String name = file.getName();
+
         File folders = new File( path );
 
         if ( ! folders.exists() ) {
@@ -123,19 +137,15 @@ public class Utils {
             }
         }
 
-        File retFile = new File( path + "/" + file_name);
-
-        if ( ! retFile.exists() ) {
+        if ( ! file.exists() ) {
             try {
-                retFile.createNewFile();
+                file.createNewFile();
                 //retFile.mkdirs();
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.e(TAG, "File can't be created: " + retFile.getAbsolutePath() );
+                Log.e(TAG, "File can't be created: " + file.getAbsolutePath() );
             }
         }
-
-        return retFile;
     }
 
 
@@ -229,6 +239,23 @@ public class Utils {
         }
 
         return ad;
+    }
+
+    /**
+     * Method that hides the keyboard in the given activity
+     *
+     * @param activity the activity context where the method will hide the keyboard
+     */
+    public static void hideKeyboard(Activity activity) {
+        // If keyboard is shown then hide:
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(MainActivity.INPUT_METHOD_SERVICE); // TODO: MainActivity ?
+        // Find the currently focused view, so we can grab the correct window token from it.
+        View activityOnFocusView = activity.getCurrentFocus();
+        // If no view currently has focus, create a new one, just so we can grab a window token from it
+        if (activityOnFocusView == null) {
+            activityOnFocusView = new View(activity);
+        }
+        imm.hideSoftInputFromWindow(activityOnFocusView.getWindowToken(), 0);
     }
 
 }

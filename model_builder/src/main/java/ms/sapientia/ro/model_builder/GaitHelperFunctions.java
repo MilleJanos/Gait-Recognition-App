@@ -14,6 +14,7 @@ import weka.filters.unsupervised.attribute.Normalize;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -85,6 +86,7 @@ public class GaitHelperFunctions {
      */
     public static void createFeaturesFileFromRawFile(String rawDataFile, String featureFile, String userName){
         Settings.usingFrames(128);
+        Settings.setInputHasHeader(true);
         Settings.setOutputHasHeader(true); // full arff, no header
         Settings.setOutputFileType(Settings.FileType.ARFF);
         Settings.setDefaultUserId(userName);

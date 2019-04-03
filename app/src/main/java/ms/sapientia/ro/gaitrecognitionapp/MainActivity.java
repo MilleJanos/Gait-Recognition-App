@@ -19,12 +19,13 @@ import com.google.firebase.FirebaseApp;
 import java.io.File;
 
 import ms.sapientia.gaitrecognitionapp.R;
+import ms.sapientia.ro.gaitrecognitionapp.service.ActivityBase;
 import ms.sapientia.ro.gaitrecognitionapp.service.BackgroundService;
 import ms.sapientia.ro.gaitrecognitionapp.service.FirebaseUtils;
 import ms.sapientia.ro.gaitrecognitionapp.service.Utils;
 import weka.classifiers.evaluation.output.prediction.Null;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends ActivityBase {
 
     private static final String TAG = "MainActivity";
 
@@ -44,17 +45,19 @@ public class MainActivity extends AppCompatActivity {
         FirebaseApp.initializeApp(this);
         FirebaseUtils.Init( MainActivity.this );
 
-        BindViews();
-        BindClickListeners();
+        bindViews();
+        bindClickListeners();
     }
 
-    private void BindViews() {
+    @Override
+    protected void bindViews() {
         mEditText = findViewById(R.id.edit_text_input);
         mStartServiceButton = findViewById(R.id.start_service_button);
         mStopServiceButton = findViewById(R.id.stop_service_button);
     }
 
-    private void BindClickListeners() {
+    @Override
+    protected void bindClickListeners() {
         mStartServiceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

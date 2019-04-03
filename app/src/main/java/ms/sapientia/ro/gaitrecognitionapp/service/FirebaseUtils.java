@@ -161,10 +161,9 @@ public class FirebaseUtils {
      * @param saveToThisFile  the file that will contain the downloaded data
      * @author Mille Janos
      */
-    public static void downloadFileFromFirebaseStorage(Activity activity, StorageReference downloadFromRef, File saveToThisFile, final FinishedCallback callback) {
+    public static void downloadFileFromFirebaseStorage(StorageReference downloadFromRef, File saveToThisFile, final FinishedCallback callback) {
         Log.d(TAG, ">>>RUN>>>downloadFileFromFirebaseStorage()");
 
-        final Activity context = activity;
         final File file = saveToThisFile;
 
         //Util.mRef = Util.mStorage.getReference().child( /*featureFolder*/ FirebaseUtil.STORAGE_FEATURES_KEY + "/" + Util.firebaseDummyFileName );
@@ -173,19 +172,21 @@ public class FirebaseUtils {
             downloadFromRef.getFile(file).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+
                     Log.d(TAG, "<<<FINISHED<<<(async)downloadFileFromFirebaseStorage() - onSuccess");
                     Log.i(TAG, "File feature found and downloaded to: Local PATH: " + file.getAbsolutePath());
-                    Toast.makeText(context, "File downloaded.", Toast.LENGTH_LONG).show();
                     callback.onCallback(0);
+
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
+
                     Log.d(TAG, "<<<FINISHED<<<(async)downloadFileFromFirebaseStorage() - onFailure");
                     Log.i(TAG, "File not found or internet problems; -> return;");
-                    Toast.makeText(context, "Download failed!", Toast.LENGTH_LONG).show();
                     e.printStackTrace();
                     callback.onCallback(1);
+
                 }
             });
         } catch (Exception e) {

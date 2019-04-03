@@ -1,6 +1,5 @@
 package ms.sapientia.ro.gaitrecognitionapp.service;
 
-import android.app.Activity;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -12,6 +11,7 @@ import android.widget.Toast;
 
 import com.google.firebase.storage.StorageReference;
 
+import java.io.File;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,9 +31,9 @@ public class Recorder {
     private static final String TAG = "Recorder";
 
     // Constants
-    private final long MAX_ACCELEROMETER_ARRAY = 2*128;
-    private final long INTERVAL_BETWEEN_TESTS = 2*128; // after analyzing data how m
-    private final long FILES_COUNT_BEFORE_MODEL_GENERATING = 5;
+    private final long MAX_ACCELEROMETER_ARRAY = 10*128;
+    private final long INTERVAL_BETWEEN_TESTS = 10*128; // after analyzing data how m
+    private final long FILES_COUNT_BEFORE_MODEL_GENERATING = 3;
     private final int PREPROCESSING_INTERVAL = 128;
 
     // Sensor
@@ -50,6 +50,11 @@ public class Recorder {
     private long mRecordCount = 0;
     private long mIntervalBetweenTests = 0;
     private long mFileCount = 0;
+
+    // Sound
+    MediaPlayer mp_bing;
+    MediaPlayer mp_feature;
+    MediaPlayer mp_model;
 
 
     public Recorder(Context context) {
@@ -76,13 +81,15 @@ public class Recorder {
             }
         };
 
+        initSound();
     }
 
-    public void Run(){
-
-
-
+    private void initSound() {
+        mp_bing = MediaPlayer.create(mContext, R.raw.relentless);
+        mp_feature = MediaPlayer.create(mContext, R.raw.feature);
+        mp_model = MediaPlayer.create(mContext, R.raw.model);
     }
+
 
     private void updateRecordedList(SensorEvent event){
         long timeStamp = event.timestamp;
@@ -94,15 +101,13 @@ public class Recorder {
 
             if(mIntervalBetweenTests == INTERVAL_BETWEEN_TESTS){
 
-                MediaPlayer mp = MediaPlayer.create(mContext, R.raw.relentless);
-                mp.start();
+
+                mp_bing.start();
 
                 // Init Internal Files
                 //Utils.initInternalFiles();
-                String file_path = Utils.internalFilesRoot.getAbsolutePath() + "/" + Utils.getCurrentDateFormatted();
-                String file_name = "/rawdata.csv";
-                Utils.rawdataUserFile = Utils.createInternalFileByPath(file_path, file_name);
-                Utils.rawdata_user_path = Utils.rawdataUserFile.getAbsolutePath();
+                Utils.rawdataUserFile = new File( Utils.internalFilesRoot.getAbsolutePath() + "/" + Utils.getCurrentDateFormatted() + "/" + "rawdata.csv");
+                Utils.createFileIfNotExists( Utils.rawdataUserFile );
 
                 // Preprocessing raw data
                 List<Accelerometer> list = new ArrayList(Arrays.asList( mAccelerometerArray.toArray()));
@@ -118,76 +123,129 @@ public class Recorder {
 
 
                 // If we collected enought data to being
-                if (mFileCount >= FILES_COUNT_BEFORE_MODEL_GENERATING) {
+                if (mFileCount >= FILES_COUNT_BEFORE_MODEL_GENERATING - 1 ) {
 
                     // Download Dummy
                     if (Utils.rawdataUserFile.length() > 0) { // if the file is not empty
 
+                        Utils.featureNegativeDummyFile = new File(Utils.internalFilesRoot.getAbsolutePath() + "/" + "feature_negative_dummy.arff");
+                        if( ! Utils.featureNegativeDummyFile.exists()) {
+                            Utils.createFileIfNotExists(Utils.featureNegativeDummyFile);
+                        }
+
                         StorageReference reference = FirebaseUtils.firebaseStorage.getReference().child(
                                 FirebaseUtils.STORAGE_FEATURES_KEY
-                                        + "/"
-                                        + FirebaseUtils.firebaseDummyFileName
+                                        + "/" + FirebaseUtils.firebaseDummyFileName
                         );
+                        if( true /*Utils.downloadingNegativeDummyFile IS EMPTY*/ ) {        // If it's not downloaded
 
-                        FirebaseUtils.downloadFileFromFirebaseStorage((Activity) mContext, reference, Utils.featureNegativeDummyFile, new FinishedCallback() {
-                            @Override
-                            public void onCallback(int errorCode) {
+                            if (Utils.downloadingNegativeDummyFile == false) {              // and if it's not downloading at the moment, then: download
 
-                                if (errorCode == 0) {
+                                Utils.downloadingNegativeDummyFile = true;
 
+                                FirebaseUtils.downloadFileFromFirebaseStorage(reference, Utils.featureNegativeDummyFile, new FinishedCallback() {
+                                    @Override
+                                    public void onCallback(int errorCode) {                 // after onSuccess or onFailure
 
-                                    // Generate Feature
+                                        if (errorCode == 0) {
 
-                                    GaitHelperFunctions.createFeaturesFileFromRawFile(
-                                            Utils.rawdata_user_path,      // in
-                                            Utils.feature_user_path.substring(0, Utils.feature_user_path.length() - (".arff").length()),   // out
-                                            "noUserId"          // in
-                                    );
+                                            Toast.makeText(mContext, "Negative Data downloaded", Toast.LENGTH_SHORT).show();
 
-                                    GaitHelperFunctions.mergeEquallyArffFiles(
-                                            Utils.feature_negative_dummy_path,  // in
-                                            Utils.feature_user_path             // in and out
-                                    );
+                                            createFeature();
 
-                                    // Generate Model
+                                            createModel();
+                                            
+                                            updateGait();
+                                            
+                                        } else {
+                                            Toast.makeText(mContext, "Error downloading Negative Data!", Toast.LENGTH_LONG).show();
+                                        }
 
-                                    try {
-                                        IGaitModelBuilder builder = new GaitModelBuilder();
-
-                                        Classifier classifier = builder.createModel(
-                                                Utils.feature_user_path     // in
-                                        );
-
-                                        ((GaitModelBuilder) builder).saveModel(
-                                                classifier,             // in
-                                                Utils.model_user_path   // in
-                                        );
-
-                                    } catch (Exception e) {
-                                        Toast.makeText(mContext, "Model Generating failed!", Toast.LENGTH_LONG).show();
-                                        Log.e(TAG, "Model Generating failed!");
-                                        e.printStackTrace();
+                                        Utils.downloadingNegativeDummyFile = false;
                                     }
-
-                                } else {
-                                    Toast.makeText(mContext, "Error downloading Negative Data!", Toast.LENGTH_LONG).show();
-                                }
+                                });
                             }
-                        });
+                        }else{              // if it's downloaded
+                            Toast.makeText(mContext, "Negative Data already downloaded", Toast.LENGTH_SHORT).show();
+
+                            createFeature();
+
+                            createModel();
+
+                            updateGait();
+                        }
                     }
+                    mFileCount = -1;
                 }
+
+               ++mFileCount;
 
                 // Reset counter
                 mIntervalBetweenTests= 0;
             }
-            if(mAccelerometerArray.size() == MAX_ACCELEROMETER_ARRAY-1 ){
+            if(mAccelerometerArray.size() == MAX_ACCELEROMETER_ARRAY - 1 ){     // if the list is full, then remove first then
                 mAccelerometerArray.removeFirst();
             }
-            mAccelerometerArray.addLast(new Accelerometer(timeStamp,x,y,z,mStepCount));
+            mAccelerometerArray.addLast(new Accelerometer(timeStamp,x,y,z,mStepCount));     // add to last
             ++mRecordCount;
             ++mIntervalBetweenTests;
             // printAccelerometerList(mAccelerometerArray); // print every iteration
         }
+    }
+
+    private void updateGait() {
+
+
+
+    }
+
+
+    private void createFeature() {
+
+        // Create feature file
+        Utils.featureUserFile = new File ( Utils.internalFilesRoot + "/" + "generated" + "/" + Utils.formatDate(Utils.lastUsedDate) + "/" + "feature_user.arff" );
+        Utils.createFileIfNotExists( Utils.featureUserFile );
+
+        GaitHelperFunctions.createFeaturesFileFromRawFile(
+                Utils.rawdataUserFile.getAbsolutePath(),      // in
+                Utils.featureUserFile.getAbsolutePath().substring(0, Utils.featureUserFile.getAbsolutePath().length() - (".arff").length()),   // out   - without ".arff" at the end
+                "noUserId"                          // in
+        );
+
+        mp_feature.start();
+
+        GaitHelperFunctions.mergeEquallyArffFiles(
+                Utils.featureNegativeDummyFile.getAbsolutePath(),  // in
+                Utils.featureUserFile.getAbsolutePath()            // in and out
+        );
+
+    }
+
+    private void createModel() {
+
+        try {
+            IGaitModelBuilder builder = new GaitModelBuilder();
+
+            Classifier classifier = builder.createModel(
+                    Utils.featureUserFile.getAbsolutePath()     // in
+            );
+
+            mp_model.start();
+
+            Utils.modelUserFile = new File(Utils.internalFilesRoot + "/" + "generated" + "/" + Utils.formatDate(Utils.lastUsedDate) + "/" + "model.mdl");
+            Utils.createFileIfNotExists(Utils.modelUserFile);
+
+            ((GaitModelBuilder) builder).saveModel(
+                    classifier,                             // in
+                    Utils.modelUserFile.getAbsolutePath()   // in
+            );
+
+        } catch (Exception e) {
+            Toast.makeText(mContext, "Model Generating failed!", Toast.LENGTH_LONG).show();
+            Log.e(TAG, "Model Generating failed!");
+            e.printStackTrace();
+        }
+
     }
 
     public void startRecording(){
@@ -195,7 +253,6 @@ public class Recorder {
             resetRecording();
             mIsRecording = true;
             mSensorManager.registerListener(mAccelerometerEventListener, mAccelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST);
-            Run();
         }
     }
 
@@ -223,7 +280,7 @@ public class Recorder {
         return mAccelerometerArray;
     }
 
-    public boolean ismIsRecording(){
+    public boolean isRecording(){
         return mIsRecording;
     }
 
@@ -239,8 +296,6 @@ public class Recorder {
         }
     }*/
 
-    
-    
     private void printAccelerometerList(ArrayDeque<Accelerometer> list){
         int idx = 0;
         for(Accelerometer a : list){
