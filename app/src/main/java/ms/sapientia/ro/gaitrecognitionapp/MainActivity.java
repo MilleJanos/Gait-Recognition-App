@@ -47,6 +47,8 @@ public class MainActivity extends ActivityBase {
 
         bindViews();
         bindClickListeners();
+
+
     }
 
     @Override

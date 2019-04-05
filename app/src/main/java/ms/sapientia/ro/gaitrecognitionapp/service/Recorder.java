@@ -31,9 +31,9 @@ public class Recorder {
     private static final String TAG = "Recorder";
 
     // Constants
-    private final long MAX_ACCELEROMETER_ARRAY = 10*128;
-    private final long INTERVAL_BETWEEN_TESTS = 10*128; // after analyzing data how m
-    private final long FILES_COUNT_BEFORE_MODEL_GENERATING = 3;
+    private final long MAX_ACCELEROMETER_ARRAY = 30*128;
+    private final long INTERVAL_BETWEEN_TESTS = 30*128; // after analyzing data how m
+    private final long FILES_COUNT_BEFORE_MODEL_GENERATING = 1;
     private final int PREPROCESSING_INTERVAL = 128;
 
     // Sensor
@@ -106,7 +106,7 @@ public class Recorder {
 
                 // Init Internal Files
                 //Utils.initInternalFiles();
-                Utils.rawdataUserFile = new File( Utils.internalFilesRoot.getAbsolutePath() + "/" + Utils.getCurrentDateFormatted() + "/" + "rawdata.csv");
+                Utils.rawdataUserFile = new File( Utils.internalFilesRoot.getAbsolutePath() + "/" + "rawdata" + "/" + Utils.getCurrentDateFormatted() + "/" + "rawdata.csv");
                 Utils.createFileIfNotExists( Utils.rawdataUserFile );
 
                 // Preprocessing raw data
@@ -121,6 +121,7 @@ public class Recorder {
                 ArrayDeque copy = Utils.listToArrayDeque(list);
                 Utils.saveRawAccelerometerDataIntoCsvFile(copy, Utils.rawdataUserFile, Utils.RAWDATA_DEFAULT_HEADER);
 
+                Log.d(TAG, "mFileCount = " + mFileCount);
 
                 // If we collected enought data to being
                 if (mFileCount >= FILES_COUNT_BEFORE_MODEL_GENERATING - 1 ) {
@@ -175,10 +176,13 @@ public class Recorder {
                             updateGait();
                         }
                     }
-                    mFileCount = -1;
-                }
+                    mFileCount = 0
+                    ;
+                }else{
 
-               ++mFileCount;
+                    ++mFileCount;
+
+                }
 
                 // Reset counter
                 mIntervalBetweenTests= 0;
@@ -193,14 +197,10 @@ public class Recorder {
         }
     }
 
-    private void updateGait() {
-
-
-
-    }
-
 
     private void createFeature() {
+        Log.d(TAG, "createFeature: IN");
+
 
         // Create feature file
         Utils.featureUserFile = new File ( Utils.internalFilesRoot + "/" + "generated" + "/" + Utils.formatDate(Utils.lastUsedDate) + "/" + "feature_user.arff" );
@@ -219,9 +219,11 @@ public class Recorder {
                 Utils.featureUserFile.getAbsolutePath()            // in and out
         );
 
+        Log.d(TAG, "createFeature: OUT");
     }
 
     private void createModel() {
+        Log.d(TAG, "createModel: IN");
 
         try {
             IGaitModelBuilder builder = new GaitModelBuilder();
@@ -245,6 +247,19 @@ public class Recorder {
             Log.e(TAG, "Model Generating failed!");
             e.printStackTrace();
         }
+
+        Log.d(TAG, "createModel: OUT");
+    }
+
+    private void updateGait() {
+
+        double d = Utils.checkUserInPercentage();
+
+        Toast.makeText(mContext,"%%% "+ d +" %%%",Toast.LENGTH_LONG).show();
+
+        Log.i(TAG, "==============================");
+        Log.i(TAG, "============="+ d +"============");
+        Log.i(TAG, "==============================");
 
     }
 

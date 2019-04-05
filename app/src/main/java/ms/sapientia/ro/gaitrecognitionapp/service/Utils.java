@@ -7,17 +7,28 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import ms.sapientia.ro.commonclasses.Accelerometer;
 import ms.sapientia.ro.gaitrecognitionapp.MainActivity;
+import ms.sapientia.ro.model_builder.GaitHelperFunctions;
+import ms.sapientia.ro.model_builder.GaitModelBuilder;
+import ms.sapientia.ro.model_builder.GaitVerification;
+import ms.sapientia.ro.model_builder.IGaitModelBuilder;
+import ms.sapientia.ro.model_builder.IGaitVerification;
+import weka.classifiers.Classifier;
+import weka.classifiers.trees.RandomForest;
+import weka.core.Attribute;
+import weka.core.SerializationHelper;
 
 public class Utils {
 
@@ -256,6 +267,42 @@ public class Utils {
             activityOnFocusView = new View(activity);
         }
         imm.hideSoftInputFromWindow(activityOnFocusView.getWindowToken(), 0);
+    }
+
+    public static double checkUserInPercentage(/*Activity activity, String userRawDataFilePath, String userFeatureFilePath, String dummyFeatureFilePath, String userModelFilePath, String userId*/) {
+
+        double percentage = -1;
+
+        IGaitModelBuilder builder = new GaitModelBuilder();
+        Classifier classifier;
+        try {
+            classifier = (RandomForest) SerializationHelper.read(new FileInputStream( Utils.modelUserFile.getAbsolutePath() )); //new RandomForest();
+
+            //GaitHelperFunctions.createFeaturesFileFromRawFile(
+            //        Utils.rawdataUserFile.getAbsolutePath(),
+            //        Utils.featureUserFile.getAbsolutePath().substring(0, Utils.featureUserFile.getAbsolutePath().length() - (".arff").length()), "userId");
+
+            // features_dummy + features_user
+            GaitHelperFunctions.mergeEquallyArffFiles(
+                    Utils.featureNegativeDummyFile.getAbsolutePath(),
+                    Utils.featureUserFile.getAbsolutePath());
+
+            ArrayList<Attribute> attributes = builder.getAttributes( Utils.featureUserFile.getAbsolutePath() ); ///feature (mar letezo)
+
+            IGaitVerification verifier = new GaitVerification();
+            percentage = verifier.verifyUser(classifier, attributes, Utils.rawdataUserFile.getAbsolutePath()); //user raw data
+
+            // percentage = Integer.parseInt( ((percentage * 100) + "").substring(0, 2) );
+
+        } catch (FileNotFoundException e) {
+            Log.e(TAG, "*********File not found!");
+            e.printStackTrace();
+        } catch (Exception e) {
+            Log.e(TAG, "*********Error!");
+            e.printStackTrace();
+        }
+
+        return percentage;
     }
 
 }
