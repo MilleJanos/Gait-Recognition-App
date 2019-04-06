@@ -1,6 +1,7 @@
 package ms.sapientia.ro.gaitrecognitionapp;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
@@ -87,12 +88,27 @@ public class MainActivity extends ActivityBase {
     // Service methods:
 
     public void startService(View v){
-        String input = mEditText.getText().toString();
+        //String input = mEditText.getText().toString();
 
         Intent serviceIntent = new Intent(this, BackgroundService.class);
         //serviceIntent.putExtra(Utils.INPUT_EXTRA_KEY, input);
 
         startService(serviceIntent);
+
+        ///*with Thread*/
+        //final Intent serviceIntent = new Intent(getApplicationContext(), BackgroundService.class);
+        //Thread thread = new Thread(){
+        //    public void run(){
+        //        getApplicationContext().bindService(
+        //                serviceIntent,
+        //                serviceConnection,
+        //                Context.BIND_AUTO_CREATE
+        //        );
+        //    }
+        //};
+        //thread.run();
+        ///*with Thread (end)*/
+
     }
 
     public void stopService(View v){

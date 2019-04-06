@@ -148,7 +148,9 @@ public class Recorder {
                                     @Override
                                     public void onCallback(int errorCode) {                 // after onSuccess or onFailure
 
-                                        if (errorCode == 0) {
+                                        Log.d(TAG, "onCallback: I'M HERE");
+                                        
+                                        if (errorCode == 0) { // onSuccess
 
                                             Toast.makeText(mContext, "Negative Data downloaded", Toast.LENGTH_SHORT).show();
 
@@ -158,7 +160,7 @@ public class Recorder {
                                             
                                             updateGait();
                                             
-                                        } else {
+                                        } else { // onFailure or other error
                                             Toast.makeText(mContext, "Error downloading Negative Data!", Toast.LENGTH_LONG).show();
                                         }
 
@@ -196,7 +198,6 @@ public class Recorder {
             // printAccelerometerList(mAccelerometerArray); // print every iteration
         }
     }
-
 
     private void createFeature() {
         Log.d(TAG, "createFeature: IN");
