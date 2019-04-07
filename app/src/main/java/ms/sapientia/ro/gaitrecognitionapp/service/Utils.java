@@ -45,6 +45,7 @@ public class Utils {
     public static File featureUserFile;
     public static File modelUserFile;
     public static File featureNegativeDummyFile;
+    public static File featureMergedFile;
     //region HELP
         // get full path:           file.getAbsolutePath()
         // get parent folder path:  file.getParentFile().getAbsolutePath()
@@ -58,6 +59,7 @@ public class Utils {
 
     // Vars
     public static Date lastUsedDate = new Date();
+    public static String deviceID;
 
     // stored internal files location
     public static File internalFilesRoot;

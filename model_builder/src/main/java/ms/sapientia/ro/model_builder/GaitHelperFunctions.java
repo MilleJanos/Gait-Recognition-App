@@ -183,10 +183,10 @@ public class GaitHelperFunctions {
             }
         }
 
-        String item1 = line.split("\\{")[0].split(" ")[1];
-        String item2 = line2.split("\\{")[0].split(" ")[1];
-        //String item1 = line.split(" ")[2];
-        //String item2 = line2.split(" ")[2];
+        //String item1 = line.split("\\{")[0].split(" ")[];
+        //String item2 = line2.split("\\{")[0].split(" ")[1];
+        String item1 = line.split(" ")[2];
+        String item2 = line2.split(" ")[2];
         sb.append("@attribute userID{" + item1.substring(1, item1.length() - 1) + "," + item2.substring(1, item2.length() - 1) + "}\n\n");
         while (scanner.hasNextLine()) {
             line = scanner.nextLine().trim();
@@ -271,7 +271,7 @@ public class GaitHelperFunctions {
      * @throws IOException
      *
      */
-    private static void mergeFeatureFiles(ArrayList<String> files, String output) throws IOException {
+    public static void mergeFeatureFiles(ArrayList<String> files, String output) throws IOException {
         int counter = 0;
 
         for(String input:files) {
