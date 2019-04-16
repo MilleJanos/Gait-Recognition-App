@@ -12,6 +12,7 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Normalize;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Set;
@@ -274,22 +275,102 @@ public class GaitHelperFunctions {
     public static void mergeFeatureFiles(ArrayList<String> files, String output) throws IOException {
         int counter = 0;
 
+
+
+        Scanner scanner2 = null;
+        try {
+            scanner2 = new Scanner(new File(output));
+        } catch (Exception ex) {
+            System.out.println("File not found: " + output);
+        }
+
+        FileWriter writer = null;
+        try {
+            writer = new FileWriter(output, false);
+        } catch (Exception ex) {
+            System.out.println("File not found: " + output);
+        }
+
+        OutputStream out = new FileOutputStream(output);
+
+        /*
+            Iterate trought files name list
+        */
+
+
         for(String input:files) {
+
             counter ++;
-            if(counter > 0){
-                int n = 1024;
-                OutputStream out = new FileOutputStream(output);
-                byte[] buf = new byte[n];
-                InputStream in = new FileInputStream(input);
-                int b = 0;
-                while ( (b = in.read(buf)) >= 0) {
-                    out.write(buf, 0, b);
+
+            // open input file
+            Scanner inScanner = null;
+            try {
+                inScanner = new Scanner(new File(input));
+            } catch (Exception ex) {
+                System.out.println("File not found: " + input);
+            }
+
+            if(counter == 1){   // Print the header only once
+                //int n = 1024;
+                //byte[] buf = new byte[n];
+                //InputStream in = new FileInputStream(input);
+                //int b = 0;
+                //while ( (b = in.read(buf)) >= 0) {
+                //    out.write(buf, 0, b);
+                //    out.flush();
+                //}
+                String line;
+                while( inScanner.hasNextLine()){
+                    line = inScanner.nextLine().trim();
+                    line += "\n";
+                    out.write(line.getBytes(), 0, line.length());
                     out.flush();
                 }
+                //out.close();
+                continue;
+            }else{
+                boolean printFromNext = false;
+                //int n = 1024;
+                //byte[] buf = new byte[n];
+                //InputStream in = new FileInputStream(input);
+                //int b = 0;
+                //while ( (b = in.read(buf)) >= 0) {
+                //    String str = new String(buf, StandardCharsets.UTF_8);
+                //    String[] splitted = str.split(" ");
+                //
+                //    if(printFromNext){
+                //        out.write(buf, 0, b);
+                //        out.flush();
+                //    }
+                String line;
+                while( inScanner.hasNextLine()){
+                    line = inScanner.nextLine().trim();
 
-                out.close();
+                    if(printFromNext) {
+                        line += "\n";
+                        out.write(line.getBytes(), 0, line.length());
+                        out.flush();
+                    }
+
+                    /*
+                    String[] splitted = line.split(" ");
+
+                    if(splitted.length >= 2) {
+                        if (splitted[1].equals("userid") || splitted[1].equals("userId") || splitted[1].equals("userID")) {
+                            printFromNext = true;
+                        }
+                    }
+                    */
+                    if(line.equals("@data")){
+                        printFromNext = true;
+                    }
+
+                }
+                //in.close();
+                inScanner.close();
                 continue;
             }
+            /*
             Scanner scanner = null;
             try {
                 scanner = new Scanner(new File(input));
@@ -298,56 +379,63 @@ public class GaitHelperFunctions {
             }
 
             StringBuilder sb = new StringBuilder();
-            Scanner scanner2 = null;
 
-            try {
-                scanner2 = new Scanner(new File(output));
-            } catch (Exception ex) {
-                System.out.println("File not found: " + output);
-            }
 
-            FileWriter writer = null;
+
+
 
             String line2 = null;
             while (scanner2.hasNextLine()) {
                 line2 = scanner2.nextLine().trim();
+                sb.append(line2 + "\n");
                 if (line2.contains("@attribute userID") || line2.contains("@attribute userid") || line2.contains("@attribute userId")) {
                     break;
                 }
-                sb.append(line2 + "\n");
+                //sb.append(line2 + "\n");
             }
+
+
+
             String line = null;
-            while (scanner.hasNextLine()) {
-                line = scanner.nextLine().trim();
-                if (line.contains("@attribute userID") || line.contains("@attribute userid") || line.contains("@attribute userId")) {
-                    break;
+            if(counter==1) {
+                while (scanner.hasNextLine()) {
+                    line = scanner.nextLine().trim();
+                    if (line.contains("@attribute userID") || line.contains("@attribute userid") || line.contains("@attribute userId")) {
+                        break;
+                    }
+                }
+
+
+                String item1 = line.split(" ")[2];
+
+
+                sb.append("@attribute userID {" + item1.substring(1, item1.length() - 1) + "}\n\n");
+                while (scanner.hasNextLine()) {
+
+                    line = scanner.nextLine().trim();
+                    if (line.equals("@data")) {
+                        break;
+                    }
+                }
+
+            }
+
+
+            if(counter == 1) {
+                while (scanner2.hasNextLine()) {
+
+                    line = scanner2.nextLine().trim();
+
+                    if (line.isEmpty()) {
+                        continue;
+                    }
+                    sb.append(line + "\n");
                 }
             }
 
-            String item1 = line.split(" ")[2];
-            //String item2 = line2.split(" ")[2];
-            sb.append("@attribute userID {" + item1.substring(1, item1.length() - 1) + "}\n\n");
-            while (scanner.hasNextLine()) {
-                line = scanner.nextLine().trim();
-                if (line.equals("@data")) {
-                    break;
-                }
-            }
 
-            while (scanner2.hasNextLine()) {
 
-                line = scanner2.nextLine().trim();
 
-                if (line.isEmpty()) {
-                    continue;
-                }
-                sb.append(line + "\n");
-            }
-            try {
-                writer = new FileWriter(output, false);
-            } catch (Exception ex) {
-                System.out.println("File not found: " + output);
-            }
             try {
                 writer.write(sb.toString());
             } catch (IOException ex) {
@@ -371,13 +459,19 @@ public class GaitHelperFunctions {
             }
 
             scanner.close();
-            scanner2.close();
-            try {
-                writer.close();
-            } catch (IOException ex) {
-                Logger.getLogger(GaitHelperFunctions.class.getName()).log(Level.SEVERE, null, ex);
-            }
+
+            */
         }
+
+        //out.close();
+
+        try {
+            writer.close();
+        } catch (IOException ex) {
+            Logger.getLogger(GaitHelperFunctions.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        scanner2.close();
 
     }
 }

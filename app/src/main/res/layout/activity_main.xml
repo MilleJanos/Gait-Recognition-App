@@ -73,5 +73,32 @@
         android:textAlignment="center"
         />
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="center">
+
+        <TextView
+            android:id="@+id/text_view_switch_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create new model " />
+
+        <Switch
+            android:id="@+id/model_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:enabled="true"/>
+
+        <TextView
+            android:id="@+id/text_view_switch_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Verify last model" />
+
+    </LinearLayout>
+
 
 </LinearLayout>

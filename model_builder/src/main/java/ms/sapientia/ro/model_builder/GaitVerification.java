@@ -132,9 +132,11 @@ public class GaitVerification implements IGaitVerification {
 
     public double verifyUser(Classifier classifier, ArrayList<Attribute> attributes, String rawdata_file) {
         Settings.usingFrames(128);
-        Settings.setInputHasHeader(false);
+        Settings.setInputHasHeader(true);
         Settings.setOutputHasHeader(true);
         Settings.setOutputFileType(Settings.FileType.ARFF);
+        //todo kiegesziteni
+
 
         //Settings.setDefaultUserId("mj");
         System.out.println(Settings.getAllSettings());

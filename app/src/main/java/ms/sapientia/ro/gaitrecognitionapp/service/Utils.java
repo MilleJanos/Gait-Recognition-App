@@ -11,6 +11,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
@@ -38,6 +40,7 @@ public class Utils {
     private static final String TAG = "Utils";
 
     public final static String INPUT_EXTRA_KEY = "inputextra";
+    public final static String INPUT_CREATE_OR_VERIFY = "createorverify";
     public final static String CHANNEL_ID_01 = "channel_01";
 
     // File vars
@@ -46,6 +49,7 @@ public class Utils {
     public static File modelUserFile;
     public static File featureNegativeDummyFile;
     public static File featureMergedFile;
+    public static File featureUserFile_Copy;
     //region HELP
         // get full path:           file.getAbsolutePath()
         // get parent folder path:  file.getParentFile().getAbsolutePath()
@@ -284,15 +288,17 @@ public class Utils {
             //        Utils.rawdataUserFile.getAbsolutePath(),
             //        Utils.featureUserFile.getAbsolutePath().substring(0, Utils.featureUserFile.getAbsolutePath().length() - (".arff").length()), "userId");
 
+
             // features_dummy + features_user
             GaitHelperFunctions.mergeEquallyArffFiles(
                     Utils.featureNegativeDummyFile.getAbsolutePath(),
-                    Utils.featureUserFile.getAbsolutePath());
+                    Utils.featureUserFile_Copy.getAbsolutePath());
 
-            ArrayList<Attribute> attributes = builder.getAttributes( Utils.featureUserFile.getAbsolutePath() ); ///feature (mar letezo)
+            ArrayList<Attribute> attributes = builder.getAttributes( Utils.featureUserFile_Copy.getAbsolutePath() ); ///feature (mar letezo)
 
             IGaitVerification verifier = new GaitVerification();
-            percentage = verifier.verifyUser(classifier, attributes, Utils.rawdataUserFile.getAbsolutePath()); //user raw data
+            //percentage = verifier.verifyUser(classifier, attributes, FRESH_RAWDATA_WAITING_TO_TEST ); // 3. param - user raw data
+            percentage = verifier.verifyUser(classifier, attributes, Utils.rawdataUserFile.getAbsolutePath() );
 
             // percentage = Integer.parseInt( ((percentage * 100) + "").substring(0, 2) );
 
@@ -306,5 +312,27 @@ public class Utils {
 
         return percentage;
     }
+
+
+    public static void copy(File src, File dst) throws IOException {
+        InputStream in = new FileInputStream(src);
+        try {
+            OutputStream out = new FileOutputStream(dst);
+            try {
+                // Transfer bytes from in to out
+                byte[] buf = new byte[1024];
+                int len;
+                while ((len = in.read(buf)) > 0) {
+                    out.write(buf, 0, len);
+                }
+            } finally {
+                out.close();
+            }
+        } finally {
+            in.close();
+        }
+    }
+
+
 
 }

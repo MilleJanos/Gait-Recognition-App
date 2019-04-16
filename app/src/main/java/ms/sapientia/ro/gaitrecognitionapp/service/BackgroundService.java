@@ -14,7 +14,8 @@ import ms.sapientia.ro.gaitrecognitionapp.MainActivity;
 public class BackgroundService extends Service {
 
     // Vars
-    Recorder mRecorder;
+    private Recorder mRecorder;
+    private boolean mCreateModel; // true= Create Model; false= Verify last created model
 
     @Override
     public void onCreate() {
@@ -26,6 +27,7 @@ public class BackgroundService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //String input = intent.getStringExtra(Utils.INPUT_EXTRA_KEY);
+        mCreateModel = intent.getBooleanExtra(Utils.INPUT_CREATE_OR_VERIFY, false);
 
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent,  0);
@@ -39,7 +41,7 @@ public class BackgroundService extends Service {
         startForeground(1, notification); // id >= 1
 
         // Do heavy work
-        mRecorder = new Recorder(this);
+        mRecorder = new Recorder(this, mCreateModel);
         mRecorder.startRecording();
 
         //stopSelf();

@@ -1218,7 +1218,7 @@ public class FeatureExtractor {
                 throw new FeatureExtractorException(TAG + "Corrupted input file error");
             }
             dataset.add(new Accelerometer(Long.parseLong(items[0]),
-                    Double.parseDouble(items[1]),
+                    Double.parseDouble(items[1]),	// TEST:  Double.parseDouble( Math.abs(item[1] ),
                     Double.parseDouble(items[2]),
                     Double.parseDouble(items[3]),
                     Integer.parseInt(items[4])));
