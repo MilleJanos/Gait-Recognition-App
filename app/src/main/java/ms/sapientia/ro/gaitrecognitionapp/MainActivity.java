@@ -8,7 +8,9 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.IBinder;
+import android.os.Message;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,11 +22,21 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.RemoteMessage;
 
 import java.io.File;
+import java.util.Map;
+
+import javax.security.auth.login.LoginException;
 
 import ms.sapientia.gaitrecognitionapp.R;
+import ms.sapientia.ro.gaitrecognitionapp.pushnotification.FirebaseMessagingService;
 import ms.sapientia.ro.gaitrecognitionapp.service.ActivityBase;
 import ms.sapientia.ro.gaitrecognitionapp.service.BackgroundService;
 import ms.sapientia.ro.gaitrecognitionapp.service.FirebaseUtils;
@@ -42,7 +54,8 @@ public class MainActivity extends ActivityBase {
     private Switch mModelSwitch;
 
     // Vars
-
+    private String tipicStr = "mytopic";
+    private String mMyId = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +68,99 @@ public class MainActivity extends ActivityBase {
         bindViews();
         bindClickListeners();
 
+        //
+        // Push Notification
+        //
+
+        FirebaseMessagingService fms = new FirebaseMessagingService(MainActivity.this);
+
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "getInstanceId failed", task.getException());
+                            return;
+                        }
+
+                        try {
+
+                            // Get new Instance ID token
+                            String token = task.getResult().getToken();
+
+                            // Log and toast
+                            String msg = "my_custom_res_id";
+                            Log.d(TAG, msg);
+                            Toast.makeText(MainActivity.this, "Get Instance Id:" + msg, Toast.LENGTH_SHORT).show();
+                            mMyId = msg;
+
+                        }catch(NullPointerException e){
+                            Log.e(TAG, "onComplete: NullPointerException");
+                            e.printStackTrace();
+                        }
+
+                    }
+                });
+
+        Button registerTopic = findViewById(R.id.register_topic_button);
+        registerTopic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+
+                FirebaseMessaging.getInstance().subscribeToTopic( tipicStr )
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                String msg = "my_msg_subscribed";
+                                if (!task.isSuccessful()) {
+                                    msg = "my_msg_subscribe_failed";
+                                }
+                                Log.d(TAG, msg);
+                                Toast.makeText(MainActivity.this, "Register: " + msg, Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
+            }
+        });
+
+        Button sendTopic = findViewById(R.id.send_topic_button);
+        sendTopic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+                // See documentation on defining a message payload.
+//                Message message = Message.builder()
+//                        .putData("score", "850")
+//                        .putData("time", "2:45")
+//                        .setTopic(topic)
+//                        .build();
+
+                //RemoteMessage rm = new RemoteMessage();
+
+                String sender_id = "sender_id";
+                String message_id = "message_id";
+
+                RemoteMessage msg = new RemoteMessage.Builder(sender_id + "@gcm.googleapis.com")    
+                                .setMessageId(message_id)
+                                .addData(tipicStr, "Hello World")
+                                .addData(tipicStr + "_1","SAY_HELLO")
+                                .build();
+
+                // Send a message to the devices subscribed to the provided topic.
+                //String response = FirebaseMessaging.getInstance().send(msg);
+
+                FirebaseMessaging.getInstance().send(msg);
+
+                // Response is a message ID string.
+                //System.out.println("Successfully sent message: " + response);
+
+                Toast.makeText(MainActivity.this, "Send: " + tipicStr + " : Hello World"+ msg, Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Send: " + tipicStr + "_1" + " : SAY_HELLO"+ msg, Toast.LENGTH_SHORT).show();
+            }
+        });
 
     }
 
@@ -130,7 +236,7 @@ public class MainActivity extends ActivityBase {
 //                );
 //            }
 //        };
-//        thread.run();
+//        thread.run(); // thread.START() !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         /*with Thread (end)*/
 
     }
@@ -139,7 +245,6 @@ public class MainActivity extends ActivityBase {
         Intent serviceIntent = new Intent(this, BackgroundService.class);
         stopService(serviceIntent);
     }
-
 
     @Override
     protected void onStart() {

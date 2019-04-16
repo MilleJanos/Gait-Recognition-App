@@ -100,5 +100,25 @@
 
     </LinearLayout>
 
+    <Button
+    android:id="@+id/register_topic_button"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="Register Topic"
+    android:textAllCaps="false"
+    android:layout_marginTop="16dp"
+    android:layout_marginLeft="50dp"
+    android:layout_marginRight="50dp"/>
+
+    <Button
+    android:id="@+id/send_topic_button"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="Send Topic"
+    android:textAllCaps="false"
+    android:layout_marginTop="16dp"
+    android:layout_marginLeft="50dp"
+    android:layout_marginRight="50dp"/>
+
 
 </LinearLayout>
