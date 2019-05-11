@@ -6,11 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -22,6 +20,7 @@ import android.widget.Toast;
 
 import com.google.firebase.FirebaseApp;
 
+import java.io.Console;
 import java.io.File;
 
 import ms.sapientia.gaitrecognitionapp.R;
@@ -29,7 +28,8 @@ import ms.sapientia.ro.gaitrecognitionapp.service.ActivityBase;
 import ms.sapientia.ro.gaitrecognitionapp.service.BackgroundService;
 import ms.sapientia.ro.gaitrecognitionapp.service.FirebaseUtils;
 import ms.sapientia.ro.gaitrecognitionapp.service.Utils;
-import weka.classifiers.evaluation.output.prediction.Null;
+
+import ms.sapientia.ro.gaitrecognitionapp.service.BackgroundService.LocalBinder;
 
 public class MainActivity extends ActivityBase {
 
@@ -40,9 +40,13 @@ public class MainActivity extends ActivityBase {
     private Button mStartServiceButton;
     private Button mStopServiceButton;
     private Switch mModelSwitch;
+    private TextView mDebugTextView;
 
     // Vars
-
+    private Intent mServiceIntent;
+    //private ServiceConnection mServiceConnection; // declared at the bottom
+    BackgroundService mService;
+    private boolean mServiceIsBound = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +59,9 @@ public class MainActivity extends ActivityBase {
         bindViews();
         bindClickListeners();
 
-
+        //if(mServiceIsBound){
+        //    // service is working
+        //}
     }
 
     @Override
@@ -64,6 +70,7 @@ public class MainActivity extends ActivityBase {
         mStartServiceButton = findViewById(R.id.start_service_button);
         mStopServiceButton = findViewById(R.id.stop_service_button);
         mModelSwitch = findViewById(R.id.model_switch);
+        mDebugTextView = findViewById(R.id.debug_text_view);
     }
 
     @Override
@@ -93,53 +100,139 @@ public class MainActivity extends ActivityBase {
                 mModelSwitch.setEnabled(true);
             }
         });
+
     }
 
     // Service methods:
 
+    private void bind(){
+        try {
+            getApplicationContext().bindService(
+                    mServiceIntent,
+                    mServiceConnection,
+                    Context.BIND_AUTO_CREATE);
+        } catch (Exception e) {
+            Toast.makeText(MainActivity.this, "Can't bind!", Toast.LENGTH_SHORT).show();
+            Log.e(TAG,"Can't bind!");
+            e.printStackTrace();
+        }
+    }
+
     public void startService(View v){
+
+        //region OLD CODE
+
         //String input = mEditText.getText().toString();
 
-        Intent serviceIntent = new Intent(this, BackgroundService.class);
-        //serviceIntent.putExtra(Utils.INPUT_EXTRA_KEY, input);
-        serviceIntent.putExtra(Utils.INPUT_CREATE_OR_VERIFY, ! mModelSwitch.isChecked() );
+        //*//Intent serviceIntent = new Intent(this, BackgroundService.class);
+        //*////serviceIntent.putExtra(Utils.INPUT_EXTRA_KEY, input);
+        //*//serviceIntent.putExtra(Utils.INPUT_CREATE_OR_VERIFY, ! mModelSwitch.isChecked() );
+        //*//
+        //*//startService(serviceIntent);
 
-        startService(serviceIntent);
+        //endregion
 
         /*with Thread*/
-//        final Intent serviceIntent = new Intent(getApplicationContext(), BackgroundService.class);
-//
-//        final ServiceConnection serviceConnection = new ServiceConnection() {
-//            @Override
-//            public void onServiceConnected(ComponentName name, IBinder service) {
-//                int x;
-//            }
-//
-//            @Override
-//            public void onServiceDisconnected(ComponentName name) {
-//                int y;
-//            }
-//        };
-//
-//        Thread thread = new Thread(){
-//            public void run(){
-//                getApplicationContext().bindService(
-//                        serviceIntent,
-//                        serviceConnection,
-//                        Context.BIND_AUTO_CREATE
-//                );
-//            }
-//        };
-//        thread.run();
+        mServiceIntent = new Intent(getApplicationContext(), BackgroundService.class);
+        mServiceIntent.putExtra(Utils.INPUT_CREATE_OR_VERIFY, ! mModelSwitch.isChecked() );
+
+        Thread thread = new Thread(){
+            public void start(){
+                // Start Service:
+                //startService(mServiceIntent);
+                // Bind to it:
+                if ( ! mServiceIsBound) {
+                    bind();
+                }
+            }
+        };
+        thread.start();
         /*with Thread (end)*/
 
     }
 
+
     public void stopService(View v){
-        Intent serviceIntent = new Intent(this, BackgroundService.class);
-        stopService(serviceIntent);
+
+        // Unbinding the BIND_AUTO_CREATE one;
+
+        mServiceIntent = new Intent(getApplicationContext(), BackgroundService.class);
+        mServiceIntent.putExtra(Utils.INPUT_CREATE_OR_VERIFY, ! mModelSwitch.isChecked() );
+
+        if ( ! mServiceIsBound) {
+            bind();
+        }
+
+        //TODO: WAIT PREV/ bind() async !!!
+
+        if (mServiceIsBound) {
+            try {
+                if (mService != null) {
+                    mService.StopService();
+                } else {
+                    mServiceIsBound = false; // TODO szukseges ez ide ?
+                    return;
+                }
+                getApplicationContext().unbindService(mServiceConnection);
+                mServiceIsBound = false;
+            } catch (Exception e) {
+                Toast.makeText(MainActivity.this, "Can't unbind!", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Can't unbind!");
+                e.printStackTrace();
+            }
+        }
+
+
+
+        //region OLD CODE
+
+        //mService.StopService();
+
+
+        //mService.StopService();
+//        //*//Intent serviceIntent = new Intent( this, BackgroundService.class);
+//        try {
+//            unbindService(mServiceConnection);
+//            Toast.makeText(this, "Unbinded", Toast.LENGTH_SHORT).show();
+//        }catch (Exception e){
+//            e.printStackTrace();
+//            Toast.makeText(this, "Already Unbinded", Toast.LENGTH_SHORT).show();
+//
+//        }
+//
+//        try {
+//
+//            stopService(mServiceIntent);
+//            Toast.makeText(this, "Stopped", Toast.LENGTH_SHORT).show();
+//            mService.StopService();
+//            Toast.makeText(this, "STOP SELF", Toast.LENGTH_SHORT).show();
+//        }catch (Exception e){
+//            e.printStackTrace();
+//            Toast.makeText(this, "Already Stopped", Toast.LENGTH_SHORT).show();
+//
+//        }
+
+
+        //*//stopService(serviceIntent);
+
+        //if(mServiceIsBound){
+        //    unbindService(mServiceConnection);
+        //    mServiceIsBound = false;
+        //}
+        //Intent intent = new Intent(MainActivity.this, BackgroundService.class);
+        //stopService(intent);
+
+        //endregion
+
     }
 
+    @Override
+    protected void onResume(){
+        super.onResume();
+
+        mDebugTextView.setText(mServiceIsBound?"true":"false");
+
+    }
 
     @Override
     protected void onStart() {
@@ -152,4 +245,32 @@ public class MainActivity extends ActivityBase {
 
         Utils.deviceID = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
     }
+
+
+    private ServiceConnection mServiceConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            LocalBinder binder = (LocalBinder) service;
+            mService = binder.getService();
+
+            if(mService != null){
+                Toast.makeText(MainActivity.this, "mService NOT NULL",Toast.LENGTH_LONG).show();
+            }else{
+                Toast.makeText(MainActivity.this, "mService NULL",Toast.LENGTH_LONG).show();
+            }
+
+            Log.i("serviceID","mService = " + mService);
+
+            mServiceIsBound = true;
+            mService.onStartCommand(mServiceIntent,0,0);                   // TODO: is there a better way ? (with startService was called automated)
+            mDebugTextView.setText(mServiceIsBound?"true":"false");
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+            mServiceIsBound = false;
+            mDebugTextView.setText(mServiceIsBound?"true":"false");
+        }
+    };
+
 }
