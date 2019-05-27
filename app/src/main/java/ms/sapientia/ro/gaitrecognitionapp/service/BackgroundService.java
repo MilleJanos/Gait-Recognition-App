@@ -19,6 +19,14 @@ public class BackgroundService extends Service {
 
     private static final String TAG = "BackgroundService";
 
+    public static boolean isRunning = false;
+    public static BackgroundService Instance = null;
+    public static BackgroundService storedService = null;
+    public static Notification mNotification = null;
+
+
+
+
     // Vars
     private Recorder mRecorder;
     private boolean mCreateModel; // true= Create Model; false= Verify last created model
@@ -28,8 +36,8 @@ public class BackgroundService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
-
+        isRunning = true;
+        Instance = this;
     }
 
     @Override
@@ -40,13 +48,14 @@ public class BackgroundService extends Service {
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent,  0);
 
-        Notification notification = new NotificationCompat.Builder(this, Utils.CHANNEL_ID_01)
+        mNotification = new NotificationCompat.Builder(this, Utils.CHANNEL_ID_01)
                 .setContentTitle("Running")
                 .setContentText("Tap to open application")
                 .setSmallIcon(R.drawable.ic_assignment)
                 .setContentIntent(pendingIntent)
                 .build();
-        startForeground(1, notification); // id >= 1
+        startForeground(1, mNotification); // id >= 1
+
 
         // Do heavy work
         mRecorder = new Recorder(this, mCreateModel);
@@ -59,18 +68,31 @@ public class BackgroundService extends Service {
 
     }
 
-    public void stopRecording(){
-        mRecorder.stopRecording();
+
+
+    public void StartRecording(){
+        if(mRecorder == null) {
+            mRecorder = new Recorder(this, mCreateModel);
+        }
+        mRecorder.startRecording();
+        isRunning = true;
+    }
+
+    public void StopRecording(){
+        if(mRecorder != null) {
+            mRecorder.stopRecording();
+        }
+        isRunning = false;
     }
 
     @Override
     public void onDestroy() {
-        if(mRecorder != null){
-            mRecorder.stopRecording();
-        }
-        //mRecorder.resetRecording();
         super.onDestroy();
-    }
+        StopRecording();
+        Instance = null;
+        //mRecorder.resetRecording();
+
+}
 
     @Nullable
     @Override
@@ -89,11 +111,26 @@ public class BackgroundService extends Service {
 
     public void StopService(){
         Log.i(TAG, "StopService()");
-        if(mRecorder != null){
-            mRecorder.stopRecording();
-        }
+        StopRecording();
         stopSelf();
-        onDestroy();    // TODO: other way ?? stopSelf() should be do that
+        //onDestroy();
     }
 
+    @Override
+    public boolean onUnbind(Intent intent) {
+        return super.onUnbind(intent);
+    }
+
+    @Override
+    public void onRebind(Intent intent) {
+        super.onRebind(intent);
+    }
+
+    public BackgroundService getStoredService(){
+        return storedService;
+    }
+
+    public void setStoredService(BackgroundService service){
+        storedService = service;
+    }
 }
