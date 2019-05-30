@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- disable state. -->
+    <item android:state_enabled="false">
+        <shape android:shape="rectangle">
+            <corners android:radius="30dp" />
+            <solid android:color="@color/shadow_lighter_color_8" />
+            <stroke android:width="3dip" android:color="@color/colorBlack" />
+            <padding
+                android:left="30dp"
+                android:right="30dp"
+                android:top="5dp"
+                android:bottom="5dp" />
+        </shape>
+    </item>
+
+    <!--released state. (default) -->
+    <item xmlns:android="http://schemas.android.com/apk/res/android" android:state_pressed="false">
+        <shape android:shape="rectangle">
+            <corners android:radius="30dp" />
+            <solid android:color="@color/shadow_lighter_color_4" />
+            <stroke android:width="3dip" android:color="@color/colorBlack" />
+            <padding
+                android:left="30dp"
+                android:right="30dp"
+                android:top="5dp"
+                android:bottom="5dp" />
+        </shape>
+
+    </item>
+
+    <!--pressed state. -->
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <corners android:radius="30dp" />
+            <solid android:color="@color/shadow_lighter_color_6" />
+            <stroke android:width="3dip" android:color="@color/colorBlue4" />
+            <padding
+                android:left="30dp"
+                android:right="30dp"
+                android:top="5dp"
+                android:bottom="5dp" />
+        </shape>
+    </item>
+
+
+
+
+</selector>
