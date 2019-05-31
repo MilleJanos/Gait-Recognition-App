@@ -1,43 +1,28 @@
 package ms.sapientia.ro.gaitrecognitionapp;
 
 import android.Manifest;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.os.IBinder;
-import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Switch;
-import android.widget.TextView;
 import android.widget.Toast;
+import android.support.v4.app.Fragment;
 
 import com.google.firebase.FirebaseApp;
 
-import java.io.File;
-
 import ms.sapientia.gaitrecognitionapp.R;
-import ms.sapientia.ro.gaitrecognitionapp.Presenter.fragment.LoginFragment;
-import ms.sapientia.ro.gaitrecognitionapp.Presenter.LoginPresenter;
-import ms.sapientia.ro.gaitrecognitionapp.Presenter.interfaces.ILoginPresenter;
+import ms.sapientia.ro.gaitrecognitionapp.Presenter.LoginFragmentPresenter;
+import ms.sapientia.ro.gaitrecognitionapp.Presenter.RegisterFragmentPresenter;
 import ms.sapientia.ro.gaitrecognitionapp.service.ActivityBase;
-import ms.sapientia.ro.gaitrecognitionapp.service.BackgroundService;
 import ms.sapientia.ro.gaitrecognitionapp.service.FirebaseUtils;
-import ms.sapientia.ro.gaitrecognitionapp.service.Utils;
-
-import ms.sapientia.ro.gaitrecognitionapp.service.BackgroundService.LocalBinder;
 
 public class MainActivity extends ActivityBase {
 
     private static final String TAG = "MainActivity";
+    private static final String TAG_NAME_FRAGMENT = "FragmentList";
 
 
     @Override
@@ -61,13 +46,49 @@ public class MainActivity extends ActivityBase {
         //mLoginPresenter = new LoginPresenter(this);
         //EVENT:  button-onClick: mLoginPresenter.onLogin(_,_);
 
-        // Fragment
-        getSupportFragmentManager()
+        // Get FragmentManager & FragmentTransaction
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        // Create LoginFragmentPresenter instance
+        /*
+        fragmentManager
                 .beginTransaction()
-                .replace(R.id.fragmentContainer,new LoginFragment())
+                .replace(R.id.fragmentContainer,new LoginFragmentPresenter())
                 .addToBackStack(null)
                 .commit();
+         */
+         fragmentTransaction.add(R.id.fragmentContainer, new LoginFragmentPresenter(), "login_fragment");
+         fragmentTransaction.commit();
+
+        //printActivityFragmentList(fragmentManager);
     }
+
+/*
+    // Print fragment manager managed fragment in debug log.
+    public static void printActivityFragmentList(FragmentManager fragmentManager)
+    {
+        // Get all Fragment list.
+        List<Fragment> fragmentList = fragmentManager.getFragments();
+
+        if(fragmentList!=null)
+        {
+            int size = fragmentList.size();
+            for(int i=0;i<size;i++)
+            {
+                Fragment fragment = fragmentList.get(i);
+
+                if(fragment!=null) {
+                    String fragmentTag = fragment.getTag();
+                    Log.d(TAG_NAME_FRAGMENT, fragmentTag);
+                }
+            }
+
+            Log.d(TAG_NAME_FRAGMENT, "***********************************");
+        }
+    }
+*/
+
 
     @Override
     protected void bindViews() {
@@ -79,6 +100,30 @@ public class MainActivity extends ActivityBase {
 
     }
 
+
+
+    private static final String BACK_STACK_ROOT_TAG = "root_fragment";
+
+/*
+    private void onTabSelected(int position){
+        // Pop off everythink up to and including the current tab
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.popBackStack(BACK_STACK_ROOT_TAG, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+
+        // Add the new tab fragment
+        /////fragmentManager.beginTransaction()
+        /////        .replace(R.id.fragmentContainer, )
+    }
+
+
+    private void addFragmentOnTop(){
+        getFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragmentContainer, new RegisterFragmentPresenter())
+                .addToBackStack(null)
+                .commit();
+    }
+*/
     @Override
     public void onBackPressed() {
         //TODO: ON BACK PRESSED !

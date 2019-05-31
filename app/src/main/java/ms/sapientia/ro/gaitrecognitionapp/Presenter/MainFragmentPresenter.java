@@ -1,18 +1,13 @@
-package ms.sapientia.ro.gaitrecognitionapp.Presenter.fragment;
+package ms.sapientia.ro.gaitrecognitionapp.Presenter;
 
-import android.Manifest;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,22 +18,15 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.FirebaseApp;
-
-import java.io.File;
-
 import ms.sapientia.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.FragmentBase;
-import ms.sapientia.ro.gaitrecognitionapp.MainActivity;
-import ms.sapientia.ro.gaitrecognitionapp.Presenter.LoginPresenter;
 import ms.sapientia.ro.gaitrecognitionapp.Presenter.interfaces.ILoginPresenter;
 import ms.sapientia.ro.gaitrecognitionapp.service.BackgroundService;
-import ms.sapientia.ro.gaitrecognitionapp.service.FirebaseUtils;
 import ms.sapientia.ro.gaitrecognitionapp.service.Utils;
 
-public class MainFragment extends FragmentBase {
+public class MainFragmentPresenter extends FragmentBase {
 
-    private static final String TAG = "MainFragment";
+    private static final String TAG = "MainFragmentPresenter";
     
     // Constants
     public static String PREF_IS_RUNNING = "is_service_running";
