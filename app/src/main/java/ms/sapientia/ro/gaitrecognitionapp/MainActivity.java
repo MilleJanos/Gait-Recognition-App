@@ -2,6 +2,7 @@ package ms.sapientia.ro.gaitrecognitionapp;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
@@ -16,13 +17,18 @@ import com.google.firebase.FirebaseApp;
 import ms.sapientia.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.Presenter.LoginFragmentPresenter;
 import ms.sapientia.ro.gaitrecognitionapp.Presenter.RegisterFragmentPresenter;
+import ms.sapientia.ro.gaitrecognitionapp.Presenter.interfaces.ILoginPresenter;
 import ms.sapientia.ro.gaitrecognitionapp.service.ActivityBase;
 import ms.sapientia.ro.gaitrecognitionapp.service.FirebaseUtils;
 
 public class MainActivity extends ActivityBase {
 
+    // Consts:
     private static final String TAG = "MainActivity";
     private static final String TAG_NAME_FRAGMENT = "FragmentList";
+
+    // Vars:
+    private boolean mDoubleBackToExitPressedOnce = false;
 
 
     @Override
@@ -124,16 +130,43 @@ public class MainActivity extends ActivityBase {
                 .commit();
     }
 */
+
+    public void doublePressExit(){
+        if (mDoubleBackToExitPressedOnce) {
+            super.onBackPressed();
+            return;
+        }
+
+        mDoubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mDoubleBackToExitPressedOnce = false;
+            }
+        }, 2000);
+    }
+
     @Override
     public void onBackPressed() {
-        //TODO: ON BACK PRESSED !
-        //Fragment fragment = fragmentManager.findFragmentById(R.id.fragmentContainer);
-        //if(fragment != null){
-        //    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        //    fragmentTransaction.remove(fragment);
-        //    fragmentTransaction.commit();
-        //}else{
-        //    super.onBackPressed();
-        //}
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment fragment = fragmentManager.findFragmentById(R.id.fragmentContainer);
+        if( fragment instanceof ILoginPresenter){
+            // if Login fragment is displayed -> Exit app
+            doublePressExit();
+
+        }else{
+            if( false /*TODO: IF(logged in && Main Fragment is displayed)*/){
+                // if user is logged in and Main fragment is displayed --> Exit app
+                doublePressExit();
+
+            }else{
+                // if are fragments on top of the Login fragmen -> Remove top fragment
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.remove(fragment);
+                fragmentTransaction.commit();
+
+            }
+        }
     }
 }

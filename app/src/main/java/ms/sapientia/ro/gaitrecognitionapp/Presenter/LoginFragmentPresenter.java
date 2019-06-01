@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +20,7 @@ import java.util.regex.Pattern;
 import ms.sapientia.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.Presenter.interfaces.ILoginPresenter;
 
-public class LoginFragmentPresenter extends Fragment implements ILoginPresenter {//implements View.OnClickListener{
+public class LoginFragmentPresenter extends Fragment implements ILoginPresenter {
 
     // View:
     private EditText mEmailEditText;
@@ -61,7 +62,7 @@ public class LoginFragmentPresenter extends Fragment implements ILoginPresenter 
     }
 
     //@Override
-    protected void bindClickListeners() {
+    public void bindClickListeners() {
         mLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -80,12 +81,53 @@ public class LoginFragmentPresenter extends Fragment implements ILoginPresenter 
                 forgottPasswordClick(v);
             }
         });
+        // Edit Text error message cleaner
+        mEmailEditText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               mEmailEditText.setError(null);
+            }
+        });
+        mPasswordEditText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPasswordEditText.setError(null);
+            }
+        });
+        // Edit Text enter events
+        mEmailEditText.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                //If the event is a key-down event on the "enter" button
+                if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                    // jump to password edit text
+                    mEmailEditText.requestFocus();
+                    return true;
+                }
+                return false;
+            }
+        });
+        mPasswordEditText.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                //If the event is a key-down event on the "enter" button
+                if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                    // jump to password edit text
+                    loginButtonClick(v);
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
     public void loginButtonClick(View view){
         resetErrors();
-        if( verifyInputs() ) {
-            addFragmentToStack(new MainFragmentPresenter(), "main_fragment");
+        String email = mEmailEditText.getText().toString();
+        String password = mPasswordEditText.getText().toString();
+
+        if( verifyInputs(email,password) ) {
+            onLogin(email,password);
         }
     }
 
@@ -99,10 +141,19 @@ public class LoginFragmentPresenter extends Fragment implements ILoginPresenter 
 
     }
 
+    @Override
+    public void onLogin(String email, String password) {
 
-    public boolean verifyInputs(){
-        String email = mEmailEditText.getText().toString();
-        String password = mPasswordEditText.getText().toString();
+        //TODO
+
+        // IF EMAIL AND PASSWORD IS OK IN FIREBASE>AUTH == >
+        // THEN
+        addFragmentToStack(new MainFragmentPresenter(), "main_fragment");
+
+    }
+
+
+    public boolean verifyInputs(String email, String password){
         int errorCode;
 
         /// Check email:
@@ -151,7 +202,7 @@ public class LoginFragmentPresenter extends Fragment implements ILoginPresenter 
     /**
      * Check the email if is valid format.
      * Returns the error code:
-     *  0 if email his Correct
+     *  0 if email is Correct
      *  1 if email is empty
      *  2 if email contains extra spaces
      *  3 if email format is wrong
@@ -159,12 +210,12 @@ public class LoginFragmentPresenter extends Fragment implements ILoginPresenter 
      * @return error code
      */
     public int isEmailFormatWrong(String email){
-        // Extra space
-        if( email.trim().equals(email) ){
+        // Length:
+        if( email.length() == 0 ){
             return 1;
         }
-        // Length:
-        if( email.trim().length() == 0 ){
+        // Extra space
+        if( ! email.trim().equals(email) ){
             return 2;
         }
         // Content
@@ -177,7 +228,7 @@ public class LoginFragmentPresenter extends Fragment implements ILoginPresenter 
                         "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
                         ")+"
         );
-        if( email_address_pattern.matcher(email).matches() ){
+        if( ! email_address_pattern.matcher(email).matches() ){
             return 3;
         }
         return 0;
@@ -196,22 +247,22 @@ public class LoginFragmentPresenter extends Fragment implements ILoginPresenter 
      */
     public int isPasswordFormatWrong(String password){
         // Empty
-        if( password.trim().length() == 0 ){
+        if( password.length() == 0 ){
             return 1;
         }
         // Length
-        if( password.trim().length() < 6 ){
+        if( password.length() < 6 ){
             return 2;
         }
         // Extra space
-        if( password.trim().equals(password) ){
+        if( ! password.trim().equals(password) ){
             return 3;
         }
         // Content
         Pattern password_address_pattern = Pattern.compile(
                 "[a-zA-Z0-9_]+"
         );
-        if( password_address_pattern.matcher(password).matches() ){
+        if( ! password_address_pattern.matcher(password).matches() ){
             return 4;
         }
         return 0;
@@ -222,12 +273,6 @@ public class LoginFragmentPresenter extends Fragment implements ILoginPresenter 
         mPasswordEditText.setError(null);
     }
 
-    @Override
-    public void onLogin(String email, String password) {
-
-        //TODO
-
-    }
 
     public void addFragmentToStack(Fragment fragment, String fragment_tag){
         /*
@@ -241,25 +286,12 @@ public class LoginFragmentPresenter extends Fragment implements ILoginPresenter 
         */
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fragmentContainer, fragment, fragment_tag);
+        fragmentTransaction.add(R.id.fragmentContainer, fragment, fragment_tag);
 
         fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
 
         //MainActivity.printActivityFragmentList(fragmentManager);
     }
-
-/*
-    @Override
-    public void onClick(View view) {
-        //switch (view.getId()){
-        //    case R.id.button:
-        //    {
-        //
-        //        break;
-        //    }
-        //}
-    }
-*/
 
 }
