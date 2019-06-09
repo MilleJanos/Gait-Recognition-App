@@ -1,10 +1,7 @@
-package ms.sapientia.ro.gaitrecognitionapp.Model;
+package ms.sapientia.ro.gaitrecognitionapp.model;
 
 import android.text.TextUtils;
 import android.util.Patterns;
-import android.widget.TextView;
-
-import org.w3c.dom.Text;
 
 public class User implements IUser{
 
@@ -45,6 +42,22 @@ public class User implements IUser{
     @Override
     public String getPassword() {
         return this.password;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     @Override

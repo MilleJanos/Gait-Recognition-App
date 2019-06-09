@@ -1,4 +1,4 @@
-package ms.sapientia.ro.gaitrecognitionapp.Presenter;
+package ms.sapientia.ro.gaitrecognitionapp.fragment;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -8,10 +8,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import ms.sapientia.ro.gaitrecognitionapp.Presenter.interfaces.IRegisterPresenter;
+import ms.sapientia.ro.gaitrecognitionapp.presenter.RegisterFragmentPresenter;
 
 
-public class RegisterFragmentPresenter extends Fragment implements IRegisterPresenter {// implements View.OnClickListener{
+public class RegisterFragment extends Fragment implements RegisterFragmentPresenter.View {// implements View.OnClickListener{
 
     @Nullable
     @Override
@@ -30,8 +30,17 @@ public class RegisterFragmentPresenter extends Fragment implements IRegisterPres
 
     }
 
-    @Override
     public void onRegister(String email, String password, String password2) {
+
+    }
+
+    @Override
+    public void showProgressBar() {
+
+    }
+
+    @Override
+    public void hideProgressBar() {
 
     }
 

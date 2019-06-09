@@ -1,4 +1,4 @@
-package ms.sapientia.ro.gaitrecognitionapp.Presenter;
+package ms.sapientia.ro.gaitrecognitionapp.fragment;
 
 
 import android.os.Bundle;
@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,12 +14,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import java.util.regex.Pattern;
-
 import ms.sapientia.gaitrecognitionapp.R;
-import ms.sapientia.ro.gaitrecognitionapp.Presenter.interfaces.ILoginPresenter;
+import ms.sapientia.ro.gaitrecognitionapp.MainActivity;
+import ms.sapientia.ro.gaitrecognitionapp.presenter.LoginFragmentPresenter;
 
-public class LoginFragmentPresenter extends Fragment implements ILoginPresenter {
+public class LoginFragment extends Fragment implements LoginFragmentPresenter.View {
+
+    // MVP:
+    private LoginFragmentPresenter mPresenter;
 
     // View:
     private EditText mEmailEditText;
@@ -28,6 +29,8 @@ public class LoginFragmentPresenter extends Fragment implements ILoginPresenter 
     private Button mLoginButton;
     private TextView mRegisterTextViewButton;
     private TextView mForgottPasswordTextViewButton;
+
+    // Variables:
 
 
     @Nullable
@@ -41,8 +44,10 @@ public class LoginFragmentPresenter extends Fragment implements ILoginPresenter 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mPresenter = new LoginFragmentPresenter(this);
         initView(view);
         bindClickListeners();
+
         //ConstraintLayout layout = (ConstraintLayout) getView().findViewById(R.id.login_fragment);
         //final int sdk = android.os.Build.VERSION.SDK_INT;
         //if(sdk < android.os.Build.VERSION_CODES.JELLY_BEAN) {
@@ -85,7 +90,7 @@ public class LoginFragmentPresenter extends Fragment implements ILoginPresenter 
         mEmailEditText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               mEmailEditText.setError(null);
+                mEmailEditText.setError(null);
             }
         });
         mPasswordEditText.setOnClickListener(new View.OnClickListener() {
@@ -121,18 +126,22 @@ public class LoginFragmentPresenter extends Fragment implements ILoginPresenter 
         });
     }
 
+
+
+
     public void loginButtonClick(View view){
         resetErrors();
         String email = mEmailEditText.getText().toString();
         String password = mPasswordEditText.getText().toString();
 
-        if( verifyInputs(email,password) ) {
-            onLogin(email,password);
+        if( mPresenter.verifyInputs(email,password,mEmailEditText,mPasswordEditText) ) {
+            mPresenter.Login(email,password);
         }
     }
 
     public void registerButtonClick(View view){
-        addFragmentToStack(new RegisterFragmentPresenter(), "register_fragment");
+        FragmentManager fragmentManager = getFragmentManager();
+        MainActivity.Instance.addFragmentToStack(new RegisterFragment(), fragmentManager, "register_fragment");
     }
 
     public void forgottPasswordClick(View view){
@@ -141,132 +150,8 @@ public class LoginFragmentPresenter extends Fragment implements ILoginPresenter 
 
     }
 
-    @Override
-    public void onLogin(String email, String password) {
-
-        //TODO
-
-        // IF EMAIL AND PASSWORD IS OK IN FIREBASE>AUTH == >
-        // THEN
-        addFragmentToStack(new MainFragmentPresenter(), "main_fragment");
-
-    }
 
 
-    public boolean verifyInputs(String email, String password){
-        int errorCode;
-
-        /// Check email:
-        errorCode = isEmailFormatWrong(email);
-
-        switch (errorCode){
-            case 1:{
-                mEmailEditText.setError("Please fill the email field.");
-                return false;
-            }
-            case 2:{
-                mPasswordEditText.setError("Email can't contain extra spaces.");
-                return false;
-            }
-            case 3:{
-                mEmailEditText.setError("Wrong email format.");
-                return false;
-            }
-        }
-
-        /// Check password:
-        errorCode = isPasswordFormatWrong(password);
-
-        switch (errorCode){
-            case 1:{
-                mPasswordEditText.setError("Please fill the password field");
-                return false;
-            }
-            case 2:{
-                mPasswordEditText.setError("Password has to be at least 6 characters.");
-                return false;
-            }
-            case 3:{
-                mPasswordEditText.setError("Password can't contain extra spaces.");
-                return false;
-            }
-            case 4:{
-                mPasswordEditText.setError("Password can contain only characters, numbers and underscore.");
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Check the email if is valid format.
-     * Returns the error code:
-     *  0 if email is Correct
-     *  1 if email is empty
-     *  2 if email contains extra spaces
-     *  3 if email format is wrong
-     * @param email to verify
-     * @return error code
-     */
-    public int isEmailFormatWrong(String email){
-        // Length:
-        if( email.length() == 0 ){
-            return 1;
-        }
-        // Extra space
-        if( ! email.trim().equals(email) ){
-            return 2;
-        }
-        // Content
-        Pattern email_address_pattern = Pattern.compile(
-                "[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{1,256}" +
-                        "\\@" +
-                        "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" +
-                        "(" +
-                        "\\." +
-                        "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
-                        ")+"
-        );
-        if( ! email_address_pattern.matcher(email).matches() ){
-            return 3;
-        }
-        return 0;
-    }
-
-    /**
-     * Check the email if is valid format.
-     * Returns the error code:
-     *  0 if password his Correct
-     *  1 if password is empty
-     *  2 if password is shorter then 6
-     *  3 if password contains space
-     *  4 if password format is wrong
-     * @param password to verify
-     * @return error code
-     */
-    public int isPasswordFormatWrong(String password){
-        // Empty
-        if( password.length() == 0 ){
-            return 1;
-        }
-        // Length
-        if( password.length() < 6 ){
-            return 2;
-        }
-        // Extra space
-        if( ! password.trim().equals(password) ){
-            return 3;
-        }
-        // Content
-        Pattern password_address_pattern = Pattern.compile(
-                "[a-zA-Z0-9_]+"
-        );
-        if( ! password_address_pattern.matcher(password).matches() ){
-            return 4;
-        }
-        return 0;
-    }
 
     public void resetErrors(){
         mEmailEditText.setError(null);
@@ -274,24 +159,20 @@ public class LoginFragmentPresenter extends Fragment implements ILoginPresenter 
     }
 
 
-    public void addFragmentToStack(Fragment fragment, String fragment_tag){
-        /*
-        Fragment fragmentTwo = FragmentUtil.getFragmentByTagName(fragmentManager, "Fragment Two");
 
-        // Because fragment two has been popup from the back stack, so it must be null.
-        if(fragmentTwo==null)
-        {
-            fragmentTwo = new FragmentTwo();
-        }
-        */
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.add(R.id.fragmentContainer, fragment, fragment_tag);
 
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
-
-        //MainActivity.printActivityFragmentList(fragmentManager);
+    @Override
+    public void initProgressBar() {
+        MainActivity.Instance.initProgressBar();
     }
 
+    @Override
+    public void showProgressBar() {
+        MainActivity.Instance.showProgressBar();
+    }
+
+    @Override
+    public void hideProgressBar() {
+        MainActivity.Instance.hideProgressBar();
+    }
 }

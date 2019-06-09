@@ -1,4 +1,4 @@
-package ms.sapientia.ro.gaitrecognitionapp.Presenter;
+package ms.sapientia.ro.gaitrecognitionapp.view;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,15 +20,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import ms.sapientia.gaitrecognitionapp.R;
-import ms.sapientia.ro.gaitrecognitionapp.FragmentBase;
-import ms.sapientia.ro.gaitrecognitionapp.Presenter.interfaces.ILoginPresenter;
+import ms.sapientia.ro.gaitrecognitionapp.presenter.MainFragmentPresenter;
 import ms.sapientia.ro.gaitrecognitionapp.service.BackgroundService;
 import ms.sapientia.ro.gaitrecognitionapp.service.Utils;
 
-public class MainFragmentPresenter extends FragmentBase {
+public class MainFragment extends Fragment implements MainFragmentPresenter.View {
 
     private static final String TAG = "MainFragmentPresenter";
-    
+
     // Constants
     public static String PREF_IS_RUNNING = "is_service_running";
 
@@ -45,21 +45,12 @@ public class MainFragmentPresenter extends FragmentBase {
     BackgroundService mService;
 
     // MVP
-    ILoginPresenter mLoginPresenter;
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            //mParam1 = getArguments().getString(ARG_PARAM1);
-            //mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-        context = getContext();
-    }
+    MainFragmentPresenter mPresenter;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        //return super.onCreateView(inflater, container, savedInstanceState);
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_main, container, false);
     }
@@ -67,20 +58,40 @@ public class MainFragmentPresenter extends FragmentBase {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        bindViews();
+        mPresenter = new MainFragmentPresenter(this);
+        initView(view);
         bindClickListeners();
+
+        //ConstraintLayout layout = (ConstraintLayout) getView().findViewById(R.id.login_fragment);
+        //final int sdk = android.os.Build.VERSION.SDK_INT;
+        //if(sdk < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+        //    layout.setBackgroundDrawable(ContextCompat.getDrawable(getContext(), R.mipmap.image_asphalt_road) );
+        //} else {
+        //    layout.setBackground(ContextCompat.getDrawable(getContext(), R.mipmap.image_asphalt_road));
+        //}
     }
 
-    @Override
-    protected void bindViews() {
-        mEditText = getView().findViewById(R.id.edit_text_input);
-        mStartServiceButton = getView().findViewById(R.id.start_service_button);
-        mStopServiceButton = getView().findViewById(R.id.stop_service_button);
-        mModelSwitch = getView().findViewById(R.id.model_switch);
-        mDebugTextView = getView().findViewById(R.id.debug_text_view);
+    ////////////////////////@Override
+    ////////////////////////public void onCreate(Bundle savedInstanceState) {
+    ////////////////////////    super.onCreate(savedInstanceState);
+    ////////////////////////    if (getArguments() != null) {
+    ////////////////////////        //mParam1 = getArguments().getString(ARG_PARAM1);
+    ////////////////////////        //mParam2 = getArguments().getString(ARG_PARAM2);
+    ////////////////////////    }
+    ////////////////////////    context = getContext();
+    ////////////////////////}
+
+
+    //@Override
+    protected void initView(View view) {
+        mEditText = view.findViewById(R.id.edit_text_input);
+        mStartServiceButton = view.findViewById(R.id.start_service_button);
+        mStopServiceButton = view.findViewById(R.id.stop_service_button);
+        mModelSwitch = view.findViewById(R.id.model_switch);
+        mDebugTextView = view.findViewById(R.id.debug_text_view);
     }
 
-    @Override
+    //@Override
     protected void bindClickListeners() {
         mStartServiceButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,8 +101,8 @@ public class MainFragmentPresenter extends FragmentBase {
                 //    Log.e(TAG, "No Internet Permission!");
                 //    Toast.makeText(MainActivity.this,"No Internet Permission!", Toast.LENGTH_LONG).show();
                 //}else{
-                    startService(v);
-                    mModelSwitch.setEnabled(false);
+                startService(v);
+                mModelSwitch.setEnabled(false);
                 //}
             }
         });
@@ -225,6 +236,21 @@ public class MainFragmentPresenter extends FragmentBase {
         }
     };
 
+    @Override
+    public void initProgressBar() {
+
+    }
+
+    @Override
+    public void showProgressBar() {
+
+    }
+
+    @Override
+    public void hideProgressBar() {
+
+    }
+
     //sharedPref//private void setRunning(boolean running){
     //sharedPref//    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getContext());
     //sharedPref//    SharedPreferences.Editor editor = pref.edit();
@@ -238,7 +264,5 @@ public class MainFragmentPresenter extends FragmentBase {
     //sharedPref//    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context.getContext());
     //sharedPref//    return pref.getBoolean(PREF_IS_RUNNING,false);
     //sharedPref//}
-
-
 
 }

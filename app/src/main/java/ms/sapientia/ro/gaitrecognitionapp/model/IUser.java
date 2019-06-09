@@ -1,4 +1,4 @@
-package ms.sapientia.ro.gaitrecognitionapp.Model;
+package ms.sapientia.ro.gaitrecognitionapp.model;
 
 public interface IUser {
 
