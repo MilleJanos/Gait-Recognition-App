@@ -15,13 +15,10 @@ import android.widget.TextView;
 
 import ms.sapientia.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.MainActivity;
+import ms.sapientia.ro.gaitrecognitionapp.common.Animator;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.LoginFragmentPresenter;
 
 public class LoginFragment extends Fragment implements LoginFragmentPresenter.View {
-
-    // MVP:
-    private LoginFragmentPresenter mPresenter;
-
     // Static members:
     public static LoginFragment sInstance;
 
@@ -31,6 +28,9 @@ public class LoginFragment extends Fragment implements LoginFragmentPresenter.Vi
     private Button mLoginButton;
     private TextView mRegisterTextViewButton;
     private TextView mForgottPasswordTextViewButton;
+
+    // MVP:
+    private LoginFragmentPresenter mPresenter;
 
     @Nullable
     @Override
@@ -47,6 +47,10 @@ public class LoginFragment extends Fragment implements LoginFragmentPresenter.Vi
         bindClickListeners();
         sInstance = this;
 
+        Animator.LogoIntro(view.findViewById(R.id.ic_imageview));
+        Animator.Slide(view.findViewById(R.id.login_title_textview),-1000,0,0,0);
+
+        //region check SDK
         //ConstraintLayout layout = (ConstraintLayout) getView().findViewById(R.id.login_fragment);
         //final int sdk = android.os.Build.VERSION.SDK_INT;
         //if(sdk < android.os.Build.VERSION_CODES.JELLY_BEAN) {
@@ -54,6 +58,7 @@ public class LoginFragment extends Fragment implements LoginFragmentPresenter.Vi
         //} else {
         //    layout.setBackground(ContextCompat.getDrawable(getContext(), R.mipmap.image_asphalt_road));
         //}
+        //endregion
     }
 
     private void initView(View view){

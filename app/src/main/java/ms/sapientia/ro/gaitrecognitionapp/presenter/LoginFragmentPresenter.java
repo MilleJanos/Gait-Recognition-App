@@ -101,7 +101,7 @@ public class LoginFragmentPresenter {
      * This method adds the RegisterFragment to fragment stack.
      */
     public void goToRegisterPage() {
-        MainActivity.sInstance.addFragmentToStack(new RegisterFragment(), "register_fragment");
+        MainActivity.sInstance.addFragmentToStack(new RegisterFragment(), "register_fragment"); // Without animation
     }
 
     /**

@@ -47,6 +47,7 @@
             android:layout_margin="10dp">
 
             <TextView
+                android:id="@+id/register_title_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/aldrich"
@@ -54,7 +55,7 @@
                 android:text="Register"
                 android:textColor="@color/colorWhite"
                 android:textSize="36sp"
-                android:layout_marginBottom="50dp"/>
+                android:layout_marginBottom="24dp"/>
 
             <EditText
                 android:id="@+id/email_editText"
@@ -139,7 +140,7 @@
             android:layout_marginTop="20dp"
             android:layout_marginBottom="5dp"
             android:padding="5dp"
-            android:textColor="@color/colorBlue1"
+            android:textColor="@color/colorWhite"
             android:text="@string/register_already_have_account"
             android:fontFamily="@font/alef"/>
 
@@ -153,7 +154,7 @@
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
             android:padding="5dp"
-            android:textColor="@color/colorBlue1"
+            android:textColor="@color/colorWhite"
             android:text="@string/login_forgot_password_button"
             android:fontFamily="@font/alef"/>
 
