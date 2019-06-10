@@ -84,7 +84,7 @@ public class FirebaseUtils {
     /**
      * This method uploads the file to FireBase Storage where the refrence is set.
      *
-     * @param activity the activity context where the method will display progress messages
+     * @param activity the activity sContext where the method will display progress messages
      * @param file     the File that will be uploaded
      * @param ref      the StorageReference where the file will be uploaded
      * @author Mille Janos
@@ -156,7 +156,7 @@ public class FirebaseUtils {
     /**
      * This method downloads a file from Firebase FireStore.
      *
-     * @param activity        the activity context where the method will display progress messaged
+     * @param activity        the activity sContext where the method will display progress messaged
      * @param downloadFromRef the StorageReference where the file will be downloaded from
      * @param saveToThisFile  the file that will contain the downloaded data
      * @author Mille Janos

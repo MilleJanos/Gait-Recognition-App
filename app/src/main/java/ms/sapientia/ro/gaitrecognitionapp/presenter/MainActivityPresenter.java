@@ -1,28 +1,53 @@
 package ms.sapientia.ro.gaitrecognitionapp.presenter;
 
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.widget.Toast;
 
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
 
 import ms.sapientia.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.MainActivity;
+import ms.sapientia.ro.gaitrecognitionapp.common.Util;
 import ms.sapientia.ro.gaitrecognitionapp.service.FirebaseUtils;
 
 public class MainActivityPresenter {
 
-    public View view;
+    // Members:
+    public View mView;
+    private boolean mDoubleBackToExitPressedOnce = false;
 
+    // Interface:
+    public interface View{
+        void initProgressBar();
+        void showProgressBar();
+        void hideProgressBar();
+    }
+
+    // Constructor:
     public MainActivityPresenter(View view) {
-        this.view = view;
+        this.mView = view;
     }
 
+    /**
+     * This method initiates Firebase.
+     */
     public void InitFirebase(){
-        FirebaseApp.initializeApp( MainActivity.Instance );
-        FirebaseUtils.Init( MainActivity.Instance );
+        FirebaseApp.initializeApp( MainActivity.sInstance);
+        FirebaseUtils.Init( MainActivity.sInstance);
+
+        Util.sAuth = FirebaseAuth.getInstance();
     }
 
+    /**
+     * This method adds a new fragment on top of the stack.
+     * @param fragment new fragment
+     * @param fragmentManager application's fragment manager
+     * @param fragment_tag string tag
+     */
     public void addFragmentToStack(Fragment fragment, FragmentManager fragmentManager, String fragment_tag){
         /*
         Fragment fragmentTwo = FragmentUtil.getFragmentByTagName(fragmentManager, "Fragment Two");
@@ -44,11 +69,25 @@ public class MainActivityPresenter {
 
     }
 
-    // Interface:
-    public interface View{
-        void initProgressBar();
-        void showProgressBar();
-        void hideProgressBar();
+    /**
+     * This method solves the double press mechanic.
+     * If this method is called twice then
+     */
+    public void doublePressExit(){
+        if (mDoubleBackToExitPressedOnce) {
+            //MainActivity.sInstance.onBackPressed();
+            MainActivity.sInstance.finish();
+            return;
+        }
+
+        mDoubleBackToExitPressedOnce = true;
+        Toast.makeText(MainActivity.sInstance, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mDoubleBackToExitPressedOnce = false;
+            }
+        }, 2000);
     }
 
 }

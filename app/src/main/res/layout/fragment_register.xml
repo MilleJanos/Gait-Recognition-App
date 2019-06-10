@@ -1,25 +1,168 @@
-<?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
+<?xml version="1.0" encoding="utf-8"?><android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/register_fragment"
-    android:background="@color/colorBlue1">
+    android:scaleType="fitXY"
+    android:adjustViewBounds="true"
+    android:background="@drawable/image_asphalt_road">
+    <!--android:id="@+id/register_fragment">-->
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/shadow_lighter_color_6"/>
 
 
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="wrap_content"
+    <ImageView
+        android:id="@+id/ic_imageview"
+        android:layout_width="253dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:text="Register"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:adjustViewBounds="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@mipmap/ic_launcher_foreground_nobackground" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/aldrich"
+                android:layout_gravity="center"
+                android:text="Register"
+                android:textColor="@color/colorWhite"
+                android:textSize="36sp"
+                android:layout_marginBottom="50dp"/>
+
+            <EditText
+                android:id="@+id/email_editText"
+                android:layout_width="wrap_content"
+                android:minWidth="250dp"
+                android:layout_gravity="center"
+                android:layout_margin="10dp"
+                android:lines="1"
+                android:maxLines="1"
+                android:scrollHorizontally="false"
+                android:importantForAutofill="auto"
+                android:hint="Email"
+                android:textColorHint="@color/colorGray2"
+                android:textColor="@color/colorWhite"
+                android:fontFamily="@font/aldrich"
+                android:drawableLeft="@drawable/ic_email_black_24dp"
+                android:drawableTint="@color/colorWhite"
+                android:drawablePadding="5dp"
+                android:layout_height="wrap_content" />
+
+            <EditText
+                android:id="@+id/password_editText_1"
+                android:layout_width="wrap_content"
+                android:minWidth="250dp"
+                android:layout_gravity="center"
+                android:layout_margin="10dp"
+                android:lines="1"
+                android:scrollHorizontally="true"
+                android:hint="Password"
+                android:inputType="textPassword"
+                android:textColorHint="@color/colorGray2"
+                android:textColor="@color/colorWhite"
+                android:fontFamily="@font/aldrich"
+                android:drawableLeft="@drawable/ic_lock_black_24dp"
+                android:drawableTint="@color/colorWhite"
+                android:drawablePadding="5dp"
+                android:layout_height="wrap_content" />
+
+            <EditText
+                android:id="@+id/password_editText_2"
+                android:layout_width="wrap_content"
+                android:minWidth="250dp"
+                android:layout_gravity="center"
+                android:layout_margin="10dp"
+                android:lines="1"
+                android:scrollHorizontally="true"
+                android:hint="Reenter password"
+                android:inputType="textPassword"
+                android:textColorHint="@color/colorGray2"
+                android:textColor="@color/colorWhite"
+                android:fontFamily="@font/aldrich"
+                android:drawableLeft="@drawable/ic_lock_black_24dp"
+                android:drawableTint="@color/colorWhite"
+                android:drawablePadding="5dp"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+
+        <Button
+            android:id="@+id/register_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:minWidth="240dp"
+            android:layout_margin="2dp"
+            android:text="@string/register"
+            android:fontFamily="@font/aldrich"
+            android:background="@drawable/button_selector"
+            android:shadowRadius="@android:integer/config_longAnimTime"
+            android:textColor="@color/colorWhite"
+            android:textStyle="bold"
+            />
+
+        <TextView
+            android:id="@+id/log_in_textviewbutton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:minWidth="200dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="5dp"
+            android:padding="5dp"
+            android:textColor="@color/colorBlue1"
+            android:text="@string/register_already_have_account"
+            android:fontFamily="@font/alef"/>
+
+        <TextView
+            android:id="@+id/forgot_password_textviewbutton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:minWidth="200dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:padding="5dp"
+            android:textColor="@color/colorBlue1"
+            android:text="@string/login_forgot_password_button"
+            android:fontFamily="@font/alef"/>
+
+
+
+    </LinearLayout>
+
+
+
+
+
 </android.support.constraint.ConstraintLayout>

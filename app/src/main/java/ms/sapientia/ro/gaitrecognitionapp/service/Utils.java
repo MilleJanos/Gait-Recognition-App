@@ -261,14 +261,14 @@ public class Utils {
     /**
      * Method that hides the keyboard in the given activity
      *
-     * @param activity the activity context where the method will hide the keyboard
+     * @param activity the activity sContext where the method will hide the keyboard
      */
     public static void hideKeyboard(Activity activity) {
         // If keyboard is shown then hide:
         InputMethodManager imm = (InputMethodManager) activity.getSystemService(MainActivity.INPUT_METHOD_SERVICE); // TODO: MainActivity ?
-        // Find the currently focused view, so we can grab the correct window token from it.
+        // Find the currently focused mView, so we can grab the correct window token from it.
         View activityOnFocusView = activity.getCurrentFocus();
-        // If no view currently has focus, create a new one, just so we can grab a window token from it
+        // If no mView currently has focus, create a new one, just so we can grab a window token from it
         if (activityOnFocusView == null) {
             activityOnFocusView = new View(activity);
         }

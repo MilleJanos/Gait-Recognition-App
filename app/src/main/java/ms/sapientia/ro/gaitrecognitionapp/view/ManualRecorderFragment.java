@@ -1,4 +1,5 @@
-package ms.sapientia.ro.gaitrecognitionapp.fragment;
+package ms.sapientia.ro.gaitrecognitionapp.view;
+
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -14,26 +15,24 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import ms.sapientia.gaitrecognitionapp.R;
-import ms.sapientia.ro.gaitrecognitionapp.MainActivity;
-import ms.sapientia.ro.gaitrecognitionapp.presenter.MainFragmentPresenter;
+import ms.sapientia.ro.gaitrecognitionapp.presenter.ManualRecorderFragmentPresenter;
 import ms.sapientia.ro.gaitrecognitionapp.service.BackgroundService;
 import ms.sapientia.ro.gaitrecognitionapp.service.Utils;
 
-public class MainFragment extends Fragment implements MainFragmentPresenter.View {
+public class ManualRecorderFragment extends Fragment implements ManualRecorderFragmentPresenter.View {
 
-    private static final String TAG = "MainFragment";
-    
+    private static final String TAG = "MainFragmentPresenter";
+
     // Constants
     public static String PREF_IS_RUNNING = "is_service_running";
 
     // UI Components
-    private EditText mEditText;
+    //private EditText mEditText;
     private Button mStartServiceButton;
     private Button mStopServiceButton;
     private Switch mModelSwitch;
@@ -45,38 +44,54 @@ public class MainFragment extends Fragment implements MainFragmentPresenter.View
     //private ServiceConnection mServiceConnection; // declared at the bottom
     BackgroundService mService;
 
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            //mParam1 = getArguments().getString(ARG_PARAM1);
-            //mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-        context = getContext();
-    }
+    // MVP
+    ManualRecorderFragmentPresenter mPresenter;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        //return super.onCreateView(inflater, container, savedInstanceState);
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_main, container, false);
+        return inflater.inflate(R.layout.fragment_manual_recorder, container, false);
     }
 
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        bindViews();
+        mPresenter = new ManualRecorderFragmentPresenter(this);
+        initView(view);
         bindClickListeners();
+
+        //ConstraintLayout layout = (ConstraintLayout) getView().findViewById(R.id.login_fragment);
+        //final int sdk = android.os.Build.VERSION.SDK_INT;
+        //if(sdk < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+        //    layout.setBackgroundDrawable(ContextCompat.getDrawable(getContext(), R.mipmap.image_asphalt_road) );
+        //} else {
+        //    layout.setBackground(ContextCompat.getDrawable(getContext(), R.mipmap.image_asphalt_road));
+        //}
     }
 
-    protected void bindViews() {
-        mEditText = getView().findViewById(R.id.edit_text_input);
-        mStartServiceButton = getView().findViewById(R.id.start_service_button);
-        mStopServiceButton = getView().findViewById(R.id.stop_service_button);
-        mModelSwitch = getView().findViewById(R.id.model_switch);
-        mDebugTextView = getView().findViewById(R.id.debug_text_view);
+    ////////////////////////@Override
+    ////////////////////////public void onCreate(Bundle savedInstanceState) {
+    ////////////////////////    super.onCreate(savedInstanceState);
+    ////////////////////////    if (getArguments() != null) {
+    ////////////////////////        //mParam1 = getArguments().getString(ARG_PARAM1);
+    ////////////////////////        //mParam2 = getArguments().getString(ARG_PARAM2);
+    ////////////////////////    }
+    ////////////////////////    sContext = getContext();
+    ////////////////////////}
+
+
+    //@Override
+    protected void initView(View view) {
+        //mEditText = view.findViewById(R.id.edit_text_input);
+        mStartServiceButton = view.findViewById(R.id.start_service_button);
+        mStopServiceButton = view.findViewById(R.id.stop_service_button);
+        mModelSwitch = view.findViewById(R.id.model_switch);
+        mDebugTextView = view.findViewById(R.id.debug_text_view);
     }
 
+    //@Override
     protected void bindClickListeners() {
         mStartServiceButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -86,8 +101,8 @@ public class MainFragment extends Fragment implements MainFragmentPresenter.View
                 //    Log.e(TAG, "No Internet Permission!");
                 //    Toast.makeText(MainActivity.this,"No Internet Permission!", Toast.LENGTH_LONG).show();
                 //}else{
-                    startService(v);
-                    mModelSwitch.setEnabled(false);
+                startService(v);
+                mModelSwitch.setEnabled(false);
                 //}
             }
         });
@@ -104,10 +119,10 @@ public class MainFragment extends Fragment implements MainFragmentPresenter.View
     }
 
 
-    private void bind(){
+    private void bind() {
 
         mServiceIntent = new Intent(getContext(), BackgroundService.class);
-        mServiceIntent.putExtra(Utils.INPUT_CREATE_OR_VERIFY, ! mModelSwitch.isChecked() );
+        mServiceIntent.putExtra(Utils.INPUT_CREATE_OR_VERIFY, !mModelSwitch.isChecked());
 
         try {
             getContext().bindService(
@@ -116,17 +131,17 @@ public class MainFragment extends Fragment implements MainFragmentPresenter.View
                     Context.BIND_AUTO_CREATE);
         } catch (Exception e) {
             Toast.makeText(context, "Can't bind!", Toast.LENGTH_SHORT).show();
-            Log.e(TAG,"Can't bind!");
+            Log.e(TAG, "Can't bind!");
             e.printStackTrace();
         }
     }
 
 
-    public void startService(View v){
+    public void startService(View v) {
 
         // If service exists then restart it, do not create a new one
 
-        if( BackgroundService.Instance == null || BackgroundService.Instance.getStoredService() == null ) {
+        if (BackgroundService.Instance == null || BackgroundService.Instance.getStoredService() == null) {
             Thread thread = new Thread() {
                 public void start() {
                     bind();
@@ -135,7 +150,7 @@ public class MainFragment extends Fragment implements MainFragmentPresenter.View
             thread.start();
         } else {
             mService = BackgroundService.Instance.getStoredService();
-            if( ! BackgroundService.isRunning ){
+            if (!BackgroundService.isRunning) {
                 mService.StartRecording();
             }
         }
@@ -153,18 +168,18 @@ public class MainFragment extends Fragment implements MainFragmentPresenter.View
             bind();
         }
         //if(mService == null) {
-        //    if (BackgroundService.Instance != null) {
-        //        mService = BackgroundService.Instance.getStoredService();
+        //    if (BackgroundService.sInstance != null) {
+        //        mService = BackgroundService.sInstance.getStoredService();
         //    }
         //}
 
         // USE IT TO STOP THE RUNNING SERVICE:
 
-        if(mService != null) {
+        if (mService != null) {
             mService.StopService();
             getContext().unbindService(mServiceConnection);
-        }else{
-            if( BackgroundService.Instance != null){
+        } else {
+            if (BackgroundService.Instance != null) {
                 BackgroundService.Instance.StopService();
                 getContext().unbindService(mServiceConnection);
             }
@@ -182,15 +197,15 @@ public class MainFragment extends Fragment implements MainFragmentPresenter.View
     //protected void onStart() {
     //    super.onStart();
     //
-    //    //if(BackgroundService.Instance != null && BackgroundService.isRunning){
+    //    //if(BackgroundService.sInstance != null && BackgroundService.isRunning){
     //    //    bind();
     //    //}
     //
     //    //DEBUG//try {
-    //    //DEBUG//    BackgroundService.Instance.getStoredService().onRebind(mServiceIntent);
-    //    //DEBUG//    Toast.makeText(context, "onRebind OK", Toast.LENGTH_SHORT).show();
+    //    //DEBUG//    BackgroundService.sInstance.getStoredService().onRebind(mServiceIntent);
+    //    //DEBUG//    Toast.makeText(sContext, "onRebind OK", Toast.LENGTH_SHORT).show();
     //    //DEBUG//}catch (Exception e){
-    //    //DEBUG//    Toast.makeText(context, "onRebind FAIL", Toast.LENGTH_SHORT).show();
+    //    //DEBUG//    Toast.makeText(sContext, "onRebind FAIL", Toast.LENGTH_SHORT).show();
     //    //DEBUG//}
     //
     //
@@ -203,12 +218,12 @@ public class MainFragment extends Fragment implements MainFragmentPresenter.View
 
             BackgroundService.Instance.setStoredService(mService);
 
-            Log.i("serviceID","mService = " + mService);
+            Log.i("serviceID", "mService = " + mService);
 
-            mService.onStartCommand(mServiceIntent,0,0);                   // TODO: is there a better way ? (with startService was called automated)
+            mService.onStartCommand(mServiceIntent, 0, 0);                   // TODO: is there a better way ? (with startService was called automated)
 
             //sharedPref//setRunning(true);
-            //sharedPref//mDebugTextView.setText(isRunning(context)?"true":"false");
+            //sharedPref//mDebugTextView.setText(isRunning(sContext)?"true":"false");
         }
 
         @Override
@@ -217,40 +232,36 @@ public class MainFragment extends Fragment implements MainFragmentPresenter.View
             int x;
 
             //sharedPref//setRunning(false);
-            //sharedPref//mDebugTextView.setText(isRunning(context)?"true":"false");
+            //sharedPref//mDebugTextView.setText(isRunning(sContext)?"true":"false");
         }
     };
 
     @Override
     public void initProgressBar() {
-        MainActivity.Instance.initProgressBar();
+
     }
 
     @Override
     public void showProgressBar() {
-        MainActivity.Instance.showProgressBar();
+
     }
 
     @Override
     public void hideProgressBar() {
-        MainActivity.Instance.hideProgressBar();
+
     }
 
-
-    //sharedPref//private void setRunning(boolean running){
-    //sharedPref//    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getContext());
-    //sharedPref//    SharedPreferences.Editor editor = pref.edit();
-    //sharedPref//
-    //sharedPref//    editor.putBoolean(PREF_IS_RUNNING, running);
-    //sharedPref//
-    //sharedPref//    editor.apply();
-    //sharedPref//}
-    //sharedPref//
-    //sharedPref//private static boolean isRunning(Context context){
-    //sharedPref//    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context.getContext());
-    //sharedPref//    return pref.getBoolean(PREF_IS_RUNNING,false);
-    //sharedPref//}
-
-
-
+//sharedPref//private void setRunning(boolean running){
+//sharedPref//    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getContext());
+//sharedPref//    SharedPreferences.Editor editor = pref.edit();
+//sharedPref//
+//sharedPref//    editor.putBoolean(PREF_IS_RUNNING, running);
+//sharedPref//
+//sharedPref//    editor.apply();
+//sharedPref//}
+//sharedPref//
+//sharedPref//private static boolean isRunning(sContext sContext){
+//sharedPref//    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(sContext.getContext());
+//sharedPref//    return pref.getBoolean(PREF_IS_RUNNING,false);
+//sharedPref//}
 }
