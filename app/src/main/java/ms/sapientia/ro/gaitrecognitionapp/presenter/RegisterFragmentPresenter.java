@@ -17,8 +17,8 @@ import java.util.regex.Pattern;
 import ms.sapientia.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.MainActivity;
 import ms.sapientia.ro.gaitrecognitionapp.common.Util;
-import ms.sapientia.ro.gaitrecognitionapp.view.LoginFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainFragment;
+import ms.sapientia.ro.gaitrecognitionapp.view.RegisterFragment;
 
 public class RegisterFragmentPresenter {
 
@@ -48,7 +48,7 @@ public class RegisterFragmentPresenter {
      *  3. Register
      *
      * Methods called:
-     *  CheckEmail_then_Login()
+     *  CheckEmail_then_Register()
      *     |
      *     | RegisterWithEmailAndPassword()
      *
@@ -87,7 +87,7 @@ public class RegisterFragmentPresenter {
      *  2. Register
      *
      * Methods called:
-     *  CheckEmail_then_Login()
+     *  CheckEmail_then_Register()
      *
      * @param email to register it
      * @param password to register it
@@ -109,8 +109,7 @@ public class RegisterFragmentPresenter {
                     Log.i(TAG, "This email is already registred!");
                     Toast.makeText(MainActivity.sContext, "This email is already registred!", Toast.LENGTH_SHORT).show();
 
-                    LoginFragment.sInstance.mEmailEditText.setError("Already used");
-                    LoginFragment.sInstance.mPasswordEditText.setError(null);
+                    setErrors("Already used",null,null);
 
                     // Hide progress bar
                     view.hideProgressBar();
@@ -189,15 +188,15 @@ public class RegisterFragmentPresenter {
 
         switch (errorCode){
             case 1:{
-                email_button.setError("Please fill the email field.");
+                setErrors("Please fill the email field.",null,null);
                 return false;
             }
             case 2:{
-                email_button.setError("Email can't contain extra spaces.");
+                setErrors("Email can't contain extra spaces.",null,null);
                 return false;
             }
             case 3:{
-                email_button.setError("Wrong email format.");
+                setErrors("Wrong email format.",null,null);
                 return false;
             }
         }
@@ -207,26 +206,26 @@ public class RegisterFragmentPresenter {
 
         switch (errorCode){
             case 1:{
-                password_button_1.setError("Please fill the password field");
+                setErrors(null,"Please fill the password field",null);
                 return false;
             }
             case 2:{
-                password_button_1.setError("Password has to be at least 6 characters.");
+                setErrors(null,"Password has to be at least 6 characters.",null);
                 return false;
             }
             case 3:{
-                password_button_1.setError("Password can't contain extra spaces.");
+                setErrors(null,"Password can't contain extra spaces.",null);
                 return false;
             }
             case 4:{
-                password_button_1.setError("Password can contain only characters, numbers and underscore.");
+                setErrors(null,"Password needs to contain lower and uppercase character and number.",null);
                 return false;
             }
         }
 
         /// Check password 1:
         if( ! password1.equals(password2) ){
-            password_button_2.setError("Passwords don't match!");
+            setErrors(null,null,"Passwords don't match!");
             return false;
         }
 
@@ -254,12 +253,12 @@ public class RegisterFragmentPresenter {
         }
         // Content
         Pattern email_address_pattern = Pattern.compile(
-                "[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{1,256}" +
+                "[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{6,256}" +
                         "\\@" +
-                        "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" +
+                        "[a-zA-Z0-9][a-zA-Z0-9\\-]{3,64}" +
                         "(" +
                         "\\." +
-                        "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
+                        "[a-zA-Z0-9][a-zA-Z0-9\\-]{1,25}" +
                         ")+"
         );
         if( ! email_address_pattern.matcher(email).matches() ){
@@ -293,12 +292,28 @@ public class RegisterFragmentPresenter {
             return 3;
         }
         // Content
-        Pattern password_address_pattern = Pattern.compile(
-                "[a-zA-Z0-9_]+"
+        Pattern lower_case_pattern = Pattern.compile(
+                "[a-z]+"
         );
-        if( ! password_address_pattern.matcher(password).matches() ){
+        Pattern upper_case_pattern = Pattern.compile(
+                "[A-Z]+"
+        );
+        Pattern number_pattern = Pattern.compile(
+                "[0-9]+"
+        );
+        //Pattern special_characters_pattern = Pattern.compile(
+        //        "[_]+"
+        //);
+
+        boolean M1 = lower_case_pattern.matcher(password).matches();
+        boolean M2 = upper_case_pattern.matcher(password).matches();
+        boolean M3 = number_pattern.matcher(password).matches();
+        boolean M4 =  true; //special_characters_pattern.matcher(password).matches();
+
+        if( ! M1 || ! M2 || ! M3 || ! M4){
             return 4;
         }
+
         return 0;
     }
 
@@ -312,10 +327,43 @@ public class RegisterFragmentPresenter {
         MainActivity.sInstance.removeFragment(fragment);
     }
 
-    public void resetErrors(EditText email_edit_text, EditText password_edit_text_1, EditText password_edit_text_2){
-        email_edit_text.setError(null);
-        password_edit_text_1.setError(null);
-        password_edit_text_2.setError(null);
+    /**
+     * This method sets error on input fielsd
+     * @param email_msg email input field error message
+     * @param password_msg_1 first password input field error message
+     * @param password_msg_2 second password input field error message
+     */
+    private void setErrors(String email_msg, String password_msg_1, String password_msg_2){
+        // Set errors:
+        RegisterFragment.sInstance.mEmailEditText.setError(email_msg);
+        RegisterFragment.sInstance.mPasswordEditText1.setError(password_msg_1);
+        RegisterFragment.sInstance.mPasswordEditText2.setError(password_msg_2);
+        // Set focus:
+        if( email_msg != null && ( ! email_msg.isEmpty()) ){
+
+            RegisterFragment.sInstance.mEmailEditText.requestFocus();
+
+        }else{
+
+            if( password_msg_1 != null && ( ! password_msg_1.isEmpty()) ){
+
+                RegisterFragment.sInstance.mPasswordEditText1.requestFocus();
+
+            }else{
+
+                if( password_msg_2 != null && ( ! password_msg_2.isEmpty()) ) {
+
+                    RegisterFragment.sInstance.mPasswordEditText2.requestFocus();
+
+                }
+            }
+        }
     }
+
+    public void resetErrors(EditText email_edit_text, EditText password_edit_text_1, EditText password_edit_text_2){
+        setErrors(null,null,null);
+    }
+
+
 
 }

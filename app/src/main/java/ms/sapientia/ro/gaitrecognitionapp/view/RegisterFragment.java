@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,13 +14,17 @@ import android.widget.TextView;
 
 import ms.sapientia.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.MainActivity;
-import ms.sapientia.ro.gaitrecognitionapp.presenter.LoginFragmentPresenter;
+import ms.sapientia.ro.gaitrecognitionapp.common.Util;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.RegisterFragmentPresenter;
 
 
 public class RegisterFragment extends Fragment implements RegisterFragmentPresenter.View {
 
+    // Constants:
     private static final String TAG = "RegisterFragment";
+
+    // Static members:
+    public static RegisterFragment sInstance;
 
     // View members:
     public EditText mEmailEditText;
@@ -48,6 +51,7 @@ public class RegisterFragment extends Fragment implements RegisterFragmentPresen
         mPresenter = new RegisterFragmentPresenter(this);
         initView(view);
         bindClickListeners();
+        sInstance = this;
     }
 
     private void initView(View view){
@@ -63,6 +67,7 @@ public class RegisterFragment extends Fragment implements RegisterFragmentPresen
         mRegisterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Util.hideKeyboard(MainActivity.sInstance);
                 registerButtonClick(v);
             }
         });
@@ -104,7 +109,7 @@ public class RegisterFragment extends Fragment implements RegisterFragmentPresen
                 //If the event is a key-down event on the "enter" button
                 if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
                     // jump to password edit text
-                    mEmailEditText.requestFocus();
+                    mPasswordEditText1.requestFocus();
                     return true;
                 }
                 return false;
@@ -116,7 +121,7 @@ public class RegisterFragment extends Fragment implements RegisterFragmentPresen
                 //If the event is a key-down event on the "enter" button
                 if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
                     // jump to password edit text
-                    registerButtonClick(v);
+                    mPasswordEditText2.requestFocus();
                     return true;
                 }
                 return false;
@@ -128,6 +133,7 @@ public class RegisterFragment extends Fragment implements RegisterFragmentPresen
                 //If the event is a key-down event on the "enter" button
                 if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
                     // jump to password edit text
+                    Util.hideKeyboard(MainActivity.sInstance);
                     registerButtonClick(v);
                     return true;
                 }

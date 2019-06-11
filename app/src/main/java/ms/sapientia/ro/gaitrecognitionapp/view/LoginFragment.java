@@ -16,6 +16,7 @@ import android.widget.TextView;
 import ms.sapientia.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.MainActivity;
 import ms.sapientia.ro.gaitrecognitionapp.common.Animator;
+import ms.sapientia.ro.gaitrecognitionapp.common.Util;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.LoginFragmentPresenter;
 
 public class LoginFragment extends Fragment implements LoginFragmentPresenter.View {
@@ -73,6 +74,7 @@ public class LoginFragment extends Fragment implements LoginFragmentPresenter.Vi
         mLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Util.hideKeyboard(MainActivity.sInstance);
                 loginButtonClick(v);
             }
         });
@@ -108,7 +110,7 @@ public class LoginFragment extends Fragment implements LoginFragmentPresenter.Vi
                 //If the event is a key-down event on the "enter" button
                 if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
                     // jump to password edit text
-                    mEmailEditText.requestFocus();
+                    mPasswordEditText.requestFocus();
                     return true;
                 }
                 return false;
@@ -120,6 +122,7 @@ public class LoginFragment extends Fragment implements LoginFragmentPresenter.Vi
                 //If the event is a key-down event on the "enter" button
                 if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
                     // jump to password edit text
+                    Util.hideKeyboard(MainActivity.sInstance);
                     loginButtonClick(v);
                     return true;
                 }

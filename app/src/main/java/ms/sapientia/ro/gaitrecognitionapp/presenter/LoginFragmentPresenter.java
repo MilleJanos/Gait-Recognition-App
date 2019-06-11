@@ -49,15 +49,15 @@ public class LoginFragmentPresenter {
 
         switch (errorCode){
             case 1:{
-                email_button.setError("Please fill the email field.");
+                setErrors("Please fill the email field.",null);
                 return false;
             }
             case 2:{
-                email_button.setError("Email can't contain extra spaces.");
+                setErrors("Email can't contain extra spaces.",null);
                 return false;
             }
             case 3:{
-                email_button.setError("Wrong email format.");
+                setErrors("Wrong email format.",null);
                 return false;
             }
         }
@@ -67,19 +67,19 @@ public class LoginFragmentPresenter {
 
         switch (errorCode){
             case 1:{
-                password_button.setError("Please fill the password field");
+                setErrors(null,"Please fill the password field");
                 return false;
             }
             case 2:{
-                password_button.setError("Password has to be at least 6 characters.");
+                setErrors(null,"Password has to be at least 6 characters.");
                 return false;
             }
             case 3:{
-                password_button.setError("Password can't contain extra spaces.");
+                setErrors(null,"Password can't contain extra spaces.");
                 return false;
             }
             case 4:{
-                password_button.setError("Password can contain only characters, numbers and underscore.");
+                setErrors(null,"Password can contain only characters, numbers and underscore.");
                 return false;
             }
         }
@@ -88,13 +88,35 @@ public class LoginFragmentPresenter {
     }
 
     /**
+     * This method sets error on input fielsd
+     * @param email_msg email input field error message
+     * @param password_msg password input field error message
+     */
+    private void setErrors(String email_msg, String password_msg){
+        // Set errors:
+        LoginFragment.sInstance.mEmailEditText.setError(email_msg);
+        LoginFragment.sInstance.mPasswordEditText.setError(password_msg);
+
+        // Set focus:
+        if( email_msg != null && (! email_msg.isEmpty()) ){
+
+            LoginFragment.sInstance.mEmailEditText.requestFocus();
+
+        }else{
+
+            if( password_msg != null && (! password_msg.isEmpty() )) {
+                LoginFragment.sInstance.mPasswordEditText.requestFocus();
+            }
+        }
+    }
+
+    /**
      * This method resets the error on the input EditText-s.
      * @param email_edit_text
      * @param password_edit_text
      */
     public void resetErrors(EditText email_edit_text, EditText password_edit_text){
-        email_edit_text.setError(null);
-        password_edit_text.setError(null);
+        setErrors(null, null);
     }
 
     /**
@@ -216,8 +238,7 @@ public class LoginFragmentPresenter {
            }else{
 
                // Login attempt failed.
-               LoginFragment.sInstance.mEmailEditText.setError(null);
-               LoginFragment.sInstance.mPasswordEditText.setError("Wrong password");
+               setErrors(null,"Wrong password");
 
                // Hide progress bar
                view.hideProgressBar();
@@ -294,5 +315,7 @@ public class LoginFragmentPresenter {
         }
         return 0;
     }
+
+
 
 }
