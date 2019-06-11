@@ -1,4 +1,4 @@
-package ms.sapientia.ro.gaitrecognitionapp;
+package ms.sapientia.ro.gaitrecognitionapp.view;
 
 import android.Manifest;
 import android.content.Context;
@@ -6,13 +6,19 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -20,10 +26,22 @@ import android.widget.Toast;
 
 import ms.sapientia.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.MainActivityPresenter;
-import ms.sapientia.ro.gaitrecognitionapp.view.LoginFragment;
+import ms.sapientia.ro.gaitrecognitionapp.view.auth.LoginFragment;
 
+/*
+EXAMPLE HOW TO REACH DRAWER MENU HEADER ITEMS
 
-public class MainActivity extends AppCompatActivity implements MainActivityPresenter.View {
+navigationMenuUserName = navigationView.getHeaderView(0).findViewById(R.id.nav_header_name);
+navigationMenuEmail =    navigationView.getHeaderView(0).findViewById(R.id.nav_header_email);
+
+OPEN NAVIGATION DRAWER
+
+DrawerLayout mDrawerLayout = (DrawerLayout) getView().findViewById(R.id.nav_view);
+mDrawerLayout.openDrawer(mDrawerLayout);
+
+*/
+
+public class MainActivity extends AppCompatActivity implements MainActivityPresenter.View, NavigationView.OnNavigationItemSelectedListener{
 
     // Constants:
     private final String TAG = "MainActivity";
@@ -42,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main_nav);
 
         // Lock screen orientation to portrait
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -83,6 +101,24 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
         // Init progress bar
         initProgressBar();
         hideProgressBar();
+
+        // Init Navigation Menu Drawer:
+        initNavigationMenuDrawer();
+    }
+
+    private void initNavigationMenuDrawer() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        //navigationView.getMenu().getItem(0).setChecked(true);
+
     }
 
     /**
@@ -191,6 +227,54 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
     @Override
     public void hideProgressBar() {
         mProgressBar.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+        // Handle navigation view item clicks here.
+        int id = menuItem.getItemId();
+
+        switch (id){
+            case R.id.nav_home: {
+                //TODO
+                break;
+            }
+            case R.id.nav_profile: {
+                //TODO
+                break;
+            }
+            case R.id.nav_mode: {
+                //TODO
+                MainActivity.sInstance.addFragmentToStack(new ModeFragment(), "mode_fragment");
+                break;
+            }
+            case R.id.nav_settings: {
+                //TODO
+                break;
+            }
+            case R.id.nav_help: {
+                //TODO
+                break;
+            }
+            case R.id.nav_logout: {
+                //TODO
+                break;
+            }
+            case R.id.nav_exit: {
+                //TODO
+                break;
+            }
+
+
+        }
+
+
+        return false;
+    }
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+
     }
 
 

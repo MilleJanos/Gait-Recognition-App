@@ -21,7 +21,7 @@ import java.util.Date;
 import java.util.List;
 
 import ms.sapientia.ro.commonclasses.Accelerometer;
-import ms.sapientia.ro.gaitrecognitionapp.MainActivity;
+import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 import ms.sapientia.ro.model_builder.GaitHelperFunctions;
 import ms.sapientia.ro.model_builder.GaitModelBuilder;
 import ms.sapientia.ro.model_builder.GaitVerification;

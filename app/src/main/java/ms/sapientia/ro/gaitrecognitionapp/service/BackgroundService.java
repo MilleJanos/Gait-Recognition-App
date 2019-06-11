@@ -10,10 +10,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import java.net.DatagramSocketImpl;
-
 import ms.sapientia.gaitrecognitionapp.R;
-import ms.sapientia.ro.gaitrecognitionapp.MainActivity;
+import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 
 public class BackgroundService extends Service {
 

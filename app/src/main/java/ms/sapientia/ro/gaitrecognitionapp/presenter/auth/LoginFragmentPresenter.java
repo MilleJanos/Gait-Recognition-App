@@ -1,4 +1,4 @@
-package ms.sapientia.ro.gaitrecognitionapp.presenter;
+package ms.sapientia.ro.gaitrecognitionapp.presenter.auth;
 
 import android.util.Log;
 import android.widget.EditText;
@@ -8,11 +8,11 @@ import com.google.firebase.auth.SignInMethodQueryResult;
 
 import java.util.regex.Pattern;
 
-import ms.sapientia.ro.gaitrecognitionapp.MainActivity;
+import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 import ms.sapientia.ro.gaitrecognitionapp.common.Util;
-import ms.sapientia.ro.gaitrecognitionapp.view.LoginFragment;
+import ms.sapientia.ro.gaitrecognitionapp.view.auth.LoginFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainFragment;
-import ms.sapientia.ro.gaitrecognitionapp.view.RegisterFragment;
+import ms.sapientia.ro.gaitrecognitionapp.view.auth.RegisterFragment;
 
 public class LoginFragmentPresenter {
 

@@ -1,4 +1,4 @@
-package ms.sapientia.ro.gaitrecognitionapp.view;
+package ms.sapientia.ro.gaitrecognitionapp.view.auth;
 
 
 import android.os.Bundle;
@@ -14,10 +14,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import ms.sapientia.gaitrecognitionapp.R;
-import ms.sapientia.ro.gaitrecognitionapp.MainActivity;
+import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 import ms.sapientia.ro.gaitrecognitionapp.common.Animator;
 import ms.sapientia.ro.gaitrecognitionapp.common.Util;
-import ms.sapientia.ro.gaitrecognitionapp.presenter.LoginFragmentPresenter;
+import ms.sapientia.ro.gaitrecognitionapp.presenter.auth.LoginFragmentPresenter;
 
 public class LoginFragment extends Fragment implements LoginFragmentPresenter.View {
     // Static members:
@@ -139,6 +139,13 @@ public class LoginFragment extends Fragment implements LoginFragmentPresenter.Vi
         String email = mEmailEditText.getText().toString();
         String password = mPasswordEditText.getText().toString();
 
+        if(email.equals("x") && password.equals("")){       // TODO: DELETE THIS !
+            email = "millejanos31@gmail.com";
+            password = "01234567";
+            LoginFragment.sInstance.mEmailEditText.setText(email);
+            LoginFragment.sInstance.mPasswordEditText.setText(password);
+        }
+
         // Try to login:
         if( mPresenter.verifyInputs(email,password,mEmailEditText,mPasswordEditText) ) {
 
@@ -150,6 +157,7 @@ public class LoginFragment extends Fragment implements LoginFragmentPresenter.Vi
     public void registerButtonClick(View view){
         mPresenter.goToRegisterPage();
     }
+
     public void forgottPasswordClick(View view){
 
         // TODO forgottPasswordClick()

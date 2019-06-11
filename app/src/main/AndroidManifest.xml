@@ -12,9 +12,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:screenOrientation="portrait"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
+        android:theme="@style/AppTheme.NoActionBar"
         android:windowSoftInputMode="adjustPan|adjustResize" > <!-- To avoid focused items being behind the keyboard -->
-        <activity android:name="ms.sapientia.ro.gaitrecognitionapp.MainActivity">
+        <activity android:name="ms.sapientia.ro.gaitrecognitionapp.view.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

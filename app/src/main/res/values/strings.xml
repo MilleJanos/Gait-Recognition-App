@@ -11,5 +11,8 @@
     <string name="register_already_have_account">Already have account?</string>
     <string name="register">Register</string>
 
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
 
 </resources>

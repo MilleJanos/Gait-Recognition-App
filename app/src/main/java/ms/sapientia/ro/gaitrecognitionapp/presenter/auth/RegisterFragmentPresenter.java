@@ -1,4 +1,4 @@
-package ms.sapientia.ro.gaitrecognitionapp.presenter;
+package ms.sapientia.ro.gaitrecognitionapp.presenter.auth;
 
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -15,10 +15,10 @@ import com.google.firebase.auth.SignInMethodQueryResult;
 import java.util.regex.Pattern;
 
 import ms.sapientia.gaitrecognitionapp.R;
-import ms.sapientia.ro.gaitrecognitionapp.MainActivity;
+import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 import ms.sapientia.ro.gaitrecognitionapp.common.Util;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainFragment;
-import ms.sapientia.ro.gaitrecognitionapp.view.RegisterFragment;
+import ms.sapientia.ro.gaitrecognitionapp.view.auth.RegisterFragment;
 
 public class RegisterFragmentPresenter {
 
