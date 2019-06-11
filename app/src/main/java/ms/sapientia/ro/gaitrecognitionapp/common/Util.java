@@ -2,9 +2,11 @@ package ms.sapientia.ro.gaitrecognitionapp.common;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
@@ -59,6 +61,40 @@ public class Util {
             activityOnFocusView = new View(activity);
         }
         imm.hideSoftInputFromWindow(activityOnFocusView.getWindowToken(), 0);
+    }
+
+    /**
+     * Class to get device screen resolution.
+     */
+    public static class DeviceScreenResolution{
+
+        private static boolean ready = false;
+        private static int width;
+        private static int height;
+
+        private DeviceScreenResolution(){
+            Display display = MainActivity.sInstance.getWindowManager().getDefaultDisplay();
+            Point size = new Point();
+            display.getSize(size);
+            width = size.x;
+            height = size.y;
+            ready = true;
+        }
+
+        public static int GetWidth(){
+            if( ! ready ){
+                new DeviceScreenResolution();
+            }
+            return width;
+        }
+
+        public static int GetHeight(){
+            if( ! ready ){
+                new DeviceScreenResolution();
+            }
+            return height;
+        }
+
     }
 
 

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,20 +14,26 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Display;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
 import ms.sapientia.gaitrecognitionapp.R;
+import ms.sapientia.ro.gaitrecognitionapp.common.Util;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.MainActivityPresenter;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.LoginFragment;
+import ms.sapientia.ro.gaitrecognitionapp.view.menu.ModeFragment;
 
 /*
 EXAMPLE HOW TO REACH DRAWER MENU HEADER ITEMS
@@ -55,6 +62,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
     // Members:
     private MainActivityPresenter mPresenter;
     private ProgressBar mProgressBar;
+    Toolbar mToolbar;
+    DrawerLayout mDrawer;
 
 
     @Override
@@ -102,23 +111,58 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
         initProgressBar();
         hideProgressBar();
 
+        // Init toolbar:
+        initToolbar();
+
         // Init Navigation Menu Drawer:
         initNavigationMenuDrawer();
+
+        // Lock navigation drawer
+        lockNavigationDrawer();
+    }
+
+    private void initToolbar(){
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
+
+        mDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, mDrawer, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        mDrawer.addDrawerListener(toggle);
+        toggle.syncState();
     }
 
     private void initNavigationMenuDrawer() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
-
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         //navigationView.getMenu().getItem(0).setChecked(true);
 
+        // Default selected item (Home)
+        navigationView.setCheckedItem(R.id.nav_home);
+
+        // Start locked (unlock after login)
+        lockNavigationDrawer();
+    }
+
+    public void lockNavigationDrawer(){
+        DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        // hide toolbar
+        hideToolbar();
+    }
+
+    public void unlockNavigationDrawer(){
+        DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        // show toolbar
+        showToolbar();
+    }
+
+    private void hideToolbar(){
+        getSupportActionBar().hide();
+    }
+
+    private void showToolbar(){
+        getSupportActionBar().show();
     }
 
     /**
@@ -205,12 +249,18 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
      */
     @Override
     public void initProgressBar() {
+        int height = Util.DeviceScreenResolution.GetHeight();
         mProgressBar = new ProgressBar(this, null, android.R.attr.progressBarStyleSmall);
+
         mProgressBar.setIndeterminate(true);
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(Resources.getSystem().getDisplayMetrics().widthPixels,250);
-        params.addRule(RelativeLayout.CENTER_IN_PARENT);
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(Resources.getSystem().getDisplayMetrics().widthPixels,250);
+        params.setMargins(0,height/3+50,0,0);
+        //RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(Resources.getSystem().getDisplayMetrics().widthPixels,250);
+        //params.addRule(RelativeLayout.CENTER_IN_PARENT);
+        mProgressBar.setVisibility(View.VISIBLE);
         this.addContentView(mProgressBar, params);
         //showProgressBar();
+
     }
 
     /**
@@ -268,8 +318,9 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
 
         }
 
-
-        return false;
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 
     @Override

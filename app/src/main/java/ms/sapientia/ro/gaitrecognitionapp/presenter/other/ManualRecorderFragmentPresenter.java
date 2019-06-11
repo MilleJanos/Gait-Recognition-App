@@ -1,4 +1,4 @@
-package ms.sapientia.ro.gaitrecognitionapp.presenter;
+package ms.sapientia.ro.gaitrecognitionapp.presenter.other;
 
 public class ManualRecorderFragmentPresenter {
 

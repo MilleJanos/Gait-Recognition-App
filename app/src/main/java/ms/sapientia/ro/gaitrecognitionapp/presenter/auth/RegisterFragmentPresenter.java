@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 import ms.sapientia.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 import ms.sapientia.ro.gaitrecognitionapp.common.Util;
-import ms.sapientia.ro.gaitrecognitionapp.view.MainFragment;
+import ms.sapientia.ro.gaitrecognitionapp.view.menu.MainFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.RegisterFragment;
 
 public class RegisterFragmentPresenter {

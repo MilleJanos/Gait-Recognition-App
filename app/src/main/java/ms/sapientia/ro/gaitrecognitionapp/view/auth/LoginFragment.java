@@ -14,10 +14,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import ms.sapientia.gaitrecognitionapp.R;
-import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 import ms.sapientia.ro.gaitrecognitionapp.common.Animator;
 import ms.sapientia.ro.gaitrecognitionapp.common.Util;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.auth.LoginFragmentPresenter;
+import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 
 public class LoginFragment extends Fragment implements LoginFragmentPresenter.View {
     // Static members:

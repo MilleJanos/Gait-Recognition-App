@@ -1,4 +1,4 @@
-package ms.sapientia.ro.gaitrecognitionapp.view;
+package ms.sapientia.ro.gaitrecognitionapp.view.other;
 
 
 import android.content.ComponentName;
@@ -20,7 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import ms.sapientia.gaitrecognitionapp.R;
-import ms.sapientia.ro.gaitrecognitionapp.presenter.ManualRecorderFragmentPresenter;
+import ms.sapientia.ro.gaitrecognitionapp.presenter.other.ManualRecorderFragmentPresenter;
 import ms.sapientia.ro.gaitrecognitionapp.service.BackgroundService;
 import ms.sapientia.ro.gaitrecognitionapp.service.Utils;
 

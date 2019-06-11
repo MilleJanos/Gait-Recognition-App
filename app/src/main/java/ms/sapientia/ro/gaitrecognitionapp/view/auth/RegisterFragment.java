@@ -13,9 +13,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import ms.sapientia.gaitrecognitionapp.R;
-import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 import ms.sapientia.ro.gaitrecognitionapp.common.Util;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.auth.RegisterFragmentPresenter;
+import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 
 
 public class RegisterFragment extends Fragment implements RegisterFragmentPresenter.View {

@@ -3,35 +3,39 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_home"
+            android:icon="@drawable/ic_home"
+            android:title="Home"/>
+        <item
+            android:id="@+id/nav_profile"
+            android:icon="@drawable/ic_profile"
+            android:title="Profile"/>
+        <item
+            android:id="@+id/nav_mode"
+            android:icon="@drawable/ic_mode"
+            android:title="Mode"/>
+        <item
+            android:id="@+id/nav_settings"
+            android:icon="@drawable/ic_settings"
+            android:title="Settings"/>
+        <item
+            android:id="@+id/nav_help"
+            android:icon="@drawable/ic_help"
+            android:title="Help"/>
+    </group>
+
+
     <item android:title="Options">
         <menu>
             <item
-                android:id="@+id/nav_home"
-                android:icon="@drawable/ic_email_black_24dp"
-                android:title="Home"/>
-            <item
-                android:id="@+id/nav_profile"
-                android:icon="@drawable/ic_email_black_24dp"
-                android:title="Profile"/>
-            <item
-                android:id="@+id/nav_mode"
-                android:icon="@drawable/ic_email_black_24dp"
-                android:title="Mode"/>
-            <item
-                android:id="@+id/nav_settings"
-                android:icon="@drawable/ic_email_black_24dp"
-                android:title="Settings"/>
-            <item
-                android:id="@+id/nav_help"
-                android:icon="@drawable/ic_email_black_24dp"
-                android:title="Help"/>
-            <item
                 android:id="@+id/nav_logout"
-                android:icon="@drawable/ic_email_black_24dp"
+                android:icon="@drawable/ic_log_out"
                 android:title="Log out"/>
             <item
                 android:id="@+id/nav_exit"
-                android:icon="@drawable/ic_email_black_24dp"
+                android:icon="@drawable/ic_exit"
                 android:title="Exit"/>
         </menu>
     </item>

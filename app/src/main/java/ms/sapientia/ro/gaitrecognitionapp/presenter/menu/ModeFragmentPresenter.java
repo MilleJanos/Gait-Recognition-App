@@ -1,4 +1,4 @@
-package ms.sapientia.ro.gaitrecognitionapp.presenter;
+package ms.sapientia.ro.gaitrecognitionapp.presenter.menu;
 
 public class ModeFragmentPresenter {
 
@@ -19,6 +19,20 @@ public class ModeFragmentPresenter {
     }
 
 
+    // Methods:
+
+
+    public void Prepare4Train(){
+        // TODO
+    }
+
+    public void Prepare4Authentication(){
+        // TODO
+    }
+
+    public void Prepare4DataCollection(){
+        // TODO
+    }
 
 
 }
