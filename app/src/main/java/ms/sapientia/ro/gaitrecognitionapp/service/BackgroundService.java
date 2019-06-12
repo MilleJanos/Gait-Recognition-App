@@ -58,8 +58,9 @@ public class BackgroundService extends Service {
 
 
         // Do heavy work
-        mRecorder = new Recorder(this, mCreateModel);
-        mRecorder.startRecording();
+        //mRecorder = new Recorder(this, mCreateModel);
+        //mRecorder.startRecording();
+        StartRecording(Recorder.Mode.MODE_TRAIN);
 
 
         //stopSelf();
@@ -71,9 +72,9 @@ public class BackgroundService extends Service {
 
 
 
-    public void StartRecording(){
+    public void StartRecording(Recorder.Mode mode){
         if(mRecorder == null) {
-            mRecorder = new Recorder(this, mCreateModel);
+            mRecorder = new Recorder(this, mode);
         }
         mRecorder.startRecording();
         isRunning = true;

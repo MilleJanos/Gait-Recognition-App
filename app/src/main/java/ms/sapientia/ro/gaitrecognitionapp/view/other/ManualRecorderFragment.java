@@ -22,6 +22,7 @@ import android.widget.Toast;
 import ms.sapientia.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.other.ManualRecorderFragmentPresenter;
 import ms.sapientia.ro.gaitrecognitionapp.service.BackgroundService;
+import ms.sapientia.ro.gaitrecognitionapp.service.Recorder;
 import ms.sapientia.ro.gaitrecognitionapp.service.RecorderUtils;
 
 public class ManualRecorderFragment extends Fragment implements ManualRecorderFragmentPresenter.View {
@@ -150,7 +151,7 @@ public class ManualRecorderFragment extends Fragment implements ManualRecorderFr
         } else {
             mService = BackgroundService.Instance.getStoredService();
             if (!BackgroundService.isRunning) {
-                mService.StartRecording();
+                mService.StartRecording(Recorder.Mode.MODE_TRAIN);
             }
         }
     }

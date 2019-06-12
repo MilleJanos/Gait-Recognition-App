@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.List;
 
 import ms.sapientia.ro.commonclasses.Accelerometer;
+import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 import ms.sapientia.ro.model_builder.GaitHelperFunctions;
 import ms.sapientia.ro.model_builder.GaitModelBuilder;
@@ -37,36 +38,29 @@ public class RecorderUtils {
     private RecorderUtils() {
     }
 
+    // Tag member:
     private static final String TAG = "RecorderUtils";
-
+    // Constant members:
     public final static String INPUT_EXTRA_KEY = "inputextra";
     public final static String INPUT_CREATE_OR_VERIFY = "createorverify";
     public final static String CHANNEL_ID_01 = "channel_01";
-
-    // File vars
-    public static File rawdataUserFile;
-    public static File featureUserFile;
-    public static File modelUserFile;
-    public static File featureNegativeDummyFile;
+    // File  members:
     public static File featureMergedFile;
     public static File featureUserFile_Copy;
-    //region HELP
+    //region file-HELP
         // get full path:           file.getAbsolutePath()
         // get parent folder path:  file.getParentFile().getAbsolutePath()
         // get file name:           file.getName()
     //endregion
-
-    public static boolean downloadingNegativeDummyFile = false;
-
-    // Rawdata Default header
+    // Shows that the downloading of negative feature file is ongoing or not:
+    public static boolean downloadingNegativeFeatureFile = false;
+    // Rawdata Default header:
     public static final String RAWDATA_DEFAULT_HEADER = "timestamp,accx,accy,accz,stepnum";
-
-    // Vars
+    // Members:
     public static Date lastUsedDate = new Date();
     public static String deviceID;
+    // Methods:
 
-
-    //region HELP
     /**
      * This method saves the accArray<Accelerometer> list into file including header.
      *
@@ -76,7 +70,6 @@ public class RecorderUtils {
      * @return 0 if there is no error
      * 1 if there occurred an error
      */
-    //endregion
     public static short saveRawAccelerometerDataIntoCsvFile(ArrayDeque<Accelerometer> array, File file, String headerStr) {
         String TAG = "saveRawAccelerometerDataIntoCsvFile";
         Log.d(TAG, ">>>RUN>>>savingAccArrayIntoCSV()");
@@ -118,7 +111,6 @@ public class RecorderUtils {
         return 0;
     }
 
-
     public static String getCurrentDateFormatted(){
         Date date = new Date();
         lastUsedDate = date;
@@ -128,7 +120,6 @@ public class RecorderUtils {
     public static String formatDate(Date date){
         return DateFormat.format("yyyyMMdd_HHmmss", date.getTime()).toString();
     }
-
 
     public static void createFileIfNotExists(File file){
         //File myInternalFilesRoot = new File(RecorderUtils.internalFilesRoot.getAbsolutePath() /*+ customDIR*/);
@@ -162,7 +153,6 @@ public class RecorderUtils {
             }
         }
     }
-
 
 //    // Initial Files
 //    public static void initInternalFiles(){
@@ -231,7 +221,6 @@ public class RecorderUtils {
 //        }
 //    }
 
-
     public static String getCurrentTimeStamp(){
         try {
 
@@ -280,7 +269,7 @@ public class RecorderUtils {
         IGaitModelBuilder builder = new GaitModelBuilder();
         Classifier classifier;
         try {
-            classifier = (RandomForest) SerializationHelper.read(new FileInputStream( RecorderUtils.modelUserFile.getAbsolutePath() )); //new RandomForest();
+            classifier = (RandomForest) SerializationHelper.read(new FileInputStream( AppUtil.modelUserFile.getAbsolutePath() )); //new RandomForest();
 
             //GaitHelperFunctions.createFeaturesFileFromRawFile(
             //        RecorderUtils.rawdataUserFile.getAbsolutePath(),
@@ -289,14 +278,14 @@ public class RecorderUtils {
 
             // features_dummy + features_user
             GaitHelperFunctions.mergeEquallyArffFiles(
-                    RecorderUtils.featureNegativeDummyFile.getAbsolutePath(),
+                    AppUtil.featureNegativeFile.getAbsolutePath(),
                     RecorderUtils.featureUserFile_Copy.getAbsolutePath());
 
             ArrayList<Attribute> attributes = builder.getAttributes( RecorderUtils.featureUserFile_Copy.getAbsolutePath() ); ///feature (mar letezo)
 
             IGaitVerification verifier = new GaitVerification();
             //percentage = verifier.verifyUser(classifier, attributes, FRESH_RAWDATA_WAITING_TO_TEST ); // 3. param - user raw data
-            percentage = verifier.verifyUser(classifier, attributes, RecorderUtils.rawdataUserFile.getAbsolutePath() );
+            percentage = verifier.verifyUser(classifier, attributes, AppUtil.featureNegativeFile.getAbsolutePath() );
 
             // percentage = Integer.parseInt( ((percentage * 100) + "").substring(0, 2) );
 

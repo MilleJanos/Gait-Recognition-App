@@ -17,26 +17,26 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
-        android:layout_marginBottom="0dp"
+        android:layout_marginBottom="16dp"
         android:fontFamily="@font/aldrich"
-        android:text="Service"
         android:switchPadding="10dp"
+        android:text="Service"
         android:textColor="@color/colorGray9"
         android:textSize="30sp"
-        app:layout_constraintBottom_toTopOf="@+id/radioGroup"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintStart_toStartOf="parent" />
         <!--android:thumb="@drawable/switch_thumb_custom"-->
         <!--android:track="@drawable/switch_track_custom"-->
 
 
-    <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/radioGroup"
+    <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
-        android:layout_height="455dp"
+        android:layout_height="match_parent"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="140dp"
         android:layout_marginEnd="32dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="80dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -44,16 +44,17 @@
         app:layout_constraintTop_toTopOf="parent">
 
 
-        <!-- Radio: Train -->
+        <!-- My Radio: Train -->
 
         <LinearLayout
+            android:id="@+id/item_train"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
             android:orientation="vertical">
 
-            <RadioButton
-                android:id="@+id/radio_train"
+            <TextView
+
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/aldrich"
@@ -86,16 +87,17 @@
 
         </LinearLayout>
 
-        <!-- Radio: Authenticate -->
+        <!-- My Radio: Authenticate -->
 
         <LinearLayout
+            android:id="@+id/item_auth"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
             android:orientation="vertical">
 
-            <RadioButton
-                android:id="@+id/radio_auth"
+            <TextView
+
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/aldrich"
@@ -128,16 +130,17 @@
 
         </LinearLayout>
 
-        <!-- Radio: Collect Data -->
+        <!-- My Radio: Collect Data -->
 
         <LinearLayout
+            android:id="@+id/item_collect_data"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
             android:orientation="vertical">
 
-            <RadioButton
-                android:id="@+id/radio_collect_data"
+
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/aldrich"
@@ -171,6 +174,6 @@
         </LinearLayout>
 
 
-    </RadioGroup>
+    </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

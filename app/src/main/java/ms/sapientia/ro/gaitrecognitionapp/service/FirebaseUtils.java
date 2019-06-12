@@ -30,29 +30,42 @@ public class FirebaseUtils {
     //
     // Firebase Keys
     //
-    // FireStore (Beta database)
-    public static final String USER_RECORDS_OLD_KEY = "user_records";
-    public static final String USER_RECORDS_NEW_KEY = "user_records_2";
-    public static final String USER_RECORDS_DEBUG_KEY = "user_records_debug";
+    // FireStore (Cloud Firestore)
+    public static final String USER_COLLECTION_KEY = "user";
         /* <user_id> */
-            /* <device_id> */
-                /* <random_id> */
-                    public static final String DATE_KEY = "date";                   // they will be used more
-                    public static final String FILE_ID_KEY = "fileId";              // often in UserRecordObject
-                    public static final String DOWNLOAD_URL_KEY = "downloadUrl";    // class
-                    public static final String USER_DATA_KEY = "user_data";
-    /* <user_id> */
-    public static final String USER_DATE_KEY = "date";                   // they will be used more
-    public static final String USER_FILE_ID_KEY = "fileId";              // often in UserRecordObject
-    public static final String USER_DOWNLOAD_URL_KEY = "downloadUrl";    // class
+
+
+
+    //public static final String USER_RECORDS_OLD_KEY = "user_records";
+    //public static final String USER_RECORDS_NEW_KEY = "user_records_2";
+    //public static final String USER_RECORDS_DEBUG_KEY = "user_records_debug";
+    //    /* <user_id> */
+    //        /* <device_id> */
+    //            /* <random_id> */
+    //                public static final String DATE_KEY = "date";                   // they will be used more
+    //                public static final String FILE_ID_KEY = "fileId";              // often in UserRecordObject
+    //                public static final String DOWNLOAD_URL_KEY = "downloadUrl";    // class
+    //                public static final String USER_DATA_KEY = "user_data";
+    ///* <user_id> */
+    //public static final String USER_DATE_KEY = "date";                   // they will be used more
+    //public static final String USER_FILE_ID_KEY = "fileId";              // often in UserRecordObject
+    //public static final String USER_DOWNLOAD_URL_KEY = "downloadUrl";    // class
     // Storage (Files)
-    public static final String STORAGE_FEATURES_KEY = "features";
-    public static final String STORAGE_FILES_KEY = "files";
-    public static final String STORAGE_FILES_METADATA_KEY = "files_metadata";
-    public static final String STORAGE_MODELS_KEY = "models";
-    public static final String STORAGE_FEATURES_DEBUG_KEY = "features_debug";
-    public static final String STORAGE_FILES_DEBUG_KEY = "files_debug";
-    public static final String STORAGE_MODELS_DEBUG_KEY = "models_debug";
+    public static final String STORAGE_DATA_KEY = "data";
+        /* <user_id> */
+            public static final String STORAGE_RAW_KEY = "raw";
+            public static final String STORAGE_FEATURE_KEY = "feature";
+            public static final String STORAGE_MODEL_KEY = "model";
+            public static final String STORAGE_OTHER_KEY = "other";
+            public static final String STORAGE_TRAIN_KEY = "train";
+
+    //public static final String STORAGE_FEATURES_KEY = "features";
+    //public static final String STORAGE_FILES_KEY = "files";
+    //public static final String STORAGE_FILES_METADATA_KEY = "files_metadata";
+    //public static final String STORAGE_MODELS_KEY = "models";
+    //public static final String STORAGE_FEATURES_DEBUG_KEY = "features_debug";
+    //public static final String STORAGE_FILES_DEBUG_KEY = "files_debug";
+    //public static final String STORAGE_MODELS_DEBUG_KEY = "models_debug";
     /**
      * A constant that contains the name of the Firebase/Firestore collection where user statistics
      * are stored
@@ -69,7 +82,7 @@ public class FirebaseUtils {
     //public static StorageReference storageReference;
 
     // Negative Dummy Name (in STORAGE_FEATURES_KEY)
-    public static final String firebaseDummyFileName = "features_rRHyStiEKkN4Cq5rVSxlpvrCwA72.arff";
+    public static final String negativeFeatureFileName = "features_negative.arff";
 
     //
     // Methods:
@@ -166,7 +179,7 @@ public class FirebaseUtils {
 
         final File file = saveToThisFile;
 
-        //AppUtil.mRef = AppUtil.mStorage.getReference().child( /*featureFolder*/ FirebaseUtil.STORAGE_FEATURES_KEY + "/" + AppUtil.firebaseDummyFileName );
+        //AppUtil.mRef = AppUtil.mStorage.getReference().child( /*featureFolder*/ FirebaseUtil.STORAGE_FEATURES_KEY + "/" + AppUtil.negativeFeatureFileName );
 
         try {
             downloadFromRef.getFile(file).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {

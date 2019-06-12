@@ -50,7 +50,6 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
 
     private void initView(View view) {
         mServiceSwitch = view.findViewById(R.id.service_switch);
-        mRadioGroup = view.findViewById(R.id.radioGroup);
 
     }
 
@@ -68,7 +67,7 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
                 mPresenter.StopService();
             }
         });
-        mRadioGroup.setOnCheckedChangeListener((group, checkedId) -> RadioButtonClicked(checkedId));
+        //mRadioGroup.setOnCheckedChangeListener((group, checkedId) -> RadioButtonClicked(checkedId));
     }
 
     private void setLastState(){
@@ -76,31 +75,31 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
         mServiceSwitch.setChecked(checked);
     }
 
-    /**
-     * Radio button view items will call this
-     * method automatic.
-     * @param checked_id radio button checked button id
-     */
-    public void RadioButtonClicked(int checked_id) {
-        // Is the button now checked?
-        //boolean checked = ((RadioButton) view).isChecked();
-
-        // Check which radio button was clicked
-        switch(checked_id) {
-
-            case R.id.radio_train:
-                mPresenter.Prepare4Train();
-                break;
-
-            case R.id.radio_auth:
-                mPresenter.Prepare4Authentication();
-                break;
-
-            case R.id.radio_collect_data:
-                mPresenter.Prepare4DataCollection();
-                break;
-        }
-    }
+    ///**
+    // * Radio button view items will call this
+    // * method automatic.
+    // * @param checked_id radio button checked button id
+    // */
+    //public void RadioButtonClicked(int checked_id) {
+    //    // Is the button now checked?
+    //    //boolean checked = ((RadioButton) view).isChecked();
+    //
+    //    // Check which radio button was clicked
+    //    switch(checked_id) {
+    //
+    //        case R.id.item_train:
+    //            mPresenter.Prepare4Train();
+    //            break;
+    //
+    //        case R.id.item_auth:
+    //            mPresenter.Prepare4Authentication();
+    //            break;
+    //
+    //        case R.id.item_collect_data:
+    //            mPresenter.Prepare4DataCollection();
+    //            break;
+    //    }
+    //}
 
     @Override
     public void showProgressBar() {

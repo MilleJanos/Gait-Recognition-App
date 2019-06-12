@@ -35,6 +35,7 @@ public class AppUtil {
     public static File featureUserFile;
     public static File modelUserFile;
     public static File featureNegativeFile;  // local stored dummy file from firebase
+    public static File trainFeatureFile;
     // Other
     public static CharSequence recordDateAndTimeFormatted = "";
 
@@ -45,11 +46,10 @@ public class AppUtil {
      * This method initiates all members of the internal storage, creates the folders and files.
      */
     public static void initInternalFiles(){
+
         // Internal files Path:
         Date date = new Date();
         recordDateAndTimeFormatted = DateFormat.format("yyyyMMdd_HHmmss", date.getTime());
-        // Create folder if not exists:
-        File myInternalFilesRoot;
 
         // Init internal file location
         internalFilesRoot = new File(MainActivity.sInstance.getFilesDir().toString());
@@ -57,37 +57,41 @@ public class AppUtil {
         // Create folders to internal files location
         createFoldersIfNotExists(internalFilesRoot);
 
-        // internal files path:
-        String raw = AppUtil.internalFilesRoot.getAbsolutePath() + AppUtil.customDIR + "/rawdata_" + sAuth.getUid() + "_" + AppUtil.recordDateAndTimeFormatted + ".csv";
-        String fea = AppUtil.internalFilesRoot.getAbsolutePath() + AppUtil.customDIR + "/feature_" + sAuth.getUid() + "_" + AppUtil.recordDateAndTimeFormatted + ".arff";
-        String mdl = AppUtil.internalFilesRoot.getAbsolutePath() + AppUtil.customDIR + "/model_" + sAuth.getUid() + "_" + AppUtil.recordDateAndTimeFormatted + ".mdl";
-        String neg = AppUtil.internalFilesRoot.getAbsolutePath() + AppUtil.customDIR + "/feature_negative" + ".arff";
-
-        // internal files in File type:
-        featureNegativeFile = new File(raw);
-        rawdataUserFile = new File(fea);
-        featureUserFile = new File(mdl);
-        modelUserFile = new File(neg);
-
-        // Create files if they does not exist
-        createFileIfNotExists(rawdataUserFile);
-        createFileIfNotExists(featureUserFile);
-        createFileIfNotExists(modelUserFile);
-        createFileIfNotExists(featureNegativeFile);
-
-        //region Print this 4 paths
-        Log.i(TAG, "PATH: featureNegativeFile.getAbsolutePath() = " + featureNegativeFile.getAbsolutePath());
-        Log.i(TAG, "PATH: rawdataUserFile.getAbsolutePath()  = " + rawdataUserFile.getAbsolutePath());
-        Log.i(TAG, "PATH: featureUserFile.getAbsolutePath()  = " + featureUserFile.getAbsolutePath());
-        Log.i(TAG, "PATH: modelUserFile.getAbsolutePath()    = " + modelUserFile.getAbsolutePath());
-        //endregion
+        //// internal files path:
+        //String raw = AppUtil.internalFilesRoot.getAbsolutePath() + AppUtil.customDIR + "/rawdata_" + sAuth.getUid() + "_" + AppUtil.recordDateAndTimeFormatted + ".csv";
+        //String fea = AppUtil.internalFilesRoot.getAbsolutePath() + AppUtil.customDIR + "/feature_" + sAuth.getUid() + "_" + AppUtil.recordDateAndTimeFormatted + ".arff";
+        //String mdl = AppUtil.internalFilesRoot.getAbsolutePath() + AppUtil.customDIR + "/model_"   + sAuth.getUid() + "_" + AppUtil.recordDateAndTimeFormatted + ".mdl";
+        //String neg = AppUtil.internalFilesRoot.getAbsolutePath() + AppUtil.customDIR + "/feature_negative" + ".arff";
+        //String trn = AppUtil.internalFilesRoot.getAbsolutePath() + AppUtil.customDIR + "/trainFeature_" + sAuth.getUid() + ".arff";
+        //
+        //// internal files in File type:
+        //rawdataUserFile     = new File(raw);
+        //featureUserFile     = new File(fea);
+        //modelUserFile       = new File(mdl);
+        //featureNegativeFile = new File(neg);
+        //trainFeatureFile    = new File(trn);
+        //
+        //// Create files if they does not exist
+        //createFileIfNotExists(rawdataUserFile);
+        //createFileIfNotExists(featureUserFile);
+        //createFileIfNotExists(modelUserFile);
+        //createFileIfNotExists(featureNegativeFile);
+        //createFileIfNotExists(trainFeatureFile);
+        //
+        ////region Print this 4 paths
+        //Log.i(TAG, "PATH: rawdataUserFile.getAbsolutePath()     = "    + rawdataUserFile.getAbsolutePath());
+        //Log.i(TAG, "PATH: featureUserFile.getAbsolutePath()     = "    + featureUserFile.getAbsolutePath());
+        //Log.i(TAG, "PATH: modelUserFile.getAbsolutePath()       = "    + modelUserFile.getAbsolutePath());
+        //Log.i(TAG, "PATH: featureNegativeFile.getAbsolutePath() = "    + featureNegativeFile.getAbsolutePath());
+        //Log.i(TAG, "PATH: trainFeatureFile.getAbsolutePath()    = "    + trainFeatureFile.getAbsolutePath());
+        ////endregion
     }
 
     /**
      * This method creates the file if not exists.
      * @param file file to create
      */
-    private static void createFileIfNotExists(File file) {
+    public static void createFileIfNotExists(File file) {
         if ( ! file.exists()) {
             try {
                 file.createNewFile();
@@ -102,7 +106,7 @@ public class AppUtil {
      * This method creates the folders to the input file DIR.
      * @param file folders root to create
      */
-    private static void createFoldersIfNotExists(File file) {
+    public static void createFoldersIfNotExists(File file) {
         if ( ! file.exists()) {
             file.mkdirs();
             Log.i(TAG, "Path not exists (" + file.getAbsolutePath() + ") --> .mkdirs()");
