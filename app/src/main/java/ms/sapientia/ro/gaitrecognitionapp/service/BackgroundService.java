@@ -15,7 +15,9 @@ import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 
 public class BackgroundService extends Service {
 
+    // Static members
     private static final String TAG = "BackgroundService";
+    public static final String NAME = "ms.sapientia.ro.gaitrecognitionapp.service.BackgroundService";
 
     public static boolean isRunning = false;
     public static BackgroundService Instance = null;
@@ -40,13 +42,13 @@ public class BackgroundService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) { debugCounter++;
-        //String input = intent.getStringExtra(Utils.INPUT_EXTRA_KEY);
-        mCreateModel = intent.getBooleanExtra(Utils.INPUT_CREATE_OR_VERIFY, false);
+        //String input = intent.getStringExtra(RecorderUtils.INPUT_EXTRA_KEY);
+        mCreateModel = intent.getBooleanExtra(RecorderUtils.INPUT_CREATE_OR_VERIFY, false);
 
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent,  0);
 
-        mNotification = new NotificationCompat.Builder(this, Utils.CHANNEL_ID_01)
+        mNotification = new NotificationCompat.Builder(this, RecorderUtils.CHANNEL_ID_01)
                 .setContentTitle("Running")
                 .setContentText("Tap to open application")
                 .setSmallIcon(R.drawable.ic_assignment)
@@ -62,7 +64,8 @@ public class BackgroundService extends Service {
 
         //stopSelf();
 
-        return START_STICKY;
+        //return START_STICKY;
+        return START_NOT_STICKY;
 
     }
 

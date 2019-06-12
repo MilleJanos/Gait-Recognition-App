@@ -10,9 +10,9 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 
 import ms.sapientia.gaitrecognitionapp.R;
-import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
-import ms.sapientia.ro.gaitrecognitionapp.common.Util;
+import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.service.FirebaseUtils;
+import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 
 public class MainActivityPresenter {
 
@@ -39,7 +39,9 @@ public class MainActivityPresenter {
         FirebaseApp.initializeApp( MainActivity.sInstance);
         FirebaseUtils.Init( MainActivity.sInstance);
 
-        Util.sAuth = FirebaseAuth.getInstance();
+        AppUtil.sAuth = FirebaseAuth.getInstance();
+        //sFirestore = FirebaseStorage.getInstance();
+        //sStorageReference = sFirestore.getReference();
     }
 
     /**

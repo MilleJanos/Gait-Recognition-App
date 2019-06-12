@@ -3,20 +3,20 @@ package ms.sapientia.ro.gaitrecognitionapp.view.menu;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Switch;
 
 import ms.sapientia.gaitrecognitionapp.R;
+import ms.sapientia.ro.gaitrecognitionapp.model.NavigationMenuFragmentItem;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.menu.ModeFragmentPresenter;
+import ms.sapientia.ro.gaitrecognitionapp.service.BackgroundService;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 
 
-public class ModeFragment extends Fragment implements ModeFragmentPresenter.View {
+public class ModeFragment extends NavigationMenuFragmentItem implements ModeFragmentPresenter.View {
 
     private static final String TAG = "ModeFragment";
 
@@ -24,9 +24,10 @@ public class ModeFragment extends Fragment implements ModeFragmentPresenter.View
     Switch mServiceSwitch;
     RadioGroup mRadioGroup;
 
-
-    // MVP
+    // MVP:
     private ModeFragmentPresenter mPresenter;
+
+    // Private members:
 
     @Nullable
     @Override
@@ -42,6 +43,9 @@ public class ModeFragment extends Fragment implements ModeFragmentPresenter.View
         initView(view);
         bindClickListeners();
         mPresenter = new ModeFragmentPresenter(this);
+
+        // SetLastState
+        setLastState();
     }
 
     private void initView(View view) {
@@ -51,13 +55,31 @@ public class ModeFragment extends Fragment implements ModeFragmentPresenter.View
     }
 
     private void bindClickListeners() {
+        mServiceSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                // switch on
+
+                // Start Service
+                mPresenter.StartServiceIfNotRunning();
+            } else {
+                // switch off
+
+                // Stop Service
+                mPresenter.StopService();
+            }
+        });
         mRadioGroup.setOnCheckedChangeListener((group, checkedId) -> RadioButtonClicked(checkedId));
+    }
+
+    private void setLastState(){
+        boolean checked = mPresenter.isServiceRunning(BackgroundService.NAME);
+        mServiceSwitch.setChecked(checked);
     }
 
     /**
      * Radio button view items will call this
      * method automatic.
-     * @param view radio button view
+     * @param checked_id radio button checked button id
      */
     public void RadioButtonClicked(int checked_id) {
         // Is the button now checked?

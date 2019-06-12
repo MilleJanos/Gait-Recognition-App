@@ -1,11 +1,11 @@
 package ms.sapientia.ro.gaitrecognitionapp.presenter.menu;
 
-public class MainFragmentPresenter {
+public class HomeFragmentPresenter {
 
 //    private User user;
     private View view;
 
-    public MainFragmentPresenter(View view){
+    public HomeFragmentPresenter(View view){
         this.view = view;
     }
 

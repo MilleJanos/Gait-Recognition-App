@@ -9,9 +9,9 @@ import com.google.firebase.auth.SignInMethodQueryResult;
 import java.util.regex.Pattern;
 
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
-import ms.sapientia.ro.gaitrecognitionapp.common.Util;
+import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.LoginFragment;
-import ms.sapientia.ro.gaitrecognitionapp.view.menu.MainFragment;
+import ms.sapientia.ro.gaitrecognitionapp.view.menu.HomeFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.RegisterFragment;
 
 public class LoginFragmentPresenter {
@@ -148,7 +148,7 @@ public class LoginFragmentPresenter {
         view.showProgressBar();
 
         // Check is email is correct or not:
-        if( Util.requireInternetConnection() ){
+        if( AppUtil.requireInternetConnection() ){
 
             CheckEmail_then_Login(email,password);
 
@@ -180,7 +180,7 @@ public class LoginFragmentPresenter {
      * @param password to login with
      */
     private void CheckEmail_then_Login(String email, String password){
-        Util.sAuth.fetchSignInMethodsForEmail(email).addOnCompleteListener(task -> {
+        AppUtil.sAuth.fetchSignInMethodsForEmail(email).addOnCompleteListener(task -> {
             if(task.isSuccessful()){
                 Log.d(TAG, "Checking to see if email is registrated or not:");
 
@@ -224,13 +224,13 @@ public class LoginFragmentPresenter {
      */
     private void LoginWithEmailAndPassword(String email, String password){
 
-        Util.sAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
+        AppUtil.sAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
            if( task.isSuccessful() ) {
 
                // User now is logged in.
 
-               // Open MainFragment
-               MainActivity.sInstance.addFragmentToStack(new MainFragment(), "main_fragment");
+               // Open HomeFragment
+               MainActivity.sInstance.addFragmentToStack(new HomeFragment(), "main_fragment");
 
                // Hide progress bar
                view.hideProgressBar();

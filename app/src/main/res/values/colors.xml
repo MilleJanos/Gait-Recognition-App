@@ -39,4 +39,26 @@
     <color name="shadow_lighter_color_8">#80000000</color>
     <color name="shadow_lighter_color_9">#90000000</color>
 
+    <color name="white_alpha_color_1">#10FFFFFF</color>
+    <color name="white_alpha_color_2">#20FFFFFF</color>
+    <color name="white_alpha_color_3">#30FFFFFF</color>
+    <color name="white_alpha_color_4">#40FFFFFF</color>
+    <color name="white_alpha_color_5">#50FFFFFF</color>
+    <color name="white_alpha_color_6">#60FFFFFF</color>
+    <color name="white_alpha_color_7">#70FFFFFF</color>
+    <color name="white_alpha_color_8">#80FFFFFF</color>
+    <color name="white_alpha_color_9">#90FFFFFF</color>
+    <color name="white_alpha_color_91">#92FFFFFF</color>
+    <color name="white_alpha_color_92">#92FFFFFF</color>
+    <color name="white_alpha_color_93">#93FFFFFF</color>
+    <color name="white_alpha_color_94">#94FFFFFF</color>
+    <color name="white_alpha_color_95">#95FFFFFF</color>
+    <color name="white_alpha_color_96">#96FFFFFF</color>
+    <color name="white_alpha_color_97">#97FFFFFF</color>
+    <color name="white_alpha_color_98">#98FFFFFF</color>
+    <color name="white_alpha_color_99">#99FFFFFF</color>
+
+
+
+
 </resources>

@@ -32,12 +32,12 @@ import weka.classifiers.trees.RandomForest;
 import weka.core.Attribute;
 import weka.core.SerializationHelper;
 
-public class Utils {
+public class RecorderUtils {
 
-    private Utils() {
+    private RecorderUtils() {
     }
 
-    private static final String TAG = "Utils";
+    private static final String TAG = "RecorderUtils";
 
     public final static String INPUT_EXTRA_KEY = "inputextra";
     public final static String INPUT_CREATE_OR_VERIFY = "createorverify";
@@ -65,8 +65,6 @@ public class Utils {
     public static Date lastUsedDate = new Date();
     public static String deviceID;
 
-    // stored internal files location
-    public static File internalFilesRoot;
 
     //region HELP
     /**
@@ -80,7 +78,7 @@ public class Utils {
      */
     //endregion
     public static short saveRawAccelerometerDataIntoCsvFile(ArrayDeque<Accelerometer> array, File file, String headerStr) {
-        String TAG = "Util";
+        String TAG = "saveRawAccelerometerDataIntoCsvFile";
         Log.d(TAG, ">>>RUN>>>savingAccArrayIntoCSV()");
 
         if (!file.exists()) {
@@ -133,7 +131,7 @@ public class Utils {
 
 
     public static void createFileIfNotExists(File file){
-        //File myInternalFilesRoot = new File(Utils.internalFilesRoot.getAbsolutePath() /*+ customDIR*/);
+        //File myInternalFilesRoot = new File(RecorderUtils.internalFilesRoot.getAbsolutePath() /*+ customDIR*/);
         //if (!myInternalFilesRoot.exists()) {
         //    myInternalFilesRoot.mkdirs();
         //    Log.i(TAG, "Path not exists (" + myInternalFilesRoot.getAbsolutePath() + ") --> .mkdirs()");
@@ -170,47 +168,47 @@ public class Utils {
 //    public static void initInternalFiles(){
 //
 //        // Create folder if not exists:
-//        File myInternalFilesRoot = new File(Utils.internalFilesRoot.getAbsolutePath() /*+ customDIR*/);
+//        File myInternalFilesRoot = new File(RecorderUtils.internalFilesRoot.getAbsolutePath() /*+ customDIR*/);
 //        if (!myInternalFilesRoot.exists()) {
 //            myInternalFilesRoot.mkdirs();
 //            Log.i(TAG, "Path not exists (" + myInternalFilesRoot.getAbsolutePath() + ") --> .mkdirs()");
 //        }
 //
 //        // Creating user's raw data file path:
-//        Utils.rawdata_user_path = Utils.internalFilesRoot.getAbsolutePath() + Utils.appCustomDIR + "/" + getCurrentDateFormatted() + "/rawdata" + /*"_" + getCurrentDateFormatted +*/ ".csv";
-//        Utils.feature_user_path = Utils.internalFilesRoot.getAbsolutePath() + Utils.appCustomDIR + "/" + getCurrentDateFormatted() + "/feature" + /*"_" + getCurrentDateFormatted +*/ ".arff";
-//        Utils.model_user_path =   Utils.internalFilesRoot.getAbsolutePath() + Utils.appCustomDIR + "/" + getCurrentDateFormatted() + "/model"   + /*"_" + getCurrentDateFormatted +*/ ".mdl";
-//        Utils.feature_negative_dummy_path = Utils.internalFilesRoot.getAbsolutePath() + Utils.appCustomDIR + "/feature_negative.arff";
+//        RecorderUtils.rawdata_user_path = RecorderUtils.internalFilesRoot.getAbsolutePath() + RecorderUtils.appCustomDIR + "/" + getCurrentDateFormatted() + "/rawdata" + /*"_" + getCurrentDateFormatted +*/ ".csv";
+//        RecorderUtils.feature_user_path = RecorderUtils.internalFilesRoot.getAbsolutePath() + RecorderUtils.appCustomDIR + "/" + getCurrentDateFormatted() + "/feature" + /*"_" + getCurrentDateFormatted +*/ ".arff";
+//        RecorderUtils.model_user_path =   RecorderUtils.internalFilesRoot.getAbsolutePath() + RecorderUtils.appCustomDIR + "/" + getCurrentDateFormatted() + "/model"   + /*"_" + getCurrentDateFormatted +*/ ".mdl";
+//        RecorderUtils.feature_negative_dummy_path = RecorderUtils.internalFilesRoot.getAbsolutePath() + RecorderUtils.appCustomDIR + "/feature_negative.arff";
 //        //region Print this 4 paths
-//        Log.i(TAG, "PATH: Utils.feature_dummy_path = " + Utils.feature_negative_dummy_path);
-//        Log.i(TAG, "PATH: Utils.rawdata_user_path  = " + Utils.rawdata_user_path);
-//        Log.i(TAG, "PATH: Utils.feature_user_path  = " + Utils.feature_user_path);
-//        Log.i(TAG, "PATH: Utils.model_user_path    = " + Utils.model_user_path);
+//        Log.i(TAG, "PATH: RecorderUtils.feature_dummy_path = " + RecorderUtils.feature_negative_dummy_path);
+//        Log.i(TAG, "PATH: RecorderUtils.rawdata_user_path  = " + RecorderUtils.rawdata_user_path);
+//        Log.i(TAG, "PATH: RecorderUtils.feature_user_path  = " + RecorderUtils.feature_user_path);
+//        Log.i(TAG, "PATH: RecorderUtils.model_user_path    = " + RecorderUtils.model_user_path);
 //        //endregion                                                   //*//
 //
 //        // internal files as File type:
-//        featureNegativeDummyFile = new File(Utils.feature_negative_dummy_path);
-//        rawdataUserFile = new File(Utils.rawdata_user_path);
-//        featureUserFile = new File(Utils.feature_user_path);
-//        modelUserFile = new File(Utils.model_user_path);
+//        featureNegativeDummyFile = new File(RecorderUtils.feature_negative_dummy_path);
+//        rawdataUserFile = new File(RecorderUtils.rawdata_user_path);
+//        featureUserFile = new File(RecorderUtils.feature_user_path);
+//        modelUserFile = new File(RecorderUtils.model_user_path);
 //
 //        //*//
 //        // Creating user's raw data file (if not exists):
-//        if (!Utils.rawdataUserFile.exists()) {
+//        if (!RecorderUtils.rawdataUserFile.exists()) {
 //            try {
-//                Utils.rawdataUserFile.createNewFile();
+//                RecorderUtils.rawdataUserFile.createNewFile();
 //            } catch (Exception e) {
 //                e.printStackTrace();
-//                Log.e(TAG, "File can't be created: " + Utils.rawdata_user_path);
+//                Log.e(TAG, "File can't be created: " + RecorderUtils.rawdata_user_path);
 //            }
 //        }
 //        // Creating user's feature file (if not exists):
-//        if (!Utils.featureUserFile.exists()) {
+//        if (!RecorderUtils.featureUserFile.exists()) {
 //            try {
-//                Utils.featureUserFile.createNewFile();
+//                RecorderUtils.featureUserFile.createNewFile();
 //            } catch (Exception e) {
 //                e.printStackTrace();
-//                Log.e(TAG, "File can't be created: " + Utils.feature_user_path);
+//                Log.e(TAG, "File can't be created: " + RecorderUtils.feature_user_path);
 //            }
 //        }
 //        // Creating user's model file (if not exists):
@@ -219,7 +217,7 @@ public class Utils {
 //                modelUserFile.createNewFile();
 //            } catch (Exception e) {
 //                e.printStackTrace();
-//                Log.e(TAG, "File can't be created: " + Utils.model_user_path);
+//                Log.e(TAG, "File can't be created: " + RecorderUtils.model_user_path);
 //            }
 //        }
 //        // Creating dummy's(negative data) feature file (if not exists):
@@ -228,7 +226,7 @@ public class Utils {
 //                featureNegativeDummyFile.createNewFile();
 //            } catch (Exception e) {
 //                e.printStackTrace();
-//                Log.e(TAG, "File can't be created: " + Utils.feature_negative_dummy_path);
+//                Log.e(TAG, "File can't be created: " + RecorderUtils.feature_negative_dummy_path);
 //            }
 //        }
 //    }
@@ -282,23 +280,23 @@ public class Utils {
         IGaitModelBuilder builder = new GaitModelBuilder();
         Classifier classifier;
         try {
-            classifier = (RandomForest) SerializationHelper.read(new FileInputStream( Utils.modelUserFile.getAbsolutePath() )); //new RandomForest();
+            classifier = (RandomForest) SerializationHelper.read(new FileInputStream( RecorderUtils.modelUserFile.getAbsolutePath() )); //new RandomForest();
 
             //GaitHelperFunctions.createFeaturesFileFromRawFile(
-            //        Utils.rawdataUserFile.getAbsolutePath(),
-            //        Utils.featureUserFile.getAbsolutePath().substring(0, Utils.featureUserFile.getAbsolutePath().length() - (".arff").length()), "userId");
+            //        RecorderUtils.rawdataUserFile.getAbsolutePath(),
+            //        RecorderUtils.featureUserFile.getAbsolutePath().substring(0, RecorderUtils.featureUserFile.getAbsolutePath().length() - (".arff").length()), "userId");
 
 
             // features_dummy + features_user
             GaitHelperFunctions.mergeEquallyArffFiles(
-                    Utils.featureNegativeDummyFile.getAbsolutePath(),
-                    Utils.featureUserFile_Copy.getAbsolutePath());
+                    RecorderUtils.featureNegativeDummyFile.getAbsolutePath(),
+                    RecorderUtils.featureUserFile_Copy.getAbsolutePath());
 
-            ArrayList<Attribute> attributes = builder.getAttributes( Utils.featureUserFile_Copy.getAbsolutePath() ); ///feature (mar letezo)
+            ArrayList<Attribute> attributes = builder.getAttributes( RecorderUtils.featureUserFile_Copy.getAbsolutePath() ); ///feature (mar letezo)
 
             IGaitVerification verifier = new GaitVerification();
             //percentage = verifier.verifyUser(classifier, attributes, FRESH_RAWDATA_WAITING_TO_TEST ); // 3. param - user raw data
-            percentage = verifier.verifyUser(classifier, attributes, Utils.rawdataUserFile.getAbsolutePath() );
+            percentage = verifier.verifyUser(classifier, attributes, RecorderUtils.rawdataUserFile.getAbsolutePath() );
 
             // percentage = Integer.parseInt( ((percentage * 100) + "").substring(0, 2) );
 

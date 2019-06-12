@@ -18,7 +18,7 @@ public class App extends Application {
     private void createNotificationChannel() {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             NotificationChannel serviceChannel = new NotificationChannel(
-                    Utils.CHANNEL_ID_01,
+                    RecorderUtils.CHANNEL_ID_01,
                     "Example Service Channel",
                     NotificationManager.IMPORTANCE_DEFAULT
             );

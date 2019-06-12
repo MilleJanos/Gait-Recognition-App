@@ -22,6 +22,7 @@ import ms.sapientia.ro.commonclasses.Accelerometer;
 import ms.sapientia.gaitrecognitionapp.R;
 import ms.sapientia.ro.feature_extractor.Settings;
 import ms.sapientia.ro.feature_extractor.Util;
+import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.model_builder.GaitHelperFunctions;
 import ms.sapientia.ro.model_builder.GaitModelBuilder;
 import ms.sapientia.ro.model_builder.IGaitModelBuilder;
@@ -32,10 +33,15 @@ public class Recorder {
     private static final String TAG = "Recorder";
 
     // Constants
-    private final long MAX_ACCELEROMETER_ARRAY = 30*128;
-    private final long INTERVAL_BETWEEN_TESTS = 100; //30*128; // after analyzing data how m
-    private final int PREPROCESSING_INTERVAL = 128;
-    private final long FILES_COUNT_BEFORE_MODEL_GENERATING = 3;
+    private static final long DEFAULT_MAX_ACCELEROMETER_ARRAY = 30*128;
+    private static final long DEFAULT_INTERVAL_BETWEEN_TESTS = 30*128; // after analyzing data how m
+    private static final int DEFAULT_PREPROCESSING_INTERVAL = 128;
+    private static final long DEFAULT_FILES_COUNT_BEFORE_MODEL_GENERATING = 3;
+
+    private long sMaxAccelerometerArray;
+    private long sIntervalBetweenTests;
+    private int  sPreprocessingInterval;
+    private long sFilesCountBetweenModelGenerating;
 
     // Sensor
     private boolean mIsRecording = false;
@@ -52,7 +58,7 @@ public class Recorder {
     private long mRecordCount = 0;
     private long mIntervalBetweenTests = 0;
     private long mFileCount = 0;
-    private boolean mCreateModel; // true= Create Model; false= Verify last created model
+    private boolean mCreateModel = true; // true= Create Model; false= Verify last created model
 
     // Sound
     MediaPlayer mp_bing;
@@ -61,6 +67,9 @@ public class Recorder {
 
 
     public Recorder(Context context, boolean create_model_or_verify) {
+
+        initDefaultValues();
+
         mContext = context;
         mIsRecording = false;
         mCreateModel = create_model_or_verify;
@@ -76,7 +85,7 @@ public class Recorder {
         mAccelerometerEventListener = new SensorEventListener() {
             @Override
             public void onSensorChanged(SensorEvent event) {
-                updateRecordedList(event);
+                sensorChanged(event);
             }
 
             @Override
@@ -88,154 +97,163 @@ public class Recorder {
         initSound();
     }
 
+    private void initDefaultValues(){
+        sMaxAccelerometerArray = DEFAULT_MAX_ACCELEROMETER_ARRAY;
+        sIntervalBetweenTests = DEFAULT_INTERVAL_BETWEEN_TESTS;
+        sPreprocessingInterval = DEFAULT_PREPROCESSING_INTERVAL;
+        sFilesCountBetweenModelGenerating = DEFAULT_FILES_COUNT_BEFORE_MODEL_GENERATING;
+    }
+
     private void initSound() {
         mp_bing = MediaPlayer.create(mContext, R.raw.relentless);
         mp_feature = MediaPlayer.create(mContext, R.raw.feature);
         mp_model = MediaPlayer.create(mContext, R.raw.model);
     }
 
-    private void updateRecordedList(SensorEvent event){
+    private void sensorChanged(SensorEvent event){
         long timeStamp = event.timestamp;
         float x = event.values[0];
         float y = event.values[1];
         float z = event.values[2];
 
-        if (Utils.downloadingNegativeDummyFile == false) {  /*NO ACTIONS UNTIL Feature negative dummy is not downloaded*/
+        if (RecorderUtils.downloadingNegativeDummyFile == false) {  /*NO ACTIONS UNTIL Feature negative dummy is not downloaded*/
 
             if (mIsRecording) {
 
-                if(mIntervalBetweenTests == INTERVAL_BETWEEN_TESTS) {
+                if(mIntervalBetweenTests == sIntervalBetweenTests) {
+
+                    // PlaySound
+                    mp_bing.start(); // TODO: remove sound
+
+                    // Init Internal Files
+                    //RecorderUtils.initInternalFiles();
+                    RecorderUtils.rawdataUserFile = new File(AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "rawdata" + "/" + RecorderUtils.getCurrentDateFormatted() + "/" + "rawdata.csv");
+                    RecorderUtils.createFileIfNotExists(RecorderUtils.rawdataUserFile);
+
+                    // Preprocessing raw data
+                    List<Accelerometer> list = new ArrayList(Arrays.asList(mAccelerometerArray.toArray()));
+                    Util featureUtil = new Util();
+                    Settings.setUseDynamicPreprocessingThreshold(true);
+                    Settings.setPreprocessingInterval(sPreprocessingInterval);
+                    List<Accelerometer> preprocessedList = featureUtil.preprocess(list);
+
+                    // Save raw data
+                    //String rawdataStr = mAccelerometerArrayToString(mAccelerometerArray);
+                    ArrayDeque copy = RecorderUtils.listToArrayDeque(list);
+                    RecorderUtils.saveRawAccelerometerDataIntoCsvFile(copy, RecorderUtils.rawdataUserFile, RecorderUtils.RAWDATA_DEFAULT_HEADER);
 
 
-                    mp_bing.start();
-//DEBUG//
-//DEBUG//
-//DEBUG//                    // Init Internal Files
-//DEBUG//                    //Utils.initInternalFiles();
-//DEBUG//                    Utils.rawdataUserFile = new File(Utils.internalFilesRoot.getAbsolutePath() + "/" + "rawdata" + "/" + Utils.getCurrentDateFormatted() + "/" + "rawdata.csv");
-//DEBUG//                    Utils.createFileIfNotExists(Utils.rawdataUserFile);
-//DEBUG//
-//DEBUG//                    // Preprocessing raw data
-//DEBUG//                    List<Accelerometer> list = new ArrayList(Arrays.asList(mAccelerometerArray.toArray()));
-//DEBUG//                    Util featureUtil = new Util();
-//DEBUG//                    Settings.setUseDynamicPreprocessingThreshold(true);
-//DEBUG//                    Settings.setPreprocessingInterval(PREPROCESSING_INTERVAL);
-//DEBUG//                    List<Accelerometer> preprocessedList = featureUtil.preprocess(list);
-//DEBUG//
-//DEBUG//                    // Save raw data
-//DEBUG//                    //String rawdataStr = mAccelerometerArrayToString(mAccelerometerArray);
-//DEBUG//                    ArrayDeque copy = Utils.listToArrayDeque(list);
-//DEBUG//                    Utils.saveRawAccelerometerDataIntoCsvFile(copy, Utils.rawdataUserFile, Utils.RAWDATA_DEFAULT_HEADER);
-//DEBUG//
-//DEBUG//
-//DEBUG//                    if(mCreateModel){
-//DEBUG//
-//DEBUG//                        // mFileCount = 0; // TODO, Ez vajon szukseges ide ? (test)
-//DEBUG//
-//DEBUG//                        Log.d(TAG, "mFileCount = " + mFileCount);
-//DEBUG//
-//DEBUG//
-//DEBUG//                        // If we collected enought data to being
-//DEBUG//                        if (mFileCount >= FILES_COUNT_BEFORE_MODEL_GENERATING - 1) {
-//DEBUG//
-//DEBUG//                            // Download Dummy
-//DEBUG//                            if (Utils.rawdataUserFile.length() > 0) { // if the file is not empty
-//DEBUG//
-//DEBUG//                                Utils.featureNegativeDummyFile = new File(Utils.internalFilesRoot.getAbsolutePath() + "/" + "feature_negative_dummy.arff");
-//DEBUG//                                Utils.createFileIfNotExists(Utils.featureNegativeDummyFile);
-//DEBUG//
-//DEBUG//                                StorageReference reference = FirebaseUtils.firebaseStorage.getReference().child(
-//DEBUG//                                        FirebaseUtils.STORAGE_FEATURES_KEY
-//DEBUG//                                                + "/" + FirebaseUtils.firebaseDummyFileName
-//DEBUG//                                );
-//DEBUG//                                if (true /*Utils.downloadingNegativeDummyFile IS EMPTY*/) {        // If it's not downloaded
-//DEBUG//
-//DEBUG//                                    //if (Utils.downloadingNegativeDummyFile == false) {              // and if it's not downloading at the moment, then: download
-//DEBUG//
-//DEBUG//                                    Utils.downloadingNegativeDummyFile = true;
-//DEBUG//
-//DEBUG//                                    FirebaseUtils.downloadFileFromFirebaseStorage(reference, Utils.featureNegativeDummyFile, new FinishedCallback() {
-//DEBUG//                                        @Override
-//DEBUG//                                        public void onCallback(int errorCode) {                 // after onSuccess or onFailure
-//DEBUG//
-//DEBUG//                                            if (errorCode == 0) { // onSuccess
-//DEBUG//
-//DEBUG//                                                Toast.makeText(mContext, "Negative Data downloaded", Toast.LENGTH_SHORT).show();
-//DEBUG//
-//DEBUG//
-//DEBUG//
-//DEBUG//                                                createFeature();
-//DEBUG//
-//DEBUG//                                                mergeArffFiles();
-//DEBUG//                                                mUserFeatureFilesPath.clear();
-//DEBUG//
-//DEBUG//                                                createModel();
-//DEBUG//
-//DEBUG//                                                createFeatureUserFileCopy();
-//DEBUG//
-//DEBUG//                                                // updateGait();   // uses last created feature file
-//DEBUG//
-//DEBUG//
-//DEBUG//                                            } else { // onFailure or other error
-//DEBUG//                                                Toast.makeText(mContext, "Error downloading Negative Data!", Toast.LENGTH_LONG).show();
-//DEBUG//                                            }
-//DEBUG//
-//DEBUG//                                            Utils.downloadingNegativeDummyFile = false;
-//DEBUG//
-//DEBUG//                                    Toast.makeText(mContext, "Negative Data already downloaded", Toast.LENGTH_SHORT).show();
-//DEBUG//
-//DEBUG//                                    createFeature();
-//DEBUG//
-//DEBUG//                                    mergeArffFiles();
-//DEBUG//                                    mUserFeatureFilesPath.clear();
-//DEBUG//
-//DEBUG//                                    createModel();
-//DEBUG//
-//DEBUG//                                    createFeatureUserFileCopy();
-//DEBUG//
-//DEBUG//                                    //updateGait();   // uses last created feature file
-//DEBUG//
-//DEBUG//
-//DEBUG//                                }
-//DEBUG//                            } else {
-//DEBUG//                                Log.e(TAG, "updateRecordedList: Rawdata path is empty!");
-//DEBUG//                            }
-//DEBUG//
-//DEBUG//                            mFileCount = 0;
-//DEBUG//
-//DEBUG//                        } else {  // If it's not enought data
-//DEBUG//
-//DEBUG//                            createFeature();
-//DEBUG//
-//DEBUG//                            //mergeArffFiles();
-//DEBUG//                            //mUserFeatureFilesPath.clear();
-//DEBUG//
-//DEBUG//                            //createModel();
-//DEBUG//
-//DEBUG//                            //createFeatureUserFileCopy();
-//DEBUG//
-//DEBUG//                            //updateGait();
-//DEBUG//
-//DEBUG//                            ++mFileCount;
-//DEBUG//
-//DEBUG//                        }
-//DEBUG//
-//DEBUG//                    }else{
-//DEBUG//
-//DEBUG//                        updateGait();   // uses last created feature file
-//DEBUG//
-//DEBUG//                    }
-//DEBUG//
-//DEBUG//
-//DEBUG//                    // Reset counter
+                    if(mCreateModel){
+
+                        // mFileCount = 0; // TODO, Ez vajon szukseges ide ? (test)
+
+                        Log.d(TAG, "mFileCount = " + mFileCount);
+
+
+                        // If we collected enought data to being
+                        if (mFileCount >= sFilesCountBetweenModelGenerating - 1) {
+
+                            // Download Dummy
+                            if (RecorderUtils.rawdataUserFile.length() > 0) { // if the file is not empty
+
+                                RecorderUtils.featureNegativeDummyFile = new File(AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "feature_negative_dummy.arff");
+                                RecorderUtils.createFileIfNotExists(RecorderUtils.featureNegativeDummyFile);
+
+                                StorageReference reference = FirebaseUtils.firebaseStorage.getReference().child(
+                                        FirebaseUtils.STORAGE_FEATURES_KEY
+                                                + "/" + FirebaseUtils.firebaseDummyFileName
+                                );
+                                if (true /*RecorderUtils.downloadingNegativeDummyFile IS EMPTY*/) {        // If it's not downloaded
+
+                                    //if (RecorderUtils.downloadingNegativeDummyFile == false) {              // and if it's not downloading at the moment, then: download
+
+                                    RecorderUtils.downloadingNegativeDummyFile = true;
+
+                                    FirebaseUtils.downloadFileFromFirebaseStorage(reference, RecorderUtils.featureNegativeDummyFile, new FinishedCallback() {
+                                        @Override
+                                        public void onCallback(int errorCode) {                 // after onSuccess or onFailure
+
+                                            if (errorCode == 0) { // onSuccess
+
+                                                Toast.makeText(mContext, "Negative Data downloaded", Toast.LENGTH_SHORT).show();
+
+
+                                                createFeature();
+
+                                                mergeArffFiles();
+                                                mUserFeatureFilesPath.clear();
+
+                                                createModel();
+
+                                                createFeatureUserFileCopy();
+
+                                                // updateGait();   // uses last created feature file
+
+
+                                            } else { // onFailure or other error
+                                                Toast.makeText(mContext, "Error downloading Negative Data!", Toast.LENGTH_LONG).show();
+                                            }
+
+                                            RecorderUtils.downloadingNegativeDummyFile = false;
+                                        }
+                                    });
+                                    //}
+                                }else{
+
+                                    Toast.makeText(mContext, "Negative Data already downloaded", Toast.LENGTH_SHORT).show();
+
+                                    createFeature();
+
+                                    mergeArffFiles();
+                                    mUserFeatureFilesPath.clear();
+
+                                    createModel();
+
+                                    createFeatureUserFileCopy();
+
+                                    //updateGait();   // uses last created feature file
+
+
+                                }
+                            } else {
+                                Log.e(TAG, "sensorChanged: Rawdata path is empty!");
+                            }
+
+                            mFileCount = 0;
+
+                        } else {  // If it's not enought data
+
+                            createFeature();
+
+                            //mergeArffFiles();
+                            //mUserFeatureFilesPath.clear();
+
+                            //createModel();
+
+                            //createFeatureUserFileCopy();
+
+                            //updateGait();
+
+                            ++mFileCount;
+
+                        }
+
+                    }else{
+
+                        updateGait();   // uses last created feature file
+
+                    }
+
+
+                    // Reset counter
                     mIntervalBetweenTests = 0;
-//DEBUG//
-//DEBUG//
+
+
                 }
-//DEBUG//                if(mAccelerometerArray.size() == MAX_ACCELEROMETER_ARRAY - 1 ){     // if the list is full, then remove first then
-//DEBUG//                    mAccelerometerArray.removeFirst();
-//DEBUG//                }
-//DEBUG//                mAccelerometerArray.addLast(new Accelerometer(timeStamp,x,y,z,mStepCount));     // add to last
+                if(mAccelerometerArray.size() == sMaxAccelerometerArray - 1 ){     // if the list is full, then remove first then
+                    mAccelerometerArray.removeFirst();
+                }
+                mAccelerometerArray.addLast(new Accelerometer(timeStamp,x,y,z,mStepCount));     // add to last
                 ++mRecordCount;
                 ++mIntervalBetweenTests;
                 // printAccelerometerList(mAccelerometerArray); // print every iteration
@@ -251,23 +269,23 @@ public class Recorder {
 
 
         // Create feature file
-        Utils.featureUserFile = new File ( Utils.internalFilesRoot + "/" + "generated" + "/" + Utils.formatDate(Utils.lastUsedDate) + "/" + "feature_user.arff" );
-        Utils.createFileIfNotExists( Utils.featureUserFile );
+        RecorderUtils.featureUserFile = new File ( AppUtil.internalFilesRoot + "/" + "generated" + "/" + RecorderUtils.formatDate(RecorderUtils.lastUsedDate) + "/" + "feature_user.arff" );
+        RecorderUtils.createFileIfNotExists( RecorderUtils.featureUserFile );
 
         // Collect Feature files path until mergeing them all
-        mUserFeatureFilesPath.add( Utils.featureUserFile.getAbsolutePath() );
+        mUserFeatureFilesPath.add( RecorderUtils.featureUserFile.getAbsolutePath() );
 
         GaitHelperFunctions.createFeaturesFileFromRawFile(
-                Utils.rawdataUserFile.getAbsolutePath(),      // in
-                Utils.featureUserFile.getAbsolutePath().substring(0, Utils.featureUserFile.getAbsolutePath().length() - (".arff").length()),   // out   - without ".arff" at the end
-                Utils.deviceID                              // in
+                RecorderUtils.rawdataUserFile.getAbsolutePath(),      // in
+                RecorderUtils.featureUserFile.getAbsolutePath().substring(0, RecorderUtils.featureUserFile.getAbsolutePath().length() - (".arff").length()),   // out   - without ".arff" at the end
+                RecorderUtils.deviceID                              // in
         );
 
         mp_feature.start();
 
         //GaitHelperFunctions.mergeEquallyArffFiles(
-        //        Utils.featureNegativeDummyFile.getAbsolutePath(),  // in
-        //        Utils.featureUserFile.getAbsolutePath()            // in and out
+        //        RecorderUtils.featureNegativeDummyFile.getAbsolutePath(),  // in
+        //        RecorderUtils.featureUserFile.getAbsolutePath()            // in and out
         //);
 
         Log.d(TAG, "createFeature: OUT");
@@ -280,18 +298,18 @@ public class Recorder {
             IGaitModelBuilder builder = new GaitModelBuilder();
 
             Classifier classifier = builder.createModel(
-                    //Utils.featureUserFile.getAbsolutePath()     // in
-                    Utils.featureMergedFile.getAbsolutePath()     // in
+                    //RecorderUtils.featureUserFile.getAbsolutePath()     // in
+                    RecorderUtils.featureMergedFile.getAbsolutePath()     // in
             );
 
             mp_model.start();
 
-            Utils.modelUserFile = new File(Utils.internalFilesRoot + "/" + "generated" + "/" + Utils.formatDate(Utils.lastUsedDate) + "/" + "model.mdl");
-            Utils.createFileIfNotExists(Utils.modelUserFile);
+            RecorderUtils.modelUserFile = new File(AppUtil.internalFilesRoot + "/" + "generated" + "/" + RecorderUtils.formatDate(RecorderUtils.lastUsedDate) + "/" + "model.mdl");
+            RecorderUtils.createFileIfNotExists(RecorderUtils.modelUserFile);
 
             ((GaitModelBuilder) builder).saveModel(
                     classifier,                             // in
-                    Utils.modelUserFile.getAbsolutePath()   // in
+                    RecorderUtils.modelUserFile.getAbsolutePath()   // in
             );
 
         } catch (Exception e) {
@@ -304,15 +322,15 @@ public class Recorder {
     }
 
     private void mergeArffFiles(){
-        long num = FILES_COUNT_BEFORE_MODEL_GENERATING;
-        Utils.featureMergedFile = new File(Utils.internalFilesRoot.getAbsolutePath() + "/"+ "generated" + "/"+ Utils.formatDate(Utils.lastUsedDate) + "/"  + "feature_merged_last_"+num+".arff");
-        Utils.createFileIfNotExists(Utils.featureMergedFile);
+        long num = sFilesCountBetweenModelGenerating;
+        RecorderUtils.featureMergedFile = new File(AppUtil.internalFilesRoot.getAbsolutePath() + "/"+ "generated" + "/"+ RecorderUtils.formatDate(RecorderUtils.lastUsedDate) + "/"  + "feature_merged_last_"+num+".arff");
+        RecorderUtils.createFileIfNotExists(RecorderUtils.featureMergedFile);
 
         try {
 
             GaitHelperFunctions.mergeFeatureFiles(
                     mUserFeatureFilesPath,
-                    Utils.featureMergedFile.getAbsolutePath()
+                    RecorderUtils.featureMergedFile.getAbsolutePath()
             );
 
         } catch (IOException e) {
@@ -323,7 +341,7 @@ public class Recorder {
 
     private void updateGait() {
 
-        double d = Utils.checkUserInPercentage();
+        double d = RecorderUtils.checkUserInPercentage();
 
         Toast.makeText(mContext,"%%% "+ d +" %%%",Toast.LENGTH_LONG).show();
 
@@ -334,16 +352,16 @@ public class Recorder {
     }
 
     private void createFeatureUserFileCopy(){
-        Utils.featureUserFile_Copy = new File(Utils.internalFilesRoot + "/" + "generated" + "/" + Utils.formatDate(Utils.lastUsedDate) + "/" + "aux_feature_user.arff");
-        Utils.createFileIfNotExists(Utils.featureUserFile_Copy);
+        RecorderUtils.featureUserFile_Copy = new File(AppUtil.internalFilesRoot + "/" + "generated" + "/" + RecorderUtils.formatDate(RecorderUtils.lastUsedDate) + "/" + "aux_feature_user.arff");
+        RecorderUtils.createFileIfNotExists(RecorderUtils.featureUserFile_Copy);
 
         try {
 
-            Utils.copy(Utils.featureUserFile, Utils.featureUserFile_Copy);
+            RecorderUtils.copy(RecorderUtils.featureUserFile, RecorderUtils.featureUserFile_Copy);
 
         } catch (IOException e) {
             e.printStackTrace();
-            Log.e(TAG, "createFeatureUserFileCopy: File not found ! ( "+ Utils.featureUserFile +" or "+ Utils.featureUserFile_Copy +")");
+            Log.e(TAG, "createFeatureUserFileCopy: File not found ! ( "+ RecorderUtils.featureUserFile +" or "+ RecorderUtils.featureUserFile_Copy +")");
         }
     }
 

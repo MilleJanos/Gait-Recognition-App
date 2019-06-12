@@ -2,39 +2,47 @@
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorWhite">
+    android:background="@drawable/image_asphalt_road">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white_alpha_color_99"/>
 
     <Switch
         android:id="@+id/service_switch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="24dp"
-        android:text="Service"
+        android:layout_marginStart="32dp"
+        android:layout_marginBottom="0dp"
         android:fontFamily="@font/aldrich"
+        android:text="Service"
+        android:switchPadding="10dp"
         android:textColor="@color/colorGray9"
         android:textSize="30sp"
         app:layout_constraintBottom_toTopOf="@+id/radioGroup"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+        <!--android:thumb="@drawable/switch_thumb_custom"-->
+        <!--android:track="@drawable/switch_track_custom"-->
+
 
     <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/radioGroup"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_height="455dp"
+        android:layout_marginStart="32dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginEnd="32dp"
         android:layout_marginBottom="8dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-        
+
 
         <!-- Radio: Train -->
 
@@ -51,27 +59,28 @@
                 android:fontFamily="@font/aldrich"
                 android:text="Train"
                 android:textColor="@color/colorBlack"
-                android:textSize="30sp" />
+                android:textSize="26sp" />
 
             <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-            <ImageView
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:src="@drawable/ic_train_2"/>
-
-            <TextView
-                android:id="@+id/desc_train_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:fontFamily="@font/aldrich"
-                android:text="Train your walk. Use only on straight and flat area."
-                android:textColor="@color/colorGray9"
-                android:textSize="24sp" />
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_marginStart="20dp"
+                    android:src="@drawable/ic_train_alpha" />
+
+                <TextView
+                    android:id="@+id/desc_train_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:fontFamily="@font/alef"
+                    android:text="Train with data extracted from your walk. Use only on straight and flat area."
+                    android:textColor="@color/colorGray9"
+                    android:textSize="18sp" />
 
             </LinearLayout>
 
@@ -92,27 +101,30 @@
                 android:fontFamily="@font/aldrich"
                 android:text="Authentication"
                 android:textColor="@color/colorBlack"
-                android:textSize="30sp" />
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+                android:textSize="26sp" />
 
-            <ImageView
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:src="@drawable/ic_padlock"/>
-            <TextView
-                android:id="@+id/desc_auth_textview"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:fontFamily="@font/aldrich"
-                android:text="Use trained walk to authenticate yourself."
-                android:textColor="@color/colorGray9"
-                android:textSize="24sp" />
+                android:orientation="horizontal">
 
-        </LinearLayout>
+                <ImageView
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_marginStart="20dp"
+                    android:src="@drawable/ic_padlock_alpha" />
+
+                <TextView
+                    android:id="@+id/desc_auth_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:fontFamily="@font/alef"
+                    android:text="Use trained walk data to authenticate yourself."
+                    android:textColor="@color/colorGray9"
+                    android:textSize="18sp" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
@@ -131,29 +143,30 @@
                 android:fontFamily="@font/aldrich"
                 android:text="Collect Data"
                 android:textColor="@color/colorBlack"
-                android:textSize="30sp" />
+                android:textSize="26sp" />
 
             <LinearLayout
-                android:orientation="horizontal"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
                 <ImageView
                     android:layout_width="80dp"
                     android:layout_height="80dp"
-                    android:src="@drawable/ic_data"/>
+                    android:layout_marginStart="20dp"
+                    android:src="@drawable/ic_data_alpha" />
 
-            <TextView
-                android:id="@+id/desc_collect_data_textview"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:fontFamily="@font/aldrich"
-                android:text="Collect data for manual processing."
-                android:textColor="@color/colorGray9"
-                android:textSize="24sp" />
+                <TextView
+                    android:id="@+id/desc_collect_data_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:fontFamily="@font/alef"
+                    android:text="Collect data for manual processing."
+                    android:textColor="@color/colorGray9"
+                    android:textSize="18sp" />
 
-        </LinearLayout>
+            </LinearLayout>
 
         </LinearLayout>
 

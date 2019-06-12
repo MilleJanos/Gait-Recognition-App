@@ -22,11 +22,11 @@ import android.widget.Toast;
 import ms.sapientia.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.other.ManualRecorderFragmentPresenter;
 import ms.sapientia.ro.gaitrecognitionapp.service.BackgroundService;
-import ms.sapientia.ro.gaitrecognitionapp.service.Utils;
+import ms.sapientia.ro.gaitrecognitionapp.service.RecorderUtils;
 
 public class ManualRecorderFragment extends Fragment implements ManualRecorderFragmentPresenter.View {
 
-    private static final String TAG = "MainFragmentPresenter";
+    private static final String TAG = "HomeFragmentPresenter";
 
     // Constants
     public static String PREF_IS_RUNNING = "is_service_running";
@@ -122,7 +122,7 @@ public class ManualRecorderFragment extends Fragment implements ManualRecorderFr
     private void bind() {
 
         mServiceIntent = new Intent(getContext(), BackgroundService.class);
-        mServiceIntent.putExtra(Utils.INPUT_CREATE_OR_VERIFY, !mModelSwitch.isChecked());
+        mServiceIntent.putExtra(RecorderUtils.INPUT_CREATE_OR_VERIFY, !mModelSwitch.isChecked());
 
         try {
             getContext().bindService(
@@ -138,7 +138,6 @@ public class ManualRecorderFragment extends Fragment implements ManualRecorderFr
 
 
     public void startService(View v) {
-
         // If service exists then restart it, do not create a new one
 
         if (BackgroundService.Instance == null || BackgroundService.Instance.getStoredService() == null) {
@@ -160,7 +159,7 @@ public class ManualRecorderFragment extends Fragment implements ManualRecorderFr
     public void stopService(View v) {
 
         //mServiceIntent = new Intent(getContext(), BackgroundService.class);
-        //mServiceIntent.putExtra(Utils.INPUT_CREATE_OR_VERIFY, ! mModelSwitch.isChecked() );
+        //mServiceIntent.putExtra(RecorderUtils.INPUT_CREATE_OR_VERIFY, ! mModelSwitch.isChecked() );
 
         // TRY TO GET mService:
 

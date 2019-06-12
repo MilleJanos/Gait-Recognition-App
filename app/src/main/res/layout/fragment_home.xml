@@ -6,8 +6,13 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorWhite">
+    android:background="@drawable/image_asphalt_road">
     <!--android:id="@+id/manual_recorder_fragment">-->
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white_alpha_color_99"/>
 
     <LinearLayout
         android:orientation="vertical"
@@ -21,6 +26,7 @@
             android:layout_gravity="center"
             android:fontFamily="@font/aldrich"
             android:text="Welcome"
+            android:textColor="@color/colorBlue6"
             android:textSize="30sp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="100dp"
@@ -30,20 +36,45 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:fontFamily="@font/aldrich"
-            android:text="Use the [=]\nto navigate"
-            android:textSize="20sp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="100dp"
             android:layout_marginEnd="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/aldrich"
+                android:textAlignment="center"
+                android:text="Use the"
+                android:textSize="20sp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/aldrich"
+                android:textAlignment="center"
+                android:text="top left button"
+                android:textColor="@color/colorBlue"
+                android:textSize="20sp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/aldrich"
+                android:textAlignment="center"
+                android:text="to navigate"
+                android:textSize="20sp"/>
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/help_textviewbutton"

@@ -114,7 +114,7 @@ public class FirebaseUtils {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                             //progressDialog.dismiss();
-                            //Util.progressDialog.dismiss();
+                            //AppUtil.progressDialog.dismiss();
                             Toast.makeText(context, "File uploaded.", Toast.LENGTH_LONG).show();
                             Log.d(TAG, "<<<FINISH(async)<<<uploadFileToFirebaseStorage - onSuccess");
                             //fileUploadFunctionFinished = true;
@@ -123,7 +123,7 @@ public class FirebaseUtils {
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            //Util.progressDialog.dismiss();
+                            //AppUtil.progressDialog.dismiss();
                             Toast.makeText(context, "File upload Failed!", Toast.LENGTH_LONG).show();
                             Log.d(TAG, "<<<FINISH(async)<<<uploadFileToFirebaseStorage - onFailure");
                             //fileUploadFunctionFinished = true;
@@ -166,7 +166,7 @@ public class FirebaseUtils {
 
         final File file = saveToThisFile;
 
-        //Util.mRef = Util.mStorage.getReference().child( /*featureFolder*/ FirebaseUtil.STORAGE_FEATURES_KEY + "/" + Util.firebaseDummyFileName );
+        //AppUtil.mRef = AppUtil.mStorage.getReference().child( /*featureFolder*/ FirebaseUtil.STORAGE_FEATURES_KEY + "/" + AppUtil.firebaseDummyFileName );
 
         try {
             downloadFromRef.getFile(file).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -20,17 +19,14 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Display;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-
 import ms.sapientia.gaitrecognitionapp.R;
-import ms.sapientia.ro.gaitrecognitionapp.common.Util;
+import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.MainActivityPresenter;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.LoginFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.menu.ModeFragment;
@@ -228,9 +224,14 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
             }else{
                 // if are fragments on top of the Login fragmen -> Remove top fragment
                 removeFragment(fragment);
+                // set selected item: Home:
+                NavigationView navigationView = findViewById(R.id.nav_view);
+                navigationView.setCheckedItem(R.id.nav_home);
             }
         }
     }
+
+
 
     /**
      * Removes the fragment from fragment stack.
@@ -249,7 +250,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
      */
     @Override
     public void initProgressBar() {
-        int height = Util.DeviceScreenResolution.GetHeight();
+        int height = AppUtil.DeviceScreenResolution.GetHeight();
         mProgressBar = new ProgressBar(this, null, android.R.attr.progressBarStyleSmall);
 
         mProgressBar.setIndeterminate(true);

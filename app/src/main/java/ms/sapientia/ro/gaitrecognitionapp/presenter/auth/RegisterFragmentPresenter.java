@@ -16,8 +16,8 @@ import java.util.regex.Pattern;
 
 import ms.sapientia.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
-import ms.sapientia.ro.gaitrecognitionapp.common.Util;
-import ms.sapientia.ro.gaitrecognitionapp.view.menu.MainFragment;
+import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
+import ms.sapientia.ro.gaitrecognitionapp.view.menu.HomeFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.RegisterFragment;
 
 public class RegisterFragmentPresenter {
@@ -61,7 +61,7 @@ public class RegisterFragmentPresenter {
         view.showProgressBar();
 
         // Check is email is correct or not:
-        if( Util.requireInternetConnection() ){
+        if( AppUtil.requireInternetConnection() ){
 
             CheckEmail_then_Register(email,password);
 
@@ -93,7 +93,7 @@ public class RegisterFragmentPresenter {
      * @param password to register it
      */
     private void CheckEmail_then_Register(String email, String password){
-        Util.sAuth.fetchSignInMethodsForEmail(email).addOnCompleteListener(task -> {
+        AppUtil.sAuth.fetchSignInMethodsForEmail(email).addOnCompleteListener(task -> {
             if(task.isSuccessful()){
                 Log.d(TAG, "Checking to see if email is registrated or not:");
 
@@ -136,7 +136,7 @@ public class RegisterFragmentPresenter {
      * @param password to register it
      */
     private void RegisterWithEmailAndPassword(String email, String password){
-        Util.sAuth.createUserWithEmailAndPassword(email,password)
+        AppUtil.sAuth.createUserWithEmailAndPassword(email,password)
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
@@ -150,8 +150,8 @@ public class RegisterFragmentPresenter {
                             // Remove Register fragment:
                             //goBackToLoginPage(); // TODO Remove Register fragment before going to Main fragment
 
-                            // Open MainFragment
-                            MainActivity.sInstance.addFragmentToStack(new MainFragment(), "main_fragment");
+                            // Open HomeFragment
+                            MainActivity.sInstance.addFragmentToStack(new HomeFragment(), "main_fragment");
 
                             // Hide progress bar
                             view.hideProgressBar();
