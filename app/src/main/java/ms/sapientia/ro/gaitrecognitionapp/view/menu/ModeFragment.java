@@ -1,18 +1,22 @@
 package ms.sapientia.ro.gaitrecognitionapp.view.menu;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RadioGroup;
+import android.widget.LinearLayout;
 import android.widget.Switch;
+import android.widget.TextView;
 
 import ms.sapientia.gaitrecognitionapp.R;
+import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.model.NavigationMenuFragmentItem;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.menu.ModeFragmentPresenter;
 import ms.sapientia.ro.gaitrecognitionapp.service.BackgroundService;
+import ms.sapientia.ro.gaitrecognitionapp.service.Recorder;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 
 
@@ -22,7 +26,9 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
 
     // View members:
     Switch mServiceSwitch;
-    RadioGroup mRadioGroup;
+    LinearLayout mTrainSection;
+    LinearLayout mAuthenticationSection;
+    LinearLayout mCollectDataSection;
 
     // MVP:
     private ModeFragmentPresenter mPresenter;
@@ -46,11 +52,14 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
 
         // SetLastState
         setLastState();
+
     }
 
     private void initView(View view) {
         mServiceSwitch = view.findViewById(R.id.service_switch);
-
+        mTrainSection = view.findViewById(R.id.item_train);
+        mAuthenticationSection = view.findViewById(R.id.item_auth);
+        mCollectDataSection = view.findViewById(R.id.item_collect_data);
     }
 
     private void bindClickListeners() {
@@ -67,12 +76,76 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
                 mPresenter.StopService();
             }
         });
-        //mRadioGroup.setOnCheckedChangeListener((group, checkedId) -> RadioButtonClicked(checkedId));
+        mTrainSection.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selectMode(Recorder.Mode.MODE_TRAIN);
+            }
+        });
+        mAuthenticationSection.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selectMode(Recorder.Mode.MODE_AUTHENTICATE);
+            }
+        });
+        mCollectDataSection.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selectMode(Recorder.Mode.MODE_COLLECT_DATA);
+            }
+        });
+    }
+
+    public void restoreSelectedMode(){
+        // AppUtil.sMode = Get mode from firebase:
+        // TODO
+        // selectMode( sMode )
+        // TODO
+    }
+
+    public void selectMode(Recorder.Mode mode){
+        resetSelection();
+        AppUtil.sMode = mode;
+        setSelection(mode);
+    }
+
+    private void resetSelection(){
+        TextView title;
+        title = (TextView) mTrainSection.getChildAt(0);
+        title.setTextColor(Color.DKGRAY);
+        title = (TextView) mAuthenticationSection.getChildAt(0);
+        title.setTextColor(Color.DKGRAY);
+        title = (TextView) mCollectDataSection.getChildAt(0);
+        title.setTextColor(Color.DKGRAY);
+    }
+
+    private void setSelection(Recorder.Mode mode){
+
+       if( mode == Recorder.Mode.MODE_TRAIN){
+
+            TextView title = (TextView) mTrainSection.getChildAt(0);
+            title.setTextColor(Color.BLUE);
+        }
+
+        if( mode == Recorder.Mode.MODE_AUTHENTICATE){
+
+            TextView title = (TextView) mAuthenticationSection.getChildAt(0);
+            title.setTextColor(Color.BLUE);
+        }
+
+        if( mode == Recorder.Mode.MODE_COLLECT_DATA){
+
+            TextView title = (TextView) mCollectDataSection.getChildAt(0);
+            title.setTextColor(Color.BLUE);
+        }
     }
 
     private void setLastState(){
         boolean checked = mPresenter.isServiceRunning(BackgroundService.NAME);
         mServiceSwitch.setChecked(checked);
+        restoreSelectedMode();  // sets: AppUtil.sMode
+        resetSelection();
+        //setSelection( AppUtil.sMode );
     }
 
     ///**

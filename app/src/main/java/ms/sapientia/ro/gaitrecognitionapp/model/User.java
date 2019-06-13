@@ -6,21 +6,22 @@ import android.util.Patterns;
 public class User implements IUser{
 
     private String email;
-    private String firstName;
-    private String lastName;
+    private String first_name;
+    private String last_name;
     private String password;
+
 
     public User(String email, String password){
         this.email = email;
-        this.firstName = "";
-        this.lastName = "";
+        this.first_name = "";
+        this.last_name = "";
         this.password = password;
     }
 
     public User(String email, String firstName, String lastName, String password){
         this.email = email;
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.first_name = firstName;
+        this.last_name = lastName;
         this.password = password;
     }
 
@@ -30,13 +31,13 @@ public class User implements IUser{
     }
 
     @Override
-    public String getFirstName() {
-        return this.firstName;
+    public String getFirst_name() {
+        return this.first_name;
     }
 
     @Override
-    public String getLastName() {
-        return this.lastName;
+    public String getLast_name() {
+        return this.last_name;
     }
 
     @Override
@@ -48,12 +49,12 @@ public class User implements IUser{
         this.email = email;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public void setFirst_name(String first_name) {
+        this.first_name = first_name;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setLast_name(String last_name) {
+        this.last_name = last_name;
     }
 
     public void setPassword(String password) {
@@ -64,7 +65,7 @@ public class User implements IUser{
     public boolean isValidData() {
         return !TextUtils.isEmpty(getEmail()) &&
                 Patterns.EMAIL_ADDRESS.matcher(getEmail()).matches() &&
-               !TextUtils.isEmpty(getFirstName()) &&
-               !TextUtils.isEmpty(getLastName());
+               !TextUtils.isEmpty(getFirst_name()) &&
+               !TextUtils.isEmpty(getLast_name());
     }
 }

@@ -18,6 +18,7 @@ import com.google.firebase.storage.StorageReference;
 import java.io.File;
 import java.util.Date;
 
+import ms.sapientia.ro.gaitrecognitionapp.service.Recorder;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 
 public class AppUtil {
@@ -36,6 +37,8 @@ public class AppUtil {
     public static File modelUserFile;
     public static File featureNegativeFile;  // local stored dummy file from firebase
     public static File trainFeatureFile;
+    // Mode:
+    public static Recorder.Mode sMode = Recorder.Mode.MODE_TRAIN; // Default: Train
     // Other
     public static CharSequence recordDateAndTimeFormatted = "";
 
@@ -175,6 +178,7 @@ public class AppUtil {
         }
 
     }
+
 
 
 }

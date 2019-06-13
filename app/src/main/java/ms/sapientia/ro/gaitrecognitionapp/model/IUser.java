@@ -3,8 +3,8 @@ package ms.sapientia.ro.gaitrecognitionapp.model;
 public interface IUser {
 
     String getEmail();
-    String getFirstName();
-    String getLastName();
+    String getFirst_name();
+    String getLast_name();
     String getPassword();
     boolean isValidData();
 

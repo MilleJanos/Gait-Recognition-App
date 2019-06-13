@@ -15,11 +15,11 @@ public class HomeFragmentPresenter {
 //    }
 //
 //    public void updateFirstName(String first_name){
-//        user.setFirstName(first_name);
+//        user.setFirst_name(first_name);
 //    }
 //
 //    public void updateLastName(String last_name){
-//        user.setLastName(last_name);
+//        user.setLast_name(last_name);
 //    }
 //
 //    public void updatePassword(String password){
