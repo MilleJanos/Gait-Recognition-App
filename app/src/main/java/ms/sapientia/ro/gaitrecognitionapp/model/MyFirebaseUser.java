@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import ms.sapientia.ro.gaitrecognitionapp.service.Recorder;
 
-public class FirebaseUser extends User {
+public class MyFirebaseUser extends User {
 
     public String id = "";
     public int current_train_id = -1;
@@ -15,13 +15,16 @@ public class FirebaseUser extends User {
     public ArrayList<String> feature_files = new ArrayList<>();
     public ArrayList<String> model_files = new ArrayList<>();
     public Recorder.Mode selected_mode = Recorder.Mode.MODE_TRAIN;
+    public int profile_picture_idx = -1;
 
-
-    public FirebaseUser(String email, String password) {
-        super(email, password);
+    public MyFirebaseUser() {
     }
 
-    public FirebaseUser(String email, String firstName, String lastName, String password) {
-        super(email, firstName, lastName, password);
+    public MyFirebaseUser(String email/*, String password*/) {
+        super(email/*, password*/);
+    }
+
+    public MyFirebaseUser(String email, String firstName, String lastName/*, String password*/) {
+        super(email, firstName, lastName/*, password*/);
     }
 }

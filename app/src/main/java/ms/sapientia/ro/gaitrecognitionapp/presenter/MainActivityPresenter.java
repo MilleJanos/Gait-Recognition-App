@@ -9,6 +9,8 @@ import android.widget.Toast;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.util.ArrayList;
+
 import ms.sapientia.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.service.FirebaseUtils;
@@ -19,6 +21,9 @@ public class MainActivityPresenter {
     // Members:
     public View mView;
     private boolean mDoubleBackToExitPressedOnce = false;
+    private ArrayList<Fragment> mFragmentStack = new ArrayList<>();
+
+
 
     // Interface:
     public interface View{
@@ -36,7 +41,7 @@ public class MainActivityPresenter {
      * This method initiates Firebase.
      */
     public void InitFirebase(){
-        FirebaseApp.initializeApp( MainActivity.sInstance);
+        FirebaseApp.initializeApp( MainActivity.sInstance );
         FirebaseUtils.Init( MainActivity.sInstance);
 
         AppUtil.sAuth = FirebaseAuth.getInstance();
@@ -50,7 +55,21 @@ public class MainActivityPresenter {
      * @param fragmentManager application's fragment manager
      * @param fragment_tag string tag
      */
-    public void addFragmentToStack(Fragment fragment, FragmentManager fragmentManager, String fragment_tag){
+    public void addFragment(Fragment fragment, FragmentManager fragmentManager, String fragment_tag) {
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.add(R.id.fragmentContainer, fragment, fragment_tag);
+
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+    }
+
+    /**
+     * This method replaces fragment on top of the stack.
+     * @param fragment new fragment
+     * @param fragmentManager application's fragment manager
+     * @param fragment_tag string tag
+     */
+    public void replaceFragment(Fragment fragment, FragmentManager fragmentManager, String fragment_tag){
         /*
         Fragment fragmentTwo = FragmentUtil.getFragmentByTagName(fragmentManager, "Fragment Two");
 
@@ -60,11 +79,19 @@ public class MainActivityPresenter {
             fragmentTwo = new FragmentTwo();
         }
         */
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.add(R.id.fragmentContainer, fragment, fragment_tag);
 
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
+        Fragment topFragment = fragmentManager.findFragmentById(R.id.fragmentContainer);
+        if( topFragment == null ){
+            // if there is nothing to replace, then add a new one:
+            addFragment(fragment, fragmentManager, fragment_tag);
+        }else{
+            // if there is fragment to replace, then replace it:
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.fragmentContainer, fragment, fragment_tag);
+
+            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.commit();
+        }
 
         //MainActivity.printActivityFragmentList(fragmentManager);
 

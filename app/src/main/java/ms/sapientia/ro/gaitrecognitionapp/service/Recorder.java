@@ -9,6 +9,7 @@ import android.media.MediaPlayer;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
@@ -76,6 +77,7 @@ public class Recorder {
     private SensorManager mSensorManager;
     private SensorEventListener mAccelerometerEventListener;
     // Members:
+    private FirebaseAuth mSavedAuth = null;
     private Context mContext;
     private ArrayDeque<Accelerometer> mAccelerometerArray = new ArrayDeque<>();
     private ArrayDeque<String> mUploadableFilesPath = new ArrayDeque<>();
@@ -92,9 +94,11 @@ public class Recorder {
     private MediaPlayer mp_model;
 
     // Constructor:
-    public Recorder(Context context, Mode create_model_or_verify) {
+    public Recorder(Context context, FirebaseAuth auth, Mode create_model_or_verify) {
 
         initDefaultValues();
+
+        mSavedAuth = auth;
 
         mContext = context;
         mIsRecording = false;

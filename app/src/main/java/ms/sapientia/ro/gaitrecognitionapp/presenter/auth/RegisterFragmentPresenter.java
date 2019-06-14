@@ -1,24 +1,22 @@
 package ms.sapientia.ro.gaitrecognitionapp.presenter.auth;
 
-import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.SignInMethodQueryResult;
 
 import java.util.regex.Pattern;
 
 import ms.sapientia.gaitrecognitionapp.R;
-import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
-import ms.sapientia.ro.gaitrecognitionapp.view.menu.HomeFragment;
+import ms.sapientia.ro.gaitrecognitionapp.logic.FirebaseController;
+import ms.sapientia.ro.gaitrecognitionapp.model.MyFirebaseUser;
+import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.RegisterFragment;
+import ms.sapientia.ro.gaitrecognitionapp.view.menu.HomeFragment;
 
 public class RegisterFragmentPresenter {
 
@@ -137,35 +135,40 @@ public class RegisterFragmentPresenter {
      */
     private void RegisterWithEmailAndPassword(String email, String password){
         AppUtil.sAuth.createUserWithEmailAndPassword(email,password)
-                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if(task.isSuccessful()){
+                .addOnCompleteListener(task -> {
+                    if(task.isSuccessful()){
 
-                            // Registration succeed:
+                        // Registration succeed:
 
-                            Log.i(TAG, "Registration succeed", task.getException());
-                            Toast.makeText(MainActivity.sContext, "Registration succeed", Toast.LENGTH_LONG).show();
+                        Log.i(TAG, "Registration succeed", task.getException());
+                        Toast.makeText(MainActivity.sContext, "Registration succeed", Toast.LENGTH_LONG).show();
 
-                            // Remove Register fragment:
-                            //goBackToLoginPage(); // TODO Remove Register fragment before going to Main fragment
+                        // Remove Register fragment:
+                        //goBackToLoginPage(); // TODO Remove Register fragment before going to Main fragment
 
-                            // Open HomeFragment
-                            MainActivity.sInstance.addFragmentToStack(new HomeFragment(), "main_fragment");
+                        // Open HomeFragment
+                        MainActivity.sInstance.replaceFragment(new HomeFragment(), "main_fragment");
 
-                            // Hide progress bar
-                            view.hideProgressBar();
+                        // Hide progress bar
+                        view.hideProgressBar();
 
-                        }else{
+                        // Create object for new user in Firestore
 
-                            // Registraiton failed:
-                            Log.i(TAG, "Registration failed", task.getException());
-                            Toast.makeText(MainActivity.sContext, "Registration failed", Toast.LENGTH_LONG).show();
+                        MyFirebaseUser u = new MyFirebaseUser();
+                        u.setEmail(AppUtil.sAuth.getCurrentUser().getEmail());
+                        u.setFirst_name("First name");
+                        u.setLast_name("Last name");
+                        FirebaseController.SetUserObject( u );
 
-                            // Hide progress bar
-                            view.hideProgressBar();
+                    }else{
 
-                        }
+                        // Registraiton failed:
+                        Log.i(TAG, "Registration failed", task.getException());
+                        Toast.makeText(MainActivity.sContext, "Registration failed", Toast.LENGTH_LONG).show();
+
+                        // Hide progress bar
+                        view.hideProgressBar();
+
                     }
                 });
     }
@@ -292,25 +295,22 @@ public class RegisterFragmentPresenter {
             return 3;
         }
         // Content
-        Pattern lower_case_pattern = Pattern.compile(
-                "[a-z]+"
-        );
-        Pattern upper_case_pattern = Pattern.compile(
-                "[A-Z]+"
-        );
-        Pattern number_pattern = Pattern.compile(
-                "[0-9]+"
-        );
-        //Pattern special_characters_pattern = Pattern.compile(
-        //        "[_]+"
-        //);
+        int lc, uc, d;
+        lc = uc = d = 0;
 
-        boolean M1 = lower_case_pattern.matcher(password).matches();
-        boolean M2 = upper_case_pattern.matcher(password).matches();
-        boolean M3 = number_pattern.matcher(password).matches();
-        boolean M4 =  true; //special_characters_pattern.matcher(password).matches();
+        for (int i = 0; i < password.length(); ++i) {
+            if (Character.isLowerCase(password.charAt(i))) {
+                ++lc;
+            }
+            if (Character.isUpperCase(password.charAt(i))) {
+                ++uc;
+            }
+            if (Character.isDigit(password.charAt(i))) {
+                ++d;
+            }
+        }
 
-        if( ! M1 || ! M2 || ! M3 || ! M4){
+        if( lc == 0 || uc == 0 || d == 0 ){
             return 4;
         }
 

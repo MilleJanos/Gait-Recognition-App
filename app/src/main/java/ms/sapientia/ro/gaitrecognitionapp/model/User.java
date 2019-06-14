@@ -5,24 +5,26 @@ import android.util.Patterns;
 
 public class User implements IUser{
 
-    private String email;
-    private String first_name;
-    private String last_name;
-    private String password;
+    private String email = "";
+    private String first_name = "";
+    private String last_name = "";
+    //private String password;
 
+    public User(){
+    }
 
-    public User(String email, String password){
+    public User(String email/*, String password*/){
         this.email = email;
         this.first_name = "";
         this.last_name = "";
-        this.password = password;
+        //this.password = password;
     }
 
-    public User(String email, String firstName, String lastName, String password){
+    public User(String email, String firstName, String lastName/*, String password*/){
         this.email = email;
         this.first_name = firstName;
         this.last_name = lastName;
-        this.password = password;
+        //this.password = password;
     }
 
     @Override
@@ -40,10 +42,12 @@ public class User implements IUser{
         return this.last_name;
     }
 
+    /*
     @Override
     public String getPassword() {
         return this.password;
     }
+    */
 
     public void setEmail(String email) {
         this.email = email;
@@ -57,9 +61,11 @@ public class User implements IUser{
         this.last_name = last_name;
     }
 
+    /*
     public void setPassword(String password) {
         this.password = password;
     }
+    */
 
     @Override
     public boolean isValidData() {

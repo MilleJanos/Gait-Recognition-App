@@ -8,6 +8,7 @@ import com.google.firebase.auth.SignInMethodQueryResult;
 
 import java.util.regex.Pattern;
 
+import ms.sapientia.ro.gaitrecognitionapp.logic.FirebaseController;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.LoginFragment;
@@ -123,7 +124,7 @@ public class LoginFragmentPresenter {
      * This method adds the RegisterFragment to fragment stack.
      */
     public void goToRegisterPage() {
-        MainActivity.sInstance.addFragmentToStack(new RegisterFragment(), "register_fragment"); // Without animation
+        MainActivity.sInstance.replaceFragment(new RegisterFragment(), "register_fragment"); // Without animation
     }
 
     /**
@@ -230,10 +231,13 @@ public class LoginFragmentPresenter {
                // User now is logged in.
 
                // Open HomeFragment
-               MainActivity.sInstance.addFragmentToStack(new HomeFragment(), "main_fragment");
+               MainActivity.sInstance.replaceFragment(new HomeFragment(), "main_fragment");
 
                // Hide progress bar
                view.hideProgressBar();
+
+               // Create user object in database if the user does not have:
+               FirebaseController.CreateUserObjectByIdIfNotExists( AppUtil.sAuth.getUid() );
 
            }else{
 

@@ -44,11 +44,12 @@ dependencies {
     annotationProcessor "android.arch.lifecycle:compiler:$archLifecycleVersion"
     //
     // Firebase
-    implementation 'com.google.firebase:firebase-storage:16.1.0'
-    implementation 'com.google.firebase:firebase-auth:16.2.0'
-    implementation 'com.google.firebase:firebase-core:16.0.8'
+    implementation 'com.google.firebase:firebase-core:16.0.9'
+    implementation 'com.google.firebase:firebase-auth:17.0.0'
+    implementation 'com.google.firebase:firebase-firestore:19.0.2'
+    implementation 'com.google.firebase:firebase-storage:17.0.0'
     //implementation 'com.androidhuman.rxfirebase2:firebase-core:16.0.5.0'
-    implementation 'com.google.firebase:firebase-core:16.0.8'
+    //implementation 'com.google.firebase:firebase-core:16.0.8'
     //
     //api fileTree(include: ['Accelerometer.java'], dir: '../commonclasses/src/main/java/ms/sapientia/ro/commonclasses')
     implementation project(':commonclasses')

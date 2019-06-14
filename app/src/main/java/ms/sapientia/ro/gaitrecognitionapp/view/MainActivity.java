@@ -29,6 +29,8 @@ import ms.sapientia.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.MainActivityPresenter;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.LoginFragment;
+import ms.sapientia.ro.gaitrecognitionapp.view.auth.RegisterFragment;
+import ms.sapientia.ro.gaitrecognitionapp.view.menu.HomeFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.menu.ModeFragment;
 
 /*
@@ -100,8 +102,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
 
         // Add Login fragment to FrameLayout
         // first stack item:
-        fragmentTransaction.add(R.id.fragmentContainer, new LoginFragment(), "login_fragment");
-        fragmentTransaction.commit();
+        //addFragment(new LoginFragment(), "login_fragment");
+        replaceFragment(new LoginFragment(), "login_fragment");
 
         // Init progress bar
         initProgressBar();
@@ -192,13 +194,22 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
     /**
      * This method calls the presenters method which adds a new fragment on top of the stack.
      * @param fragment new fragment
-     * @param fragmentManager application's fragment manager
      * @param fragment_tag string tag
      */
-    public void addFragmentToStack(Fragment fragment, String fragment_tag){
+    public void addFragment(Fragment fragment, String fragment_tag){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        mPresenter.addFragment(fragment,fragmentManager,fragment_tag);
+    }
+
+    /**
+     * This method calls the presenters method which replaces the fragment on top of the stack.
+     * @param fragment new fragment
+     * @param fragment_tag string tag
+     */
+    public void replaceFragment(Fragment fragment, String fragment_tag){
 
         FragmentManager fragmentManager = getSupportFragmentManager();
-        mPresenter.addFragmentToStack(fragment,fragmentManager,fragment_tag);
+        mPresenter.replaceFragment(fragment,fragmentManager,fragment_tag);
 
     }
 
@@ -212,15 +223,41 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
     public void onBackPressed() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment fragment = fragmentManager.findFragmentById(R.id.fragmentContainer);
-        if( fragment instanceof LoginFragment){
+
+        if( fragment instanceof LoginFragment
+                || fragment instanceof RegisterFragment
+                || fragment instanceof HomeFragment ){
+
+            mPresenter.doublePressExit();
+            return;
+        }
+
+        //if( fragment instanceof EditProfileFragment){
+        //    // if Edit Profile fragment is displayed -> open Profile
+        //    replaceFragment(ProfileFragment,"profile_fragment");
+        //    // set selected item: Home:
+        //    NavigationView navigationView = findViewById(R.id.nav_view);
+        //    navigationView.setCheckedItem(R.id.nav_profile);
+        //    return;
+        //}
+
+        // any other cases: Open Home
+        replaceFragment(new HomeFragment(), "home_fragment");
+        // set selected item: Home:
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setCheckedItem(R.id.nav_home);
+
+
+        //region OLD code
+        /*if( fragment instanceof LoginFragment){
             // if Login fragment is displayed -> Exit app
              mPresenter.doublePressExit();
-        
+
         }else{
-            if( false /*TODO: IF(  is logged in && (fragment instanceof LoginFragment)  )*/){
+            if( AppUtil.sAuth != null && (fragment instanceof LoginFragment) ){
                 // if user is logged in and Main fragment is displayed --> Exit app
                 mPresenter.doublePressExit();
-        
+
             }else{
                 // if are fragments on top of the Login fragmen -> Remove top fragment
                 removeFragment(fragment);
@@ -229,6 +266,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
                 navigationView.setCheckedItem(R.id.nav_home);
             }
         }
+        */
+        //endregion
     }
 
 
@@ -288,31 +327,36 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
         switch (id){
             case R.id.nav_home: {
                 //TODO
+                MainActivity.sInstance.replaceFragment(new HomeFragment(), "home_fragment");
                 break;
             }
             case R.id.nav_profile: {
                 //TODO
+                //MainActivity.sInstance.replaceFragment(new ProfileFragment(), "profile_fragment");
                 break;
             }
             case R.id.nav_mode: {
                 //TODO
-                MainActivity.sInstance.addFragmentToStack(new ModeFragment(), "mode_fragment");
+                MainActivity.sInstance.replaceFragment(new ModeFragment(), "mode_fragment");
                 break;
             }
             case R.id.nav_settings: {
                 //TODO
+                //MainActivity.sInstance.replaceFragment(new SettingsFragment(), "settings_fragment");
                 break;
             }
             case R.id.nav_help: {
                 //TODO
+                //MainActivity.sInstance.replaceFragment(new HelpFragment(), "help_fragment");
                 break;
             }
             case R.id.nav_logout: {
-                //TODO
+                AppUtil.sAuth.signOut();
+                MainActivity.sInstance.replaceFragment(new HomeFragment(), "home_fragment");
                 break;
             }
             case R.id.nav_exit: {
-                //TODO
+                finish();
                 break;
             }
 
@@ -328,6 +372,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
     public void onPointerCaptureChanged(boolean hasCapture) {
 
     }
+
 
 
     //region OLD CODE

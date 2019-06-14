@@ -11,6 +11,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import ms.sapientia.gaitrecognitionapp.R;
+import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 
 public class BackgroundService extends Service {
@@ -74,7 +75,7 @@ public class BackgroundService extends Service {
 
     public void StartRecording(Recorder.Mode mode){
         if(mRecorder == null) {
-            mRecorder = new Recorder(this, mode);
+            mRecorder = new Recorder(this, AppUtil.sAuth, mode);
         }
         mRecorder.startRecording();
         isRunning = true;

@@ -179,6 +179,43 @@ public class AppUtil {
 
     }
 
+    /**
+     * This method returns the string name of the mode.
+     * @param mode input
+     * @return string name of the mode
+     */
+    public static String modeToStr(Recorder.Mode mode){
+        if(mode == Recorder.Mode.MODE_TRAIN){
+            return "train";
+        }else{
+            if(mode == Recorder.Mode.MODE_AUTHENTICATE){
+                return "auth";
+            }else{
+                return "collect" ;
+            }
+        }
+    }
+
+    /**
+     * This method returns the mode of the string name.
+     * @param mode_str input
+     * @return mode or null if can't cconvert
+     */
+    public static Recorder.Mode modeStrToMode(String mode_str){
+        if(mode_str.trim().equals("train")){
+            return Recorder.Mode.MODE_TRAIN;
+        }else{
+            if(mode_str.trim().equals("auth")){
+                return Recorder.Mode.MODE_AUTHENTICATE;
+            }else{
+                if(mode_str.trim().equals("collect")) {
+                    return Recorder.Mode.MODE_COLLECT_DATA;
+                }else{
+                    return null;
+                }
+            }
+        }
+    }
 
 
 }
