@@ -53,5 +53,6 @@ dependencies {
     //
     //api fileTree(include: ['Accelerometer.java'], dir: '../commonclasses/src/main/java/ms/sapientia/ro/commonclasses')
     implementation project(':commonclasses')
+    implementation files('libs/GraphView-4.0.1.jar')
 }
 apply plugin: 'com.google.gms.google-services'

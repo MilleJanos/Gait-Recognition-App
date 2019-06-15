@@ -23,6 +23,7 @@ import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 public class ModeFragment extends NavigationMenuFragmentItem implements ModeFragmentPresenter.View {
 
     private static final String TAG = "ModeFragment";
+    public static ModeFragment sInstance;
 
     // View members:
     Switch mServiceSwitch;
@@ -49,6 +50,7 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
         initView(view);
         bindClickListeners();
         mPresenter = new ModeFragmentPresenter(this);
+        sInstance = this;
 
         // SetLastState
         setLastState();

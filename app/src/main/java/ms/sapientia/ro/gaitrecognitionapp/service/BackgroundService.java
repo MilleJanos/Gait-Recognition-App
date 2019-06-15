@@ -25,14 +25,12 @@ public class BackgroundService extends Service {
     public static BackgroundService storedService = null;
     public static Notification mNotification = null;
 
-
-
-
     // Vars
     private Recorder mRecorder;
     private boolean mCreateModel; // true= Create Model; false= Verify last created model
     private IBinder mBinder = new LocalBinder();
     private int debugCounter = 0;
+
 
     @Override
     public void onCreate() {
@@ -54,24 +52,19 @@ public class BackgroundService extends Service {
                 .setContentText("Tap to open application")
                 .setSmallIcon(R.drawable.ic_assignment)
                 .setContentIntent(pendingIntent)
+                .setSmallIcon(R.drawable.ic_gait_recognition_app)
                 .build();
         startForeground(1, mNotification); // id >= 1
 
+        if (intent != null && intent.getAction() != null) {
+            String action = intent.getAction();
+        }
 
-        // Do heavy work
-        //mRecorder = new Recorder(this, mCreateModel);
-        //mRecorder.startRecording();
+        // Do heavy work:
         StartRecording(Recorder.Mode.MODE_TRAIN);
 
-
-        //stopSelf();
-
-        //return START_STICKY;
         return START_NOT_STICKY;
-
     }
-
-
 
     public void StartRecording(Recorder.Mode mode){
         if(mRecorder == null) {
@@ -102,7 +95,6 @@ public class BackgroundService extends Service {
     public IBinder onBind(Intent intent) {
         return mBinder;
     }
-
 
     public class LocalBinder extends Binder {
 

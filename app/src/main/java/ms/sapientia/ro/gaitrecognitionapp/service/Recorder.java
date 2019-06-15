@@ -7,10 +7,14 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.MediaPlayer;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.StorageReference;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,12 +23,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import ms.sapientia.ro.commonclasses.Accelerometer;
 import ms.sapientia.gaitrecognitionapp.R;
+import ms.sapientia.ro.commonclasses.Accelerometer;
 import ms.sapientia.ro.feature_extractor.Settings;
 import ms.sapientia.ro.feature_extractor.Util;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
+import ms.sapientia.ro.gaitrecognitionapp.view.menu.ModeFragment;
 import ms.sapientia.ro.model_builder.GaitHelperFunctions;
 import ms.sapientia.ro.model_builder.GaitModelBuilder;
 import ms.sapientia.ro.model_builder.IGaitModelBuilder;
@@ -36,7 +41,7 @@ public class Recorder {
     private static final String TAG = "Recorder";
     // Default members:
     private static final long DEFAULT_MAX_ACCELEROMETER_ARRAY = 30*128;
-    private static final long DEFAULT_INTERVAL_BETWEEN_TESTS = 10 * 128;//30*128; // after analyzing data how m
+    private static final long DEFAULT_INTERVAL_BETWEEN_TESTS = 20 * 128;//30*128; // after analyzing data how m
     private static final int DEFAULT_PREPROCESSING_INTERVAL = 128;
     private static final long DEFAULT_FILES_COUNT_BEFORE_MODEL_GENERATING = 3;
     // Current used:
@@ -167,12 +172,25 @@ public class Recorder {
             List<Accelerometer> list = new ArrayList(Arrays.asList(mAccelerometerArray.toArray()));
             Util featureUtil = new Util();
             Settings.setUseDynamicPreprocessingThreshold(true);
+            //Settings.setUseDynamicPreprocessingThreshold(false);
+            //Settings.setPreprocessingThreshold(10.5);
+            Settings.usingPreprocessing(true);
             Settings.setPreprocessingInterval(sPreprocessingInterval);
             List<Accelerometer> preprocessedList = featureUtil.preprocess(list);
+
+            Log.i(TAG, "Info: Settings.getPreprocessingInterval() = " + Settings.getPreprocessingInterval() );
+            Log.i(TAG, "Info: Settings.getPreprocessingThreshold() = " + Settings.getPreprocessingThreshold() );
+            Log.i(TAG, "Info: Settings.isUsingPreprocessing() = " + Settings.isUsingPreprocessing() );
+            Log.i(TAG, "Info: Settings.isUsingDynamicPreprocessingThreshold() = " + Settings.isUsingDynamicPreprocessingThreshold() );
+
 
             // Save raw data:
             ArrayDeque preProcAD = RecorderUtils.listToArrayDeque(preprocessedList);
             RecorderUtils.saveRawAccelerometerDataIntoCsvFile(preProcAD, AppUtil.rawdataUserFile, RecorderUtils.RAWDATA_DEFAULT_HEADER);
+
+            // DEBUG -----------------------------------------------
+            //Print_UnPreprocessed_and_Preprocessed_array(list, preprocessedList);
+            // \DEBUG ----------------------------------------------
 
             switch (mCreateModel){
 
@@ -211,6 +229,7 @@ public class Recorder {
         ++mCurrentIntervalBetweenTests;
 
     }
+
 
     private void sensorChanged(long timeStamp, float x, float y, float z){
 
@@ -346,6 +365,7 @@ public class Recorder {
             // Collected enought arff files to being.
 
             // Raw --> Feature
+
             createFeature();
 
             // Merge: Feature & Train --> Train
@@ -681,5 +701,43 @@ public class Recorder {
         return sb.toString();
     }
 
+    private void Print_UnPreprocessed_and_Preprocessed_array(List<Accelerometer> list, List<Accelerometer> preprocessedList){
+        GraphView graph1 = ModeFragment.sInstance.getView().findViewById(R.id.graph_view_1);
+        graph1.setVisibility(View.VISIBLE);
+        LineGraphSeries<DataPoint> series1 = new LineGraphSeries<>();
+
+
+        int counter = 1;
+        for(Accelerometer a : getAcceleromerList()){
+            series1.appendData(
+                    new DataPoint(counter, Math.sqrt( a.getX()*a.getX()* + a.getY()*a.getY() + a.getZ()*a.getZ() ) ),
+                    false,
+                    30*128
+            );
+            ++counter;
+            if(counter == sIntervalBetweenTests) break;
+        }
+        graph1.clearAnimation();
+        graph1.removeAllSeries();
+        graph1.addSeries( series1 );
+
+        GraphView graph2 = ModeFragment.sInstance.getView().findViewById(R.id.graph_view_2);
+        graph2.setVisibility(View.VISIBLE);
+        LineGraphSeries<DataPoint> series2 = new LineGraphSeries<>();
+
+        int counter2 = 1;
+        for(Accelerometer a : preprocessedList){
+            series2.appendData(
+                    new DataPoint(counter2, Math.sqrt( a.getX()*a.getX()* + a.getY()*a.getY() + a.getZ()*a.getZ() ) ),
+                    false,
+                    30*128
+            );
+            ++counter2;
+            if(counter2 == sIntervalBetweenTests) break;
+        }
+        graph2.clearAnimation();
+        graph2.removeAllSeries();
+        graph2.addSeries( series2 );
+    }
     
 }

@@ -232,6 +232,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
             return;
         }
 
+
         //if( fragment instanceof EditProfileFragment){
         //    // if Edit Profile fragment is displayed -> open Profile
         //    replaceFragment(ProfileFragment,"profile_fragment");
