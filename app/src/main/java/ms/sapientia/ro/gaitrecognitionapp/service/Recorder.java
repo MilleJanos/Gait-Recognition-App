@@ -28,9 +28,6 @@ import ms.sapientia.ro.commonclasses.Accelerometer;
 import ms.sapientia.ro.feature_extractor.Settings;
 import ms.sapientia.ro.feature_extractor.Util;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
-import ms.sapientia.ro.gaitrecognitionapp.logic.FirebaseController;
-import ms.sapientia.ro.gaitrecognitionapp.model.ICallback;
-import ms.sapientia.ro.gaitrecognitionapp.model.MyFirebaseUser;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 import ms.sapientia.ro.gaitrecognitionapp.view.menu.ModeFragment;
 import ms.sapientia.ro.model_builder.GaitHelperFunctions;
@@ -184,58 +181,38 @@ public class Recorder {
             Log.i(TAG, "Info: Settings.getPreprocessingInterval() = " + Settings.getPreprocessingInterval() );
             Log.i(TAG, "Info: Settings.getPreprocessingThreshold() = " + Settings.getPreprocessingThreshold() );
             Log.i(TAG, "Info: Settings.isUsingPreprocessing() = " + Settings.isUsingPreprocessing() );
-            Log.i(TAG, "Info: Settings.isUsingDynamicPreprocessingThreshold() = " + Settings.isUsingDynamicPreprocessingThreshold() );
+            Log.i(TAG, "Info: Settings.isUsingPreprocessing() = " + Settings.isUsingDynamicPreprocessingThreshold() );
 
-            // Download user object:
-            class FirebaseUserCallback implements ICallback{
 
-                @Override
-                public Object Success(MyFirebaseUser obj) {
-                    // Save raw data:
-                    ArrayDeque preProcAD = RecorderUtils.listToArrayDeque(preprocessedList);
-                    RecorderUtils.saveRawAccelerometerDataIntoCsvFile(preProcAD, AppUtil.rawdataUserFile, RecorderUtils.RAWDATA_DEFAULT_HEADER);
+            // Save raw data:
+            ArrayDeque preProcAD = RecorderUtils.listToArrayDeque(preprocessedList);
+            RecorderUtils.saveRawAccelerometerDataIntoCsvFile(preProcAD, AppUtil.rawdataUserFile, RecorderUtils.RAWDATA_DEFAULT_HEADER);
 
-                    // DEBUG -----------------------------------------------
-                    //Print_UnPreprocessed_and_Preprocessed_array(list, preprocessedList);
-                    // \DEBUG ----------------------------------------------
+            // DEBUG -----------------------------------------------
+            //Print_UnPreprocessed_and_Preprocessed_array(list, preprocessedList);
+            // \DEBUG ----------------------------------------------
 
-                    switch (mCreateModel){
+            switch (mCreateModel){
 
-                        case MODE_TRAIN:{
-                            // Create feature from raw
-                            // Merge feature with train,
-                            // update train in Firebase
-                            mode_train_NEW();
-                            break;
-                        }
-
-                        case MODE_AUTHENTICATE:{
-                            mode_authenticate();
-                            break;
-                        }
-
-                        case MODE_COLLECT_DATA:{
-                            // upload raw files
-                            mode_collect_data();
-                            break;
-                        }
-                    }
-                    return null;
+                case MODE_TRAIN:{
+                    // Create feature from raw
+                    // Merge feature with train,
+                    // update train in Firebase
+                    mode_train_NEW();
+                    break;
                 }
 
-                @Override
-                public Object Failure(MyFirebaseUser obj) {
-                    return null;
+                case MODE_AUTHENTICATE:{
+                    mode_authenticate();
+                    break;
                 }
 
-                @Override
-                public void Error(int error_code) {
-
+                case MODE_COLLECT_DATA:{
+                    // upload raw files
+                    mode_collect_data();
+                    break;
                 }
             }
-            FirebaseUserCallback callback = new FirebaseUserCallback();
-            FirebaseController.GetUserObjectById( mSavedAuth.getUid(), callback );
-
 
             // Reset counter
             mCurrentIntervalBetweenTests = 0;
@@ -527,7 +504,7 @@ public class Recorder {
     private void train(){
 
         // Create file
-        String path = AppUtil.internalFilesRoot.getAbsolutePath() + AppUtil.customDIR + "/trainFeature_" + AppUtil.sAuth.getUid() + "_" + ".arff";
+        String path = AppUtil.internalFilesRoot.getAbsolutePath() + AppUtil.customDIR + "/trainFeature_" + AppUtil.sAuth.getUid() + ".arff";
         AppUtil.trainFeatureFile = new File(path);
         RecorderUtils.createFileIfNotExists(AppUtil.trainFeatureFile);
 
