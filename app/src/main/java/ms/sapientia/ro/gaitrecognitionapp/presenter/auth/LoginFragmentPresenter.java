@@ -9,6 +9,8 @@ import com.google.firebase.auth.SignInMethodQueryResult;
 import java.util.regex.Pattern;
 
 import ms.sapientia.ro.gaitrecognitionapp.logic.FirebaseController;
+import ms.sapientia.ro.gaitrecognitionapp.model.ICallback;
+import ms.sapientia.ro.gaitrecognitionapp.model.MyFirebaseUser;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.LoginFragment;
@@ -237,7 +239,38 @@ public class LoginFragmentPresenter {
                view.hideProgressBar();
 
                // Create user object in database if the user does not have:
-               FirebaseController.CreateUserObjectByIdIfNotExists( AppUtil.sAuth.getUid() );
+               new FirebaseController().getUserObjectById( AppUtil.sAuth.getUid(), new ICallback(){
+
+                   @Override
+                   public void Success(MyFirebaseUser user) {
+                       // If the user object already exists - (get object)
+                       MainActivity.setLocalUserObject(user);
+                   }
+
+                   @Override
+                   public void Failure() {
+                       // If the user object NOT exists - (get object)
+                       new FirebaseController().getUserObjectById(AppUtil.sAuth.getUid(), new ICallback() {
+                           @Override
+                           public void Success(MyFirebaseUser user) {
+                               MainActivity.setLocalUserObject(user);
+                           }
+                           @Override
+                           public void Failure() {
+                               Toast.makeText(MainActivity.sContext, "Somting went wrong! (Error:" + 2 +")", Toast.LENGTH_LONG).show();
+                           }
+                           @Override
+                           public void Error(int error_code) {
+                               Toast.makeText(MainActivity.sContext, "Somting went wrong! (Error:" + 3 +")", Toast.LENGTH_LONG).show();
+                           }
+                       });
+                   }
+
+                   @Override
+                   public void Error(int error_code) {
+                       Toast.makeText(MainActivity.sContext, "Somting went wrong! (Error:" + error_code +")", Toast.LENGTH_LONG).show();
+                   }
+               } );
 
            }else{
 

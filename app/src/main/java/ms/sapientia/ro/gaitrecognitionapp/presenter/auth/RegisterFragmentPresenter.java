@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import ms.sapientia.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.logic.FirebaseController;
+import ms.sapientia.ro.gaitrecognitionapp.model.ICallback;
 import ms.sapientia.ro.gaitrecognitionapp.model.MyFirebaseUser;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.RegisterFragment;
@@ -155,10 +156,27 @@ public class RegisterFragmentPresenter {
                         // Create object for new user in Firestore
 
                         MyFirebaseUser u = new MyFirebaseUser();
-                        u.setEmail(AppUtil.sAuth.getCurrentUser().getEmail());
-                        u.setFirst_name("First name");
-                        u.setLast_name("Last name");
-                        FirebaseController.SetUserObject( u );
+                        //u.email=AppUtil.sAuth.getCurrentUser().getEmail();
+                        u.id = AppUtil.sAuth.getUid();
+                        u.first_name="";
+                        u.last_name="";
+                        FirebaseController.setUserObject( u );
+
+                        // Save into app member:
+                        new FirebaseController().getUserObjectById( AppUtil.sAuth.getUid(), new ICallback(){
+                            @Override
+                            public void Success(MyFirebaseUser user) {
+                                MainActivity.setLocalUserObject(user);
+                            }
+                            @Override
+                            public void Failure() {
+                                Toast.makeText(MainActivity.sContext,"Error: Register",Toast.LENGTH_LONG).show();
+                            }
+                            @Override
+                            public void Error(int error_code) {
+                                Toast.makeText(MainActivity.sContext,"Error: Register",Toast.LENGTH_LONG).show();
+                            }
+                        });
 
                     }else{
 

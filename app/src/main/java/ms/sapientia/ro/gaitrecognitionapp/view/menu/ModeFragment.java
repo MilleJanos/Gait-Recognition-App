@@ -10,9 +10,14 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import ms.sapientia.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
+import ms.sapientia.ro.gaitrecognitionapp.logic.FirebaseController;
+import ms.sapientia.ro.gaitrecognitionapp.model.ICallback;
+import ms.sapientia.ro.gaitrecognitionapp.model.ISimpleCallback;
+import ms.sapientia.ro.gaitrecognitionapp.model.MyFirebaseUser;
 import ms.sapientia.ro.gaitrecognitionapp.model.NavigationMenuFragmentItem;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.menu.ModeFragmentPresenter;
 import ms.sapientia.ro.gaitrecognitionapp.service.BackgroundService;
@@ -35,6 +40,7 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
     private ModeFragmentPresenter mPresenter;
 
     // Private members:
+    private MyFirebaseUser auxUser;
 
     @Nullable
     @Override
@@ -65,37 +71,47 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
     }
 
     private void bindClickListeners() {
-        mServiceSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                // switch on
+        mServiceSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> clickSwitch(buttonView,isChecked) );
+        mTrainSection.setOnClickListener(v -> click_train()) ;
+        mAuthenticationSection.setOnClickListener(v -> click_authenticate() );
+        mCollectDataSection.setOnClickListener(v -> click_collect() );
+    }
 
-                // Start Service
-                mPresenter.StartServiceIfNotRunning();
-            } else {
-                // switch off
+    public void clickSwitch(View buttonView, boolean isChecked){
+        if (isChecked) {
+            // switch on
 
-                // Stop Service
-                mPresenter.StopService();
-            }
-        });
-        mTrainSection.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                selectMode(Recorder.Mode.MODE_TRAIN);
-            }
-        });
-        mAuthenticationSection.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                selectMode(Recorder.Mode.MODE_AUTHENTICATE);
-            }
-        });
-        mCollectDataSection.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                selectMode(Recorder.Mode.MODE_COLLECT_DATA);
-            }
-        });
+            // Start Service
+            mPresenter.StartServiceIfNotRunning();
+        } else {
+            // switch off
+
+            // Stop Service
+            mPresenter.StopService();
+        }
+    }
+
+    public void click_train(){
+        saveSelectedMode( Recorder.Mode.MODE_TRAIN );
+    }
+
+    public void click_authenticate(){
+        saveSelectedMode( Recorder.Mode.MODE_AUTHENTICATE );
+    }
+
+    public void click_collect(){
+        saveSelectedMode( Recorder.Mode.MODE_COLLECT_DATA );
+    }
+
+    public void saveSelectedMode(Recorder.Mode mode){
+        //TODO// Save changes local;
+        //*//MyFirebaseUser user = MainActivity.getLocalUserObject();
+        //*//user.selected_mode = mode;
+        //*//MainActivity.setLocalUserObject(user);
+        // Save changes firebase;
+        FirebaseController.setUserObjectMode(AppUtil.sAuth.getUid(), mode );
+        // Show:
+        selectMode(mode);
     }
 
     public void restoreSelectedMode(){
@@ -147,7 +163,37 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
         mServiceSwitch.setChecked(checked);
         restoreSelectedMode();  // sets: AppUtil.sMode
         resetSelection();
-        //setSelection( AppUtil.sMode );
+
+        // After downloading the user object set the selected mode:
+        downloadUserObject(AppUtil.sAuth.getUid(), user -> {
+            MainActivity.setLocalUserObject(user);
+            setSelection( user.selected_mode );
+            hideProgressBar();
+        });
+    }
+
+    private void downloadUserObject(String user_id, ISimpleCallback sc){
+
+        showProgressBar();
+
+        new FirebaseController().getUserObjectById(user_id, new ICallback() {
+            @Override
+            public void Success(MyFirebaseUser user) {
+                sc.Do( user );
+            }
+
+            @Override
+            public void Failure() {
+                Toast.makeText(MainActivity.sContext, "Error downloading user informations!", Toast.LENGTH_LONG).show();
+                hideProgressBar();
+            }
+
+            @Override
+            public void Error(int error_code) {
+                Toast.makeText(MainActivity.sContext, "Error downloading user informations!", Toast.LENGTH_LONG).show();
+                hideProgressBar();
+            }
+        });
     }
 
     ///**

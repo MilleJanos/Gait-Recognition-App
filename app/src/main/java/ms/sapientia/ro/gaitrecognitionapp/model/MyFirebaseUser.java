@@ -6,7 +6,19 @@ import ms.sapientia.ro.gaitrecognitionapp.service.Recorder;
 
 public class MyFirebaseUser extends User {
 
-    public String id = "";
+    public static final String ID_KEY = "id";
+    public static final String FIRST_NAME_KEY = "first_name";
+    public static final String LAST_NAME_KEY = "last_name";
+    public static final String CURRENT_TRAIN_ID_KEY = "current_train_id";
+    public static final String RAW_COUNT_KEY = "raw_count";
+    public static final String FEATURE_COUNT_KEY = "feature_count";
+    public static final String MODEL_COUNT_KEY = "model_count";
+    public static final String RAW_FILES_KEY = "raw_files";
+    public static final String FEATURE_FILES_KEY = "feature_files";
+    public static final String MODEL_FILES_KEY = "model_files";
+    public static final String SELECTED_MODE_KEY = "selected_mode";
+    public static final String PROFILE_PICTURE_IDX_KEY = "profile_picture_idx";
+
     public int current_train_id = -1;
     public int raw_count = 0;
     public int feature_count = 0;
@@ -18,13 +30,14 @@ public class MyFirebaseUser extends User {
     public int profile_picture_idx = -1;
 
     public MyFirebaseUser() {
+        super();
     }
 
-    public MyFirebaseUser(String email/*, String password*/) {
-        super(email/*, password*/);
+    public MyFirebaseUser(String user_id) {
+        super(user_id);
     }
 
-    public MyFirebaseUser(String email, String firstName, String lastName/*, String password*/) {
-        super(email, firstName, lastName/*, password*/);
+    public MyFirebaseUser(String first_name, String last_name) {
+        super(first_name, last_name);
     }
 }

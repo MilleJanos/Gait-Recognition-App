@@ -27,6 +27,7 @@ import android.widget.Toast;
 
 import ms.sapientia.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
+import ms.sapientia.ro.gaitrecognitionapp.model.MyFirebaseUser;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.MainActivityPresenter;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.LoginFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.RegisterFragment;
@@ -58,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
     public static Context sContext;
 
     // Members:
-    private MainActivityPresenter mPresenter;
+    private static MainActivityPresenter mPresenter;
     private ProgressBar mProgressBar;
     Toolbar mToolbar;
     DrawerLayout mDrawer;
@@ -375,6 +376,13 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
     }
 
 
+    public static void setLocalUserObject(MyFirebaseUser user){
+        mPresenter.setLocalUserObject(user);
+    }
+
+    public static MyFirebaseUser getLocalUserObject(){
+        return mPresenter.getLocalUserObject();
+    }
 
     //region OLD CODE
     /*

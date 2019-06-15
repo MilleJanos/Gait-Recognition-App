@@ -2,8 +2,8 @@ package ms.sapientia.ro.gaitrecognitionapp.model;
 
 public interface ICallback {
 
-    Object Success(MyFirebaseUser obj);
-    Object Failure(MyFirebaseUser obj);
+    void Success(MyFirebaseUser user);
+    void Failure();
     void Error(int error_code);
 
 }

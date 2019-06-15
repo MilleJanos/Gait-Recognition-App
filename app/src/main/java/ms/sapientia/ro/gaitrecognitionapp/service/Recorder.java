@@ -28,12 +28,16 @@ import ms.sapientia.ro.commonclasses.Accelerometer;
 import ms.sapientia.ro.feature_extractor.Settings;
 import ms.sapientia.ro.feature_extractor.Util;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
+import ms.sapientia.ro.gaitrecognitionapp.logic.FirebaseController;
+import ms.sapientia.ro.gaitrecognitionapp.model.ICallback;
+import ms.sapientia.ro.gaitrecognitionapp.model.MyFirebaseUser;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 import ms.sapientia.ro.gaitrecognitionapp.view.menu.ModeFragment;
 import ms.sapientia.ro.model_builder.GaitHelperFunctions;
 import ms.sapientia.ro.model_builder.GaitModelBuilder;
 import ms.sapientia.ro.model_builder.IGaitModelBuilder;
 import weka.classifiers.Classifier;
+import weka.classifiers.bayes.net.search.ci.ICSSearchAlgorithm;
 
 public class Recorder {
 
@@ -183,10 +187,33 @@ public class Recorder {
             Log.i(TAG, "Info: Settings.isUsingPreprocessing() = " + Settings.isUsingPreprocessing() );
             Log.i(TAG, "Info: Settings.isUsingPreprocessing() = " + Settings.isUsingDynamicPreprocessingThreshold() );
 
-
             // Save raw data:
             ArrayDeque preProcAD = RecorderUtils.listToArrayDeque(preprocessedList);
             RecorderUtils.saveRawAccelerometerDataIntoCsvFile(preProcAD, AppUtil.rawdataUserFile, RecorderUtils.RAWDATA_DEFAULT_HEADER);
+
+            // region OLD CODE
+            /*
+            // Download user object from database:
+            class Callback implements ICallback{
+
+                @Override
+                public void Success(MyFirebaseUser obj) {
+                    Log.d(TAG, "Success: ");
+                }
+
+                @Override
+                public void Failure(MyFirebaseUser obj) {
+                    
+                }
+
+                @Override
+                public void Error(int error_code) {
+
+                }
+            }
+            FirebaseController.getUserObjectById( mSavedAuth.getUid(), new Callback());
+            */
+            //endregion
 
             // DEBUG -----------------------------------------------
             //Print_UnPreprocessed_and_Preprocessed_array(list, preprocessedList);
