@@ -8,14 +8,14 @@ import com.google.firebase.auth.SignInMethodQueryResult;
 
 import java.util.regex.Pattern;
 
+import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.logic.FirebaseController;
 import ms.sapientia.ro.gaitrecognitionapp.model.ICallback;
 import ms.sapientia.ro.gaitrecognitionapp.model.MyFirebaseUser;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
-import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.LoginFragment;
-import ms.sapientia.ro.gaitrecognitionapp.view.menu.HomeFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.RegisterFragment;
+import ms.sapientia.ro.gaitrecognitionapp.view.menu.HomeFragment;
 
 public class LoginFragmentPresenter {
 
@@ -235,42 +235,34 @@ public class LoginFragmentPresenter {
                // Open HomeFragment
                MainActivity.sInstance.replaceFragment(new HomeFragment(), "main_fragment");
 
-               // Hide progress bar
-               view.hideProgressBar();
-
-               // Create user object in database if the user does not have:
+               // GerCreate user object in database if the user does not have:
                new FirebaseController().getUserObjectById( AppUtil.sAuth.getUid(), new ICallback(){
-
                    @Override
                    public void Success(MyFirebaseUser user) {
-                       // If the user object already exists - (get object)
-                       MainActivity.setLocalUserObject(user);
+                       // If user already has object in firebase:
+                       AppUtil.sUser = user;
+                       // Hide progress bar
+                       view.hideProgressBar();
                    }
-
                    @Override
                    public void Failure() {
-                       // If the user object NOT exists - (get object)
-                       new FirebaseController().getUserObjectById(AppUtil.sAuth.getUid(), new ICallback() {
-                           @Override
-                           public void Success(MyFirebaseUser user) {
-                               MainActivity.setLocalUserObject(user);
-                           }
-                           @Override
-                           public void Failure() {
-                               Toast.makeText(MainActivity.sContext, "Somting went wrong! (Error:" + 2 +")", Toast.LENGTH_LONG).show();
-                           }
-                           @Override
-                           public void Error(int error_code) {
-                               Toast.makeText(MainActivity.sContext, "Somting went wrong! (Error:" + 3 +")", Toast.LENGTH_LONG).show();
-                           }
-                       });
+                       // If hasn't --> Create one !
+                       String id = AppUtil.sAuth.getUid();
+                       MyFirebaseUser user = new MyFirebaseUser(id);
+                       // Update to firebase
+                       FirebaseController.setUserObject( user );
+                       // Set into member
+                       AppUtil.sUser = user;
+                       // Hide progress bar
+                       view.hideProgressBar();
                    }
-
                    @Override
                    public void Error(int error_code) {
-                       Toast.makeText(MainActivity.sContext, "Somting went wrong! (Error:" + error_code +")", Toast.LENGTH_LONG).show();
+                       Toast.makeText(MainActivity.sContext,"Error: Login",Toast.LENGTH_LONG).show();
+                       // Hide progress bar
+                       view.hideProgressBar();
                    }
-               } );
+               });
 
            }else{
 
@@ -283,6 +275,7 @@ public class LoginFragmentPresenter {
         });
 
     }
+
 
     /**
      * Check the email if is valid format.

@@ -13,7 +13,6 @@ import java.util.ArrayList;
 
 import ms.sapientia.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
-import ms.sapientia.ro.gaitrecognitionapp.model.MyFirebaseUser;
 import ms.sapientia.ro.gaitrecognitionapp.service.FirebaseUtils;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 
@@ -24,8 +23,6 @@ public class MainActivityPresenter {
     private boolean mDoubleBackToExitPressedOnce = false;
     private ArrayList<Fragment> mFragmentStack = new ArrayList<>();
 
-    // Static members:
-    private static MyFirebaseUser mUserObject;
 
     // Interface:
     public interface View{
@@ -120,13 +117,4 @@ public class MainActivityPresenter {
             }
         }, 2000);
     }
-
-    public static void setLocalUserObject(MyFirebaseUser user){
-        mUserObject = user;
-    }
-
-    public static MyFirebaseUser getLocalUserObject(){
-        return mUserObject;
-    }
-
 }

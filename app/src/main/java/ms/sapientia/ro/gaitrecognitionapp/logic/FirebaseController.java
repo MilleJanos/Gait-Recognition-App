@@ -13,7 +13,6 @@ import java.util.Map;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.model.ICallback;
 import ms.sapientia.ro.gaitrecognitionapp.model.MyFirebaseUser;
-import ms.sapientia.ro.gaitrecognitionapp.service.Recorder;
 
 public class FirebaseController {
 
@@ -36,7 +35,6 @@ public class FirebaseController {
                     callback.Success( mfu );
                 } else {
                     Log.d(TAG, "No such document");
-                    MyFirebaseUser mfu = convertObjectToMyFirebaseUser( document.getData() );
                     callback.Failure();
                 }
             } else {
@@ -74,7 +72,7 @@ public class FirebaseController {
         ref.set(data);
 
     }
-
+    /*
     public void createUserObjectByIdIfNotExists(String user_id, ICallback callback ){
         // TODO
 
@@ -101,7 +99,9 @@ public class FirebaseController {
             }
         });
     }
+    */
 
+    /*
     public static void setUserObjectMode(String user_id, Recorder.Mode mode){
 
         DocumentReference ref = FirebaseFirestore.getInstance()
@@ -114,6 +114,7 @@ public class FirebaseController {
 
         ref.set(data);
     }
+    */
 
     private MyFirebaseUser convertObjectToMyFirebaseUser(Map<String, Object> map){
         MyFirebaseUser user = new MyFirebaseUser();

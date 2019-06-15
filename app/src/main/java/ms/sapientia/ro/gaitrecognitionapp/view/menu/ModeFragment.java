@@ -103,16 +103,18 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
         saveSelectedMode( Recorder.Mode.MODE_COLLECT_DATA );
     }
 
+
     public void saveSelectedMode(Recorder.Mode mode){
-        //TODO// Save changes local;
-        //*//MyFirebaseUser user = MainActivity.getLocalUserObject();
-        //*//user.selected_mode = mode;
-        //*//MainActivity.setLocalUserObject(user);
+        // Save changes local;
+        MyFirebaseUser user = AppUtil.sUser;
+        user.selected_mode = mode;
+        AppUtil.sUser = user;
         // Save changes firebase;
-        FirebaseController.setUserObjectMode(AppUtil.sAuth.getUid(), mode );
+        FirebaseController.setUserObject( user );
         // Show:
         selectMode(mode);
     }
+
 
     public void restoreSelectedMode(){
         // AppUtil.sMode = Get mode from firebase:
@@ -166,7 +168,7 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
 
         // After downloading the user object set the selected mode:
         downloadUserObject(AppUtil.sAuth.getUid(), user -> {
-            MainActivity.setLocalUserObject(user);
+            AppUtil.sUser = user;
             setSelection( user.selected_mode );
             hideProgressBar();
         });

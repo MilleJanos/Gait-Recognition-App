@@ -376,14 +376,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
     }
 
 
-    public static void setLocalUserObject(MyFirebaseUser user){
-        mPresenter.setLocalUserObject(user);
-    }
-
-    public static MyFirebaseUser getLocalUserObject(){
-        return mPresenter.getLocalUserObject();
-    }
-
     //region OLD CODE
     /*
         // Print fragment manager managed fragment in debug log.
