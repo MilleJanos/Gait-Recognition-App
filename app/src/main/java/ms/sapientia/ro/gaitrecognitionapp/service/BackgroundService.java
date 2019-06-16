@@ -61,14 +61,15 @@ public class BackgroundService extends Service {
         }
 
         // Do heavy work:
-        StartRecording(Recorder.Mode.MODE_TRAIN);
+        StartRecording(AppUtil.sMode, AppUtil.sTrainNewOne);
 
         return START_NOT_STICKY;
     }
 
-    public void StartRecording(Recorder.Mode mode){
+    public void StartRecording(Recorder.Mode mode, boolean train_new_one){
         if(mRecorder == null) {
-            mRecorder = new Recorder(this, AppUtil.sAuth, mode);
+            // Start Recorder with selected mode & train mode
+            mRecorder = new Recorder(this, AppUtil.sAuth, mode, train_new_one);
         }
         mRecorder.startRecording();
         isRunning = true;

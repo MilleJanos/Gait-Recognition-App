@@ -40,7 +40,8 @@ public class AppUtil {
     public static File trainFeatureFile;
     public static File trainModelFile;
     // Mode:
-    public static Recorder.Mode sMode = Recorder.Mode.MODE_TRAIN; // Default: Train
+    public static Recorder.Mode sMode = Recorder.Mode.MODE_TRAIN;   // Default: Train
+    public static boolean sTrainNewOne = true;                      // Default: Train new one
     // Other
     public static CharSequence recordDateAndTimeFormatted = "";
     // Logged in user informations:

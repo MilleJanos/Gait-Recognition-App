@@ -105,6 +105,21 @@
 
                     </LinearLayout>
 
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <CheckBox
+                            android:id="@+id/train_new_switch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="100dp"
+                            android:fontFamily="@font/alef"
+                            android:textSize="20sp"
+                            android:text="Train new one"/>
+
+                    </LinearLayout>
+
                 </LinearLayout>
 
                 <!-- My Radio: Authenticate -->

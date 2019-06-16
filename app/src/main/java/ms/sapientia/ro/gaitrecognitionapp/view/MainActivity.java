@@ -364,7 +364,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
             }
             case R.id.nav_logout: {
                 AppUtil.sAuth.signOut();
-                MainActivity.sInstance.replaceFragment(new HomeFragment(), "home_fragment");
+                MainActivity.sInstance.replaceFragment(new LoginFragment(), "login_fragment");
+                MainActivity.sInstance.lockNavigationDrawer();
                 break;
             }
             case R.id.nav_exit: {

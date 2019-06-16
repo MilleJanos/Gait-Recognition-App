@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Switch;
@@ -36,6 +37,7 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
     LinearLayout mTrainSection;
     LinearLayout mAuthenticationSection;
     LinearLayout mCollectDataSection;
+    CheckBox mTrainNewOneCheckBox;
 
     // MVP:
     private ModeFragmentPresenter mPresenter;
@@ -75,6 +77,7 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
         mTrainSection = view.findViewById(R.id.item_train);
         mAuthenticationSection = view.findViewById(R.id.item_auth);
         mCollectDataSection = view.findViewById(R.id.item_collect_data);
+        mTrainNewOneCheckBox = view.findViewById(R.id.train_new_switch);
     }
 
     private void bindClickListeners() {
@@ -82,6 +85,7 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
         mTrainSection.setOnClickListener(v -> click_train()) ;
         mAuthenticationSection.setOnClickListener(v -> click_authenticate() );
         mCollectDataSection.setOnClickListener(v -> click_collect() );
+        mTrainNewOneCheckBox.setOnClickListener(v -> click_train_new_switch(v));
     }
 
     public void click_switch(View buttonView, boolean isChecked){
@@ -120,6 +124,10 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
             return;
         }
         saveSelectedMode( Recorder.Mode.MODE_COLLECT_DATA );
+    }
+
+    public void click_train_new_switch(View view){
+        AppUtil.sTrainNewOne = ((CheckBox) view).isChecked();
     }
 
     public void saveSelectedMode(Recorder.Mode mode){

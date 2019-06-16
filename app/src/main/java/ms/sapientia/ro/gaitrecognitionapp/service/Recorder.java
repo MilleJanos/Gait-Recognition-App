@@ -30,6 +30,7 @@ import ms.sapientia.ro.feature_extractor.Util;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.logic.FirebaseController;
 import ms.sapientia.ro.gaitrecognitionapp.model.IDoIt;
+import ms.sapientia.ro.gaitrecognitionapp.model.IFileCallback;
 import ms.sapientia.ro.gaitrecognitionapp.model.ISimpleCallback;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 import ms.sapientia.ro.gaitrecognitionapp.view.menu.ModeFragment;
@@ -43,9 +44,9 @@ public class Recorder {
     // Tag:
     private static final String TAG = "Recorder";
     // Default members:
-    private static final long DEFAULT_MAX_ACCELEROMETER_ARRAY = 30 * 100;
-    private static final long DEFAULT_INTERVAL_BETWEEN_TESTS = 10 * 100;    //30*128; // after analyzing data how m
-    private static final int DEFAULT_PREPROCESSING_INTERVAL = 100;
+    private static final long DEFAULT_MAX_ACCELEROMETER_ARRAY = 33 * 128;
+    private static final long DEFAULT_INTERVAL_BETWEEN_TESTS = 32 * 128;    //30*128; // after analyzing data how m
+    private static final int DEFAULT_PREPROCESSING_INTERVAL = 128;
     private static final long DEFAULT_FILES_COUNT_BEFORE_MODEL_GENERATING = 3;
     // Current used:
     private static long sMaxAccelerometerArray;
@@ -96,18 +97,20 @@ public class Recorder {
     private long mCurrentFileCount = 0;
     public enum Mode{ MODE_TRAIN, MODE_AUTHENTICATE, MODE_COLLECT_DATA }
     private Mode mMode = Mode.MODE_TRAIN;
+    private boolean mTrainNewOne = true;
     // Sound Members:
     private MediaPlayer mp_bing;
     private MediaPlayer mp_feature;
     private MediaPlayer mp_model;
 
     // Constructor:
-    public Recorder(Context context, FirebaseAuth auth, Mode create_model_or_verify) {
+    public Recorder(Context context, FirebaseAuth auth, Mode create_model_or_verify, boolean  train_new_one) {
 
         mSavedAuth = auth;
         mContext = context;
         mIsRecording = false;
         mMode = create_model_or_verify;
+        mTrainNewOne = train_new_one;
 
         mSensorManager = (SensorManager) mContext.getSystemService(mContext.SENSOR_SERVICE);
         mAccelerometerSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -142,7 +145,7 @@ public class Recorder {
 
         initSound();
 
-        initTrainFiles();
+        initTrainFiles(mTrainNewOne);
 
     }
 
@@ -163,25 +166,69 @@ public class Recorder {
         mp_model = MediaPlayer.create(mContext, R.raw.model);
     }
 
-    private void initTrainFiles(){
+    private void initTrainFiles(boolean train_new_one){
         String path;
-        int tf_count = AppUtil.sUser.train_feature_count;
-        int tm_count = AppUtil.sUser.train_model_count;
 
-        path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "train" + "/" + "trainModel_" + AppUtil.sUser.id + "_" + tf_count + ".mdl";
-        AppUtil.trainModelFile = new File(path);
-        RecorderUtils.createFileIfNotExists(AppUtil.trainModelFile);
+        if( train_new_one ){
+            // Train new file:
 
-        path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "train" + "/" + "trainFeature_" + AppUtil.sUser.id + "_" + tm_count + ".arff";
-        AppUtil.trainFeatureFile = new File(path);
-        RecorderUtils.createFileIfNotExists(AppUtil.trainFeatureFile);
+            int tf_count = AppUtil.sUser.train_feature_count;
+            int tm_count = AppUtil.sUser.train_model_count;
 
-        // Increase number of feature and model count:
-        AppUtil.sUser.train_feature_count++;
-        AppUtil.sUser.train_model_count++;
+            path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "train" + "/" + "trainModel_" + AppUtil.sUser.id + "_" + tf_count + ".mdl";
+            AppUtil.trainModelFile = new File(path);
+            RecorderUtils.createFileIfNotExists(AppUtil.trainModelFile);
 
-        // Save numbers to firebase:
-        FirebaseController.setUserObject(AppUtil.sUser);
+            path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "train" + "/" + "trainFeature_" + AppUtil.sUser.id + "_" + tm_count + ".arff";
+            AppUtil.trainFeatureFile = new File(path);
+            RecorderUtils.createFileIfNotExists(AppUtil.trainFeatureFile);
+
+            // Increase number of feature and model count:
+            AppUtil.sUser.train_feature_count++;
+            AppUtil.sUser.train_model_count++;
+
+            // Save numbers to firebase:
+            FirebaseController.setUserObject(AppUtil.sUser);
+
+        }else{
+            // Train last trained file:
+
+            // Download last trained file:
+            int lastTrainedArffId = AppUtil.sUser.train_feature_count;
+            String fileName = "trainFeature_" + AppUtil.sUser.id + "_" + lastTrainedArffId + ".arff";
+
+            StorageReference ref = FirebaseUtils.firebaseStorage.getReference().child(
+                    FirebaseUtils.STORAGE_DATA_KEY
+                            + "/" + AppUtil.sUser.id
+                            + "/" + FirebaseUtils.STORAGE_TRAIN_KEY
+                            + "/" + FirebaseUtils.STORAGE_FEATURE_KEY
+                            + "/" + fileName
+            );
+            path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "train" + "/" + fileName;
+            File file = new File( path );
+
+            new FirebaseController().downloadFile(ref, file, new IFileCallback() {
+                @Override
+                public void Success(File file) {
+                    // TODO ----------------------------------------------------------------------------------------
+                }
+
+                @Override
+                public void Failure() {
+                    // TODO ----------------------------------------------------------------------------------------
+                }
+
+                @Override
+                public void Error(int error_code) {
+                    // TODO ----------------------------------------------------------------------------------------
+                }
+            });
+            
+            // TODO: Download last trained .arff: ( !!! OVERRIDE CURRENT !!! )
+
+        }
+
+
     }
 
     private void sensorChanged_NEW(long timeStamp, float x, float y, float z) {
@@ -371,25 +418,27 @@ public class Recorder {
 
                 RecorderUtils.downloadingNegativeFeatureFile = true;
 
-                FirebaseUtils.downloadFileFromFirebaseStorage(reference, AppUtil.featureNegativeFile, new FinishedCallback() {
+                new FirebaseController().downloadFile(reference, AppUtil.featureNegativeFile, new IFileCallback(){
+
                     @Override
-                    public void onCallback(int errorCode) {                 // after onSuccess or onFailure
+                    public void Success(File file) {
+                        Toast.makeText(mContext, "Negative Data downloaded", Toast.LENGTH_SHORT).show();
 
-                        if (errorCode == 0) { // onSuccess
+                        generateStuff();
 
-                            Toast.makeText(mContext, "Negative Data downloaded", Toast.LENGTH_SHORT).show();
+                        // updateGait();   // uses last created feature file
+                        RecorderUtils.downloadingNegativeFeatureFile = false;
+                    }
 
-                            generateStuff();
+                    @Override
+                    public void Failure() {
+                        Toast.makeText(mContext, "Error downloading Negative Data!", Toast.LENGTH_LONG).show();
+                        RecorderUtils.downloadingNegativeFeatureFile = false;
+                    }
 
-
-
-                            // updateGait();   // uses last created feature file
-
-
-                        } else { // onFailure or other error
-                            Toast.makeText(mContext, "Error downloading Negative Data!", Toast.LENGTH_LONG).show();
-                        }
-
+                    @Override
+                    public void Error(int error_code) {
+                        Toast.makeText(mContext, "Error downloading Negative Data!", Toast.LENGTH_LONG).show();
                         RecorderUtils.downloadingNegativeFeatureFile = false;
                     }
                 });
@@ -420,14 +469,25 @@ public class Recorder {
             // Merge: Feature & Train --> Train
             train();
 
-            // Upload train:
-            StorageReference ref = FirebaseUtils.firebaseStorage.getReference().child(
+            // Upload trained feature file:
+            StorageReference featureRef = FirebaseUtils.firebaseStorage.getReference().child(
                     FirebaseUtils.STORAGE_DATA_KEY
                     + "/" + AppUtil.sAuth.getUid()
                     + "/" + FirebaseUtils.STORAGE_TRAIN_KEY
+                    + "/" + FirebaseUtils.STORAGE_FEATURE_KEY
                     + "/" + AppUtil.trainFeatureFile.getName()
             );
-            FirebaseUtils.uploadFileToFirebaseStorage(MainActivity.sInstance, AppUtil.trainFeatureFile, ref);
+            FirebaseController.uploadFile(featureRef, AppUtil.trainFeatureFile );
+
+            // Upload trained model file:
+            StorageReference modelRef = FirebaseUtils.firebaseStorage.getReference().child(
+                    FirebaseUtils.STORAGE_DATA_KEY
+                            + "/" + AppUtil.sAuth.getUid()
+                            + "/" + FirebaseUtils.STORAGE_TRAIN_KEY
+                            + "/" + FirebaseUtils.STORAGE_MODEL_KEY
+                            + "/" + AppUtil.trainModelFile.getName()
+            );
+            FirebaseController.uploadFile(modelRef, AppUtil.trainModelFile );
 
             mCurrentFileCount = 0;
 
@@ -487,7 +547,7 @@ public class Recorder {
                 + "/" + FirebaseUtils.STORAGE_RAW_KEY
                 + "/" + AppUtil.rawdataUserFile.getName()
         );
-        FirebaseUtils.uploadFileToFirebaseStorage(MainActivity.sInstance, AppUtil.rawdataUserFile, ref);
+        FirebaseController.uploadFile(ref, AppUtil.rawdataUserFile);
     }
 
 
@@ -506,7 +566,7 @@ public class Recorder {
         GaitHelperFunctions.createFeaturesFileFromRawFile(
                 AppUtil.rawdataUserFile.getAbsolutePath(),      // in
                 AppUtil.featureUserFile.getAbsolutePath().substring(0, AppUtil.featureUserFile.getAbsolutePath().length() - (".arff").length()),   // out   - without ".arff" at the end
-                RecorderUtils.deviceID                              // in
+                AppUtil.sUser.id                               // in
         );
 
         mp_feature.start(); // TODO: Remove sound
