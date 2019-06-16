@@ -22,12 +22,13 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import ms.sapientia.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
-import ms.sapientia.ro.gaitrecognitionapp.model.MyFirebaseUser;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.MainActivityPresenter;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.LoginFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.RegisterFragment;
@@ -61,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
     // Members:
     private static MainActivityPresenter mPresenter;
     private ProgressBar mProgressBar;
+    private TextView mProgressBarTextView;
     Toolbar mToolbar;
     DrawerLayout mDrawer;
 
@@ -302,6 +304,14 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
         mProgressBar.setVisibility(View.VISIBLE);
         this.addContentView(mProgressBar, params);
         //showProgressBar();
+
+        // Text
+        //mProgressBarTextView = new TextView(this, null);
+        //mProgressBarTextView.setText("Loading");
+        ////mProgressBarTextView.setC
+        //LinearLayout.LayoutParams params2 = new LinearLayout.LayoutParams(Resources.getSystem().getDisplayMetrics().widthPixels,250);
+        //params2.setMargins(0,height/3+80,0,0);
+        //this.addContentView(mProgressBarTextView, params2);
 
     }
 

@@ -38,12 +38,13 @@ public class AppUtil {
     public static File modelUserFile;
     public static File featureNegativeFile;  // local stored dummy file from firebase
     public static File trainFeatureFile;
+    public static File trainModelFile;
     // Mode:
     public static Recorder.Mode sMode = Recorder.Mode.MODE_TRAIN; // Default: Train
     // Other
     public static CharSequence recordDateAndTimeFormatted = "";
     // Logged in user informations:
-    public static MyFirebaseUser sUser;
+    public static MyFirebaseUser sUser = null;
 
     
     // Static Methods

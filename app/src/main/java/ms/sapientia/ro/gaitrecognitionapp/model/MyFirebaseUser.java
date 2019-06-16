@@ -18,6 +18,8 @@ public class MyFirebaseUser extends User {
     public static final String MODEL_FILES_KEY = "model_files";
     public static final String SELECTED_MODE_KEY = "selected_mode";
     public static final String PROFILE_PICTURE_IDX_KEY = "profile_picture_idx";
+    public static final String TRAIN_FEATURE_COUNT_KEY = "train_feature_count";
+    public static final String TRAIN_MODEL_COUNT_KEY = "train_model_count";
 
     public int current_train_id = -1;
     public int raw_count = 0;
@@ -28,6 +30,8 @@ public class MyFirebaseUser extends User {
     public ArrayList<String> model_files = new ArrayList<>();
     public Recorder.Mode selected_mode = Recorder.Mode.MODE_TRAIN;
     public int profile_picture_idx = -1;
+    public int train_feature_count = 0;
+    public int train_model_count = 0;
 
     public MyFirebaseUser() {
         super();

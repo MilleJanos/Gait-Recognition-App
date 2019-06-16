@@ -29,24 +29,23 @@ import ms.sapientia.ro.feature_extractor.Settings;
 import ms.sapientia.ro.feature_extractor.Util;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.logic.FirebaseController;
-import ms.sapientia.ro.gaitrecognitionapp.model.ICallback;
-import ms.sapientia.ro.gaitrecognitionapp.model.MyFirebaseUser;
+import ms.sapientia.ro.gaitrecognitionapp.model.IDoIt;
+import ms.sapientia.ro.gaitrecognitionapp.model.ISimpleCallback;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 import ms.sapientia.ro.gaitrecognitionapp.view.menu.ModeFragment;
 import ms.sapientia.ro.model_builder.GaitHelperFunctions;
 import ms.sapientia.ro.model_builder.GaitModelBuilder;
 import ms.sapientia.ro.model_builder.IGaitModelBuilder;
 import weka.classifiers.Classifier;
-import weka.classifiers.bayes.net.search.ci.ICSSearchAlgorithm;
 
 public class Recorder {
 
     // Tag:
     private static final String TAG = "Recorder";
     // Default members:
-    private static final long DEFAULT_MAX_ACCELEROMETER_ARRAY = 30*128;
-    private static final long DEFAULT_INTERVAL_BETWEEN_TESTS = 20 * 128;//30*128; // after analyzing data how m
-    private static final int DEFAULT_PREPROCESSING_INTERVAL = 128;
+    private static final long DEFAULT_MAX_ACCELEROMETER_ARRAY = 30 * 100;
+    private static final long DEFAULT_INTERVAL_BETWEEN_TESTS = 10 * 100;    //30*128; // after analyzing data how m
+    private static final int DEFAULT_PREPROCESSING_INTERVAL = 100;
     private static final long DEFAULT_FILES_COUNT_BEFORE_MODEL_GENERATING = 3;
     // Current used:
     private static long sMaxAccelerometerArray;
@@ -96,7 +95,7 @@ public class Recorder {
     private long mCurrentIntervalBetweenTests = 0;
     private long mCurrentFileCount = 0;
     public enum Mode{ MODE_TRAIN, MODE_AUTHENTICATE, MODE_COLLECT_DATA }
-    private Mode mCreateModel = Mode.MODE_TRAIN;
+    private Mode mMode = Mode.MODE_TRAIN;
     // Sound Members:
     private MediaPlayer mp_bing;
     private MediaPlayer mp_feature;
@@ -105,13 +104,10 @@ public class Recorder {
     // Constructor:
     public Recorder(Context context, FirebaseAuth auth, Mode create_model_or_verify) {
 
-        initDefaultValues();
-
         mSavedAuth = auth;
-
         mContext = context;
         mIsRecording = false;
-        mCreateModel = create_model_or_verify;
+        mMode = create_model_or_verify;
 
         mSensorManager = (SensorManager) mContext.getSystemService(mContext.SENSOR_SERVICE);
         mAccelerometerSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -142,7 +138,12 @@ public class Recorder {
             }
         };
 
+        initDefaultValues();
+
         initSound();
+
+        initTrainFiles();
+
     }
 
 
@@ -162,12 +163,33 @@ public class Recorder {
         mp_model = MediaPlayer.create(mContext, R.raw.model);
     }
 
+    private void initTrainFiles(){
+        String path;
+        int tf_count = AppUtil.sUser.train_feature_count;
+        int tm_count = AppUtil.sUser.train_model_count;
+
+        path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "train" + "/" + "trainModel_" + AppUtil.sUser.id + "_" + tf_count + ".mdl";
+        AppUtil.trainModelFile = new File(path);
+        RecorderUtils.createFileIfNotExists(AppUtil.trainModelFile);
+
+        path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "train" + "/" + "trainFeature_" + AppUtil.sUser.id + "_" + tm_count + ".arff";
+        AppUtil.trainFeatureFile = new File(path);
+        RecorderUtils.createFileIfNotExists(AppUtil.trainFeatureFile);
+
+        // Increase number of feature and model count:
+        AppUtil.sUser.train_feature_count++;
+        AppUtil.sUser.train_model_count++;
+
+        // Save numbers to firebase:
+        FirebaseController.setUserObject(AppUtil.sUser);
+    }
+
     private void sensorChanged_NEW(long timeStamp, float x, float y, float z) {
 
         if(mCurrentIntervalBetweenTests == sIntervalBetweenTests) {
             // Limit reached.
 
-            // Init Internal Files:
+            // Init Internal Raw File:
             String path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "rawdata" + "/" + RecorderUtils.getCurrentDateFormatted() + "/" + "rawdata.csv";
             AppUtil.rawdataUserFile = new File(path);
             RecorderUtils.createFileIfNotExists(AppUtil.rawdataUserFile);
@@ -219,7 +241,7 @@ public class Recorder {
             //Print_UnPreprocessed_and_Preprocessed_array(list, preprocessedList);
             // \DEBUG ----------------------------------------------
 
-            switch (mCreateModel){
+            switch (mMode){
 
                 case MODE_TRAIN:{
                     // Create feature from raw
@@ -288,7 +310,7 @@ public class Recorder {
                 ArrayDeque copy = RecorderUtils.listToArrayDeque(list);
                 RecorderUtils.saveRawAccelerometerDataIntoCsvFile(copy, AppUtil.rawdataUserFile, RecorderUtils.RAWDATA_DEFAULT_HEADER);
 
-                switch (mCreateModel){
+                switch (mMode){
 
                     case MODE_TRAIN:{
                         // Merge collected Arff Files,
@@ -497,6 +519,31 @@ public class Recorder {
         Log.d(TAG, "createFeature: OUT");
     }
 
+    private void createModelFromFeature(File feature_in, File model_out){   // RecorderUtils.featureMergedFile         //AppUtil.modelUserFile
+        try {
+            IGaitModelBuilder builder = new GaitModelBuilder();
+
+            Classifier classifier = builder.createModel(
+                    //RecorderUtils.featureUserFile.getAbsolutePath()   // in
+                    feature_in.getAbsolutePath()                        // in
+            );
+
+            mp_model.start();
+
+            RecorderUtils.createFileIfNotExists( model_out );
+
+            ((GaitModelBuilder) builder).saveModel(
+                    classifier,                   // in
+                    model_out.getAbsolutePath()   // in
+            );
+
+        } catch (Exception e) {
+            Toast.makeText(mContext, "Model Generating failed!", Toast.LENGTH_LONG).show();
+            Log.e(TAG, "Model Generating failed! (feature file: " + feature_in.getAbsolutePath() + ")");
+            e.printStackTrace();
+        }
+    }
+
     private void createModel() {
         Log.d(TAG, "createModel: IN");
 
@@ -514,7 +561,7 @@ public class Recorder {
             RecorderUtils.createFileIfNotExists(AppUtil.modelUserFile);
 
             ((GaitModelBuilder) builder).saveModel(
-                    classifier,                             // in
+                    classifier,                               // in
                     AppUtil.modelUserFile.getAbsolutePath()   // in
             );
 
@@ -530,10 +577,10 @@ public class Recorder {
 
     private void train(){
 
-        // Create file
-        String path = AppUtil.internalFilesRoot.getAbsolutePath() + AppUtil.customDIR + "/trainFeature_" + AppUtil.sAuth.getUid() + ".arff";
-        AppUtil.trainFeatureFile = new File(path);
-        RecorderUtils.createFileIfNotExists(AppUtil.trainFeatureFile);
+        // Create file (do in initTrainFiles())
+        //String path = AppUtil.internalFilesRoot.getAbsolutePath() + AppUtil.customDIR + "/trainFeature_" + AppUtil.sAuth.getUid() + ".arff";
+        //AppUtil.trainFeatureFile = new File(path);
+        //RecorderUtils.createFileIfNotExists(AppUtil.trainFeatureFile);
 
         // Merge these two:
         ArrayList<String> toMerge = new ArrayList<>();
@@ -544,7 +591,34 @@ public class Recorder {
         File auxFile = new File(auxPath);
         AppUtil.createFileIfNotExists(auxFile);
 
+        if( AppUtil.trainFeatureFile.length() != 0 ){
 
+            // trainFeatureFile IS NOT empty => merge into it:
+            mergeArffFilesIntoOne(toMerge, auxFile );
+            // aux-train --copy--> train:
+            try {
+                RecorderUtils.copy(auxFile, AppUtil.trainFeatureFile);
+            } catch (IOException e) {
+                Log.e(TAG, "mergeLastArffFileIntoTrain: Copy (1): IOException !" );
+                e.printStackTrace();
+            }
+
+        }else{
+
+            // trainFeatureFile IS empty => featureUserFile --copy--> trainFeatureFile:
+            try {
+                RecorderUtils.copy(AppUtil.featureUserFile, AppUtil.trainFeatureFile);
+            } catch (IOException e) {
+                Log.e(TAG, "mergeLastArffFileIntoTrain: Copy (2): IOException !" );
+                e.printStackTrace();
+            }
+
+        }
+
+
+    }
+
+    private void mergeArffFilesIntoOne(ArrayList<String> toMerge, File auxFile) {
         try {
             // Merge feature & train into aux-train file:
             GaitHelperFunctions.mergeFeatureFiles(
@@ -556,15 +630,6 @@ public class Recorder {
             Log.e(TAG, "mergeLastArffFileIntoTrain: mergeRawFiles: IOException !" );
             e.printStackTrace();
         }
-
-        // aux-train --copy--> train:
-        try {
-            RecorderUtils.copy(auxFile, AppUtil.trainFeatureFile);
-        } catch (IOException e) {
-            Log.e(TAG, "mergeLastArffFileIntoTrain: Copy: IOException !" );
-            e.printStackTrace();
-        }
-
     }
 
     private void mergeArffFiles(){
@@ -634,8 +699,22 @@ public class Recorder {
         if(mIsRecording == true) {
             mSensorManager.unregisterListener(mAccelerometerEventListener);
             mIsRecording = false;
+            // After training - create model
+            if(mMode == Mode.MODE_TRAIN){
+                processTrainedData();
+            }
         }
     }
+
+    public void processTrainedData(){
+        // Show progress bar
+        MainActivity.sInstance.showProgressBar();
+        // Create model from trained data:
+        createModelFromFeature( AppUtil.trainFeatureFile ,AppUtil.trainModelFile );
+        // Hide progress bar:
+        MainActivity.sInstance.hideProgressBar();
+    }
+
 
     public void resumeRecording(){
         if( !mIsRecording){
