@@ -7,6 +7,7 @@
     android:orientation="vertical"
     android:screenOrientation="locked"
     tools:context="ms.sapientia.ro.gaitrecognitionapp.view.MainActivity"
+    android:background="@drawable/image_asphalt_road"
     android:id="@+id/fragmentContainer">
 
 

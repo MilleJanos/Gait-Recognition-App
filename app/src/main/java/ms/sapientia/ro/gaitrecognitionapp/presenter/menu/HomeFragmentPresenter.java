@@ -2,7 +2,7 @@ package ms.sapientia.ro.gaitrecognitionapp.presenter.menu;
 
 public class HomeFragmentPresenter {
 
-//    private User user;
+    // private User user;
     private View view;
 
     public HomeFragmentPresenter(View view){

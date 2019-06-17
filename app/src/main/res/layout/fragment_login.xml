@@ -7,7 +7,6 @@
     android:layout_height="match_parent"
     android:scaleType="fitXY"
     android:adjustViewBounds="true"
-    android:background="@drawable/image_asphalt_road"
     android:id="@+id/login_fragment">
 
     <ImageView
