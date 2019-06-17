@@ -68,7 +68,7 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
         sInstance = this;
 
         // SetLastState
-        setLastState();
+        restoreLastState();
 
     }
 
@@ -145,18 +145,9 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
         selectMode(mode);
     }
 
-    /*
-    public void restoreSelectedMode(){
-        // AppUtil.sMode = Get mode from firebase:
-        // TODO
-        // selectMode( sMode )
-        // TODO
-    }
-    */
-
     public void selectMode(Recorder.Mode mode){
         resetSelection();
-        AppUtil.sMode = mode;
+        AppUtil.sUser.selected_mode = mode;
         setSelection(mode);
     }
 
@@ -205,7 +196,7 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
         }
     }
 
-    private void setLastState(){
+    private void restoreLastState(){
         boolean checked = mPresenter.isServiceRunning(BackgroundService.NAME);
         mServiceSwitch.setChecked(checked);
         //restoreSelectedMode();  // sets: AppUtil.sMode

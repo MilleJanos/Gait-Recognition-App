@@ -61,7 +61,7 @@ public class BackgroundService extends Service {
         }
 
         // Do heavy work:
-        StartRecording(AppUtil.sMode, AppUtil.sTrainNewOne);
+        StartRecording(AppUtil.sUser.selected_mode, AppUtil.sTrainNewOne);
 
         return START_NOT_STICKY;
     }

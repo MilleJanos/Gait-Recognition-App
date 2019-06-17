@@ -6,6 +6,8 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.MediaPlayer;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -17,6 +19,8 @@ import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -32,10 +36,16 @@ import ms.sapientia.ro.gaitrecognitionapp.logic.FirebaseController;
 import ms.sapientia.ro.gaitrecognitionapp.model.IFileCallback;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 import ms.sapientia.ro.gaitrecognitionapp.view.menu.ModeFragment;
+import ms.sapientia.ro.gaitrecognitionapp.view.menu.ProfileFragment;
 import ms.sapientia.ro.model_builder.GaitHelperFunctions;
 import ms.sapientia.ro.model_builder.GaitModelBuilder;
+import ms.sapientia.ro.model_builder.GaitVerification;
 import ms.sapientia.ro.model_builder.IGaitModelBuilder;
+import ms.sapientia.ro.model_builder.IGaitVerification;
 import weka.classifiers.Classifier;
+import weka.classifiers.trees.RandomForest;
+import weka.core.Attribute;
+import weka.core.SerializationHelper;
 
 public class Recorder {
 
@@ -103,12 +113,12 @@ public class Recorder {
     private MediaPlayer mp_model;
 
     // Constructor:
-    public Recorder(Context context, FirebaseAuth auth, Mode create_model_or_verify, boolean  train_new_one) {
+    public Recorder(Context context, FirebaseAuth auth, Mode mode, boolean  train_new_one) {
 
         mSavedAuth = auth;
         mContext = context;
         mIsRecording = false;
-        mMode = create_model_or_verify;
+        mMode = mode;
         mTrainNewOne = train_new_one;
 
         mSensorManager = (SensorManager) mContext.getSystemService(mContext.SENSOR_SERVICE);
@@ -144,8 +154,13 @@ public class Recorder {
 
         initSound();
 
-        mCanRecord = false;     // initTrainFiles will modofy this value
-        initTrainFiles(mTrainNewOne);
+        if( mMode == Mode.MODE_TRAIN ) {
+            mCanRecord = false;     // initTrainFiles will modofy this value
+            initTrainFiles(mTrainNewOne);
+        }else{
+            // Auth & Data collect
+            mCanRecord = true;
+        }
 
     }
 
@@ -192,38 +207,19 @@ public class Recorder {
 
             mCanRecord = true;
 
-        }else{
+        }else {
             // Train last trained file:
 
-            // Download last trained file:
-            int lastTrainedArffId = AppUtil.sUser.train_feature_count - 1; // last file index = count - 1
-            String fileName = "trainFeature_" + AppUtil.sUser.id + "_" + lastTrainedArffId + ".arff";
+            downloadLastTrainedFeature(new IFileCallback(){
 
-            StorageReference ref = FirebaseUtils.firebaseStorage.getReference().child(
-                    FirebaseUtils.STORAGE_DATA_KEY
-                            + "/" + AppUtil.sUser.id
-                            + "/" + FirebaseUtils.STORAGE_TRAIN_KEY
-                            + "/" + FirebaseUtils.STORAGE_FEATURE_KEY
-                            + "/" + fileName
-            );
-            path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "train" + "/" + fileName;
-            File file = new File( path );
-
-            // show progress bar:
-            showProgressBar();
-
-
-            new FirebaseController().downloadFile(ref, file, new IFileCallback() {
                 @Override
                 public void Success(File file) {
-                    // TODO ----------------------------------------------------------------------------------------
                     mCanRecord = true;
                     hideProgressBar();
                 }
 
                 @Override
                 public void Failure() {
-                    // TODO ----------------------------------------------------------------------------------------
                     mCanRecord = false;
                     Toast.makeText(MainActivity.sContext,"Error: downloading last train!",Toast.LENGTH_LONG).show();
                     hideProgressBar();
@@ -231,17 +227,111 @@ public class Recorder {
 
                 @Override
                 public void Error(int error_code) {
-                    // TODO ----------------------------------------------------------------------------------------
                     mCanRecord = false;
                     Toast.makeText(MainActivity.sContext,"Error: downloading last train!",Toast.LENGTH_LONG).show();
                     hideProgressBar();
                 }
             });
 
-            // TODO: Download last trained .arff: ( !!! OVERRIDE CURRENT !!! )
-
         }
 
+
+    }
+
+    private void downloadLastTrainedFeature(IFileCallback callback){
+        // Download last trained file:
+        int lastTrainedArffId = AppUtil.sUser.train_feature_count - 1; // last file index = count - 1
+        String fileName = "trainFeature_" + AppUtil.sUser.id + "_" + lastTrainedArffId + ".arff";
+
+        StorageReference ref = FirebaseUtils.firebaseStorage.getReference().child(
+                FirebaseUtils.STORAGE_DATA_KEY
+                        + "/" + AppUtil.sUser.id
+                        + "/" + FirebaseUtils.STORAGE_TRAIN_KEY
+                        + "/" + FirebaseUtils.STORAGE_FEATURE_KEY
+                        + "/" + fileName
+        );
+        String path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "train" + "/" + fileName;
+        File file = new File( path );
+        RecorderUtils.createFileIfNotExists( file );
+
+        // show progress bar:
+        showProgressBar();
+
+
+        new FirebaseController().downloadFile(ref, file, new IFileCallback() {
+            @Override
+            public void Success(File file) {
+                // hide progress bar:
+                hideProgressBar();
+                // callback method:
+                if(callback != null)
+                    callback.Success(file);
+            }
+
+            @Override
+            public void Failure() {
+                // hide progress bar:
+                hideProgressBar();
+                // callback method:
+                if(callback != null)
+                    callback.Failure();
+            }
+
+            @Override
+            public void Error(int error_code) {
+                // hide progress bar:
+                hideProgressBar();
+                // callback method:
+                if(callback != null)
+                    callback.Error(error_code);
+            }
+        });
+
+        // TODO: Download last trained .arff: ( !!! OVERRIDE CURRENT !!! )
+
+    }
+
+    private void downloadLastTrainedModel(IFileCallback callback){
+        // Download last trained file:
+        int lastTrainedModelId = AppUtil.sUser.train_model_count - 1; // last file index = count - 1
+        String fileName = "trainModel_" + AppUtil.sUser.id + "_" + lastTrainedModelId + ".mdl";
+
+        StorageReference ref = FirebaseUtils.firebaseStorage.getReference().child(
+                FirebaseUtils.STORAGE_DATA_KEY
+                        + "/" + AppUtil.sUser.id
+                        + "/" + FirebaseUtils.STORAGE_TRAIN_KEY
+                        + "/" + FirebaseUtils.STORAGE_MODEL_KEY
+                        + "/" + fileName
+        );
+        String path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "train" + "/" + fileName;
+        File file = new File( path );
+        RecorderUtils.createFileIfNotExists( file );
+
+        // show progress bar:
+        showProgressBar();
+
+
+        new FirebaseController().downloadFile(ref, file, new IFileCallback() {
+            @Override
+            public void Success(File file) {
+                if(callback != null)
+                    callback.Success( new File( path ) );
+            }
+
+            @Override
+            public void Failure() {
+                if(callback != null)
+                    callback.Failure();
+            }
+
+            @Override
+            public void Error(int error_code) {
+                if(callback != null)
+                    callback.Error(error_code);
+            }
+        });
+
+        // TODO: Download last trained .arff: ( !!! OVERRIDE CURRENT !!! )
 
     }
 
@@ -541,7 +631,131 @@ public class Recorder {
     }
 
     private void mode_authenticate(){
-        updateGait();
+        //updateGait();
+
+        // DOWNLOAD NEGATIVE FILE:
+
+        StorageReference refNeg = FirebaseUtils.firebaseStorage.getReference().child(
+                FirebaseUtils.STORAGE_DATA_KEY
+                + "/" + FirebaseUtils.negativeFeatureFileName
+        );
+
+        String path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "negativeFeature.arff";
+        AppUtil.featureNegativeFile = new File(path);
+        RecorderUtils.createFileIfNotExists(AppUtil.featureNegativeFile);
+
+        new FirebaseController().downloadFile(refNeg, AppUtil.featureNegativeFile, new IFileCallback() {
+            @Override
+            public void Success(File file) {
+
+                // DOWNLOAD LAST TRAINED MODEL FILE:
+
+                downloadLastTrainedModel(new IFileCallback() {
+                    @Override
+                    public void Success(File file) {
+
+                        // File downloadad.
+
+                        File lastTrainedModelFile = AppUtil.trainModelFile;
+
+                        // VERIFY GAIT:
+                        validateGait( lastTrainedModelFile );
+
+                    }
+
+                    @Override
+                    public void Failure() {
+                        try {
+                            // File already downloaded.
+
+                            File lastTrainedModelFile = AppUtil.trainModelFile;
+
+                            // VERIFY GAIT:
+                            validateGait( lastTrainedModelFile );
+
+                        }catch(Exception e){
+                            Toast.makeText(MainActivity.sContext,"Error (3)",Toast.LENGTH_LONG).show();
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void Error(int error_code) {
+                        Toast.makeText(MainActivity.sContext,"Error (4)",Toast.LENGTH_LONG).show();
+                    }
+                });
+
+            }
+
+            @Override
+            public void Failure() {
+                Toast.makeText(MainActivity.sContext,"Error (1)",Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void Error(int error_code) {
+                Toast.makeText(MainActivity.sContext,"Error (2)",Toast.LENGTH_LONG).show();
+            }
+        });
+
+
+
+    }
+
+    private void validateGait(File lastTrainedModelFile){
+        // Copy feature file:
+        String path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "rawdata" + "/" + "trainFeature_" + AppUtil.sUser.id + "_" + "copy" + ".arff";
+        File newFeatureFileCopy = new File(path);
+        RecorderUtils.createFileIfNotExists(newFeatureFileCopy);
+
+        createFeature(); // AppUtil.rawdataUserFile ==> AppUtil.featureUserFile
+
+        try {
+
+            RecorderUtils.copy( AppUtil.featureUserFile , newFeatureFileCopy );
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Calculate similarities (%):
+        double score = calculateAuthenticationValue(
+                lastTrainedModelFile,
+                AppUtil.featureNegativeFile,
+                newFeatureFileCopy
+        );
+
+        score = (score<0)?0:score;
+
+        Toast.makeText(MainActivity.sContext, "---> " + score + "% <---", Toast.LENGTH_LONG).show();
+
+        // Refresh average auth. score in firebase:
+        recalculateScore( score );
+    }
+
+    private void recalculateScore( double score ){
+
+        // Add new score to old:
+        double oldScore = AppUtil.sUser.authenticaiton_avg;
+
+        if ( oldScore == 0){
+            // If is the first First time:
+            AppUtil.sUser.authenticaiton_avg = score;
+        }else{
+            AppUtil.sUser.authenticaiton_avg = ( oldScore + score ) / 2;
+        }
+
+        // Save to firebase:
+        FirebaseController.setUserObject( AppUtil.sUser );
+
+        // Refresh if Profile page is open:
+        FragmentManager fragmentManager = MainActivity.sInstance.getSupportFragmentManager();
+        Fragment fragment = fragmentManager.findFragmentById(R.id.fragmentContainer);
+
+        if( fragment instanceof ProfileFragment){
+            ProfileFragment.refreshScores();
+        }
+
     }
 
     private void mode_collect_data(){
@@ -724,6 +938,38 @@ public class Recorder {
             Log.e(TAG, "mergeArffFiles: mergeRawFiles: IOException !" );
             e.printStackTrace();
         }
+    }
+
+    private double calculateAuthenticationValue( File model, File negative, File feature_copy ){
+        double percentage = -1;
+
+        IGaitModelBuilder builder = new GaitModelBuilder();
+        Classifier classifier;
+        try {
+            classifier = (RandomForest) SerializationHelper.read(new FileInputStream( model.getAbsolutePath() )); //new RandomForest();
+
+            // feature_negative + features_user
+            GaitHelperFunctions.mergeEquallyArffFiles(
+                    negative.getAbsolutePath(),
+                    feature_copy.getAbsolutePath());
+
+            ArrayList<Attribute> attributes = builder.getAttributes( feature_copy.getAbsolutePath() ); ///feature (mar letezo)
+
+            IGaitVerification verifier = new GaitVerification();
+            //percentage = verifier.verifyUser(classifier, attributes, FRESH_RAWDATA_WAITING_TO_TEST ); // 3. param - user raw data
+            percentage = verifier.verifyUser(classifier, attributes, negative.getAbsolutePath() );
+
+            // percentage = Integer.parseInt( ((percentage * 100) + "").substring(0, 2) );
+
+        } catch (FileNotFoundException e) {
+            Log.e(TAG, "*********File not found!");
+            e.printStackTrace();
+        } catch (Exception e) {
+            Log.e(TAG, "*********Error!");
+            e.printStackTrace();
+        }
+
+        return percentage;
     }
 
     private void updateGait() {

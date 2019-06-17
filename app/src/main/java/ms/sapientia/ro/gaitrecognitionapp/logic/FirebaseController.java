@@ -115,6 +115,7 @@ public class FirebaseController {
         Map<String, Object> data = new HashMap<>();
         data.put(MyFirebaseUser.ID_KEY, user.id);
         data.put(MyFirebaseUser.CURRENT_TRAIN_ID_KEY, user.current_train_id);
+        data.put(MyFirebaseUser.AUTHENTICATION_AVG_KEY, user.authenticaiton_avg);
         data.put(MyFirebaseUser.SELECTED_MODE_KEY , AppUtil.modeToStr(user.selected_mode));
         data.put(MyFirebaseUser.PROFILE_PICTURE_IDX_KEY, user.profile_picture_idx);
         data.put(MyFirebaseUser.FIRST_NAME_KEY,user.first_name);
@@ -173,6 +174,8 @@ public class FirebaseController {
         user.id = map.get(MyFirebaseUser.ID_KEY).toString();
         user.first_name = map.get(MyFirebaseUser.FIRST_NAME_KEY).toString();
         user.last_name = map.get(MyFirebaseUser.LAST_NAME_KEY).toString();
+        user.authenticaiton_avg = Double.parseDouble( map.get(MyFirebaseUser.AUTHENTICATION_AVG_KEY).toString() );
+
         user.selected_mode = AppUtil.modeStrToMode( map.get(MyFirebaseUser.SELECTED_MODE_KEY).toString() );
         user.current_train_id = Integer.parseInt( map.get(MyFirebaseUser.CURRENT_TRAIN_ID_KEY).toString() );
         user.profile_picture_idx = Integer.parseInt( map.get(MyFirebaseUser.PROFILE_PICTURE_IDX_KEY).toString() );

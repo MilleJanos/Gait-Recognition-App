@@ -22,7 +22,6 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,6 +33,7 @@ import ms.sapientia.ro.gaitrecognitionapp.view.auth.LoginFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.RegisterFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.menu.HomeFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.menu.ModeFragment;
+import ms.sapientia.ro.gaitrecognitionapp.view.menu.ProfileFragment;
 
 /*
 EXAMPLE HOW TO REACH DRAWER MENU HEADER ITEMS
@@ -343,8 +343,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
                 break;
             }
             case R.id.nav_profile: {
-                //TODO
-                //MainActivity.sInstance.replaceFragment(new ProfileFragment(), "profile_fragment");
+                MainActivity.sInstance.replaceFragment(new ProfileFragment(), "profile_fragment");
                 break;
             }
             case R.id.nav_mode: {

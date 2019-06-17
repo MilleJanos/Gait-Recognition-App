@@ -151,7 +151,7 @@ public class ManualRecorderFragment extends Fragment implements ManualRecorderFr
         } else {
             mService = BackgroundService.Instance.getStoredService();
             if (!BackgroundService.isRunning) {
-                mService.StartRecording(AppUtil.sMode, AppUtil.sTrainNewOne);
+                mService.StartRecording(AppUtil.sUser.selected_mode, AppUtil.sTrainNewOne);
             }
         }
     }
