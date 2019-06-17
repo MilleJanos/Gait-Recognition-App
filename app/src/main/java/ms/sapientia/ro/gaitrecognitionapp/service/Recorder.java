@@ -29,9 +29,7 @@ import ms.sapientia.ro.feature_extractor.Settings;
 import ms.sapientia.ro.feature_extractor.Util;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.logic.FirebaseController;
-import ms.sapientia.ro.gaitrecognitionapp.model.IDoIt;
 import ms.sapientia.ro.gaitrecognitionapp.model.IFileCallback;
-import ms.sapientia.ro.gaitrecognitionapp.model.ISimpleCallback;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 import ms.sapientia.ro.gaitrecognitionapp.view.menu.ModeFragment;
 import ms.sapientia.ro.model_builder.GaitHelperFunctions;
@@ -82,6 +80,7 @@ public class Recorder {
     }
     // Sensor members:
     private boolean mIsRecording = false;
+    private boolean mCanRecord = false; // used to finisd downloads before record
     private Sensor mAccelerometerSensor;
     private SensorManager mSensorManager;
     private SensorEventListener mAccelerometerEventListener;
@@ -123,7 +122,7 @@ public class Recorder {
         mAccelerometerEventListener = new SensorEventListener() {
             @Override
             public void onSensorChanged(SensorEvent event) {
-                if (mIsRecording) {
+                if (mIsRecording && mCanRecord) {
                     // Get accelerometer coordinates:
                     long timeStamp = event.timestamp;
                     float x = event.values[0];
@@ -145,6 +144,7 @@ public class Recorder {
 
         initSound();
 
+        mCanRecord = false;     // initTrainFiles will modofy this value
         initTrainFiles(mTrainNewOne);
 
     }
@@ -190,11 +190,13 @@ public class Recorder {
             // Save numbers to firebase:
             FirebaseController.setUserObject(AppUtil.sUser);
 
+            mCanRecord = true;
+
         }else{
             // Train last trained file:
 
             // Download last trained file:
-            int lastTrainedArffId = AppUtil.sUser.train_feature_count;
+            int lastTrainedArffId = AppUtil.sUser.train_feature_count - 1; // last file index = count - 1
             String fileName = "trainFeature_" + AppUtil.sUser.id + "_" + lastTrainedArffId + ".arff";
 
             StorageReference ref = FirebaseUtils.firebaseStorage.getReference().child(
@@ -207,23 +209,35 @@ public class Recorder {
             path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "train" + "/" + fileName;
             File file = new File( path );
 
+            // show progress bar:
+            showProgressBar();
+
+
             new FirebaseController().downloadFile(ref, file, new IFileCallback() {
                 @Override
                 public void Success(File file) {
                     // TODO ----------------------------------------------------------------------------------------
+                    mCanRecord = true;
+                    hideProgressBar();
                 }
 
                 @Override
                 public void Failure() {
                     // TODO ----------------------------------------------------------------------------------------
+                    mCanRecord = false;
+                    Toast.makeText(MainActivity.sContext,"Error: downloading last train!",Toast.LENGTH_LONG).show();
+                    hideProgressBar();
                 }
 
                 @Override
                 public void Error(int error_code) {
                     // TODO ----------------------------------------------------------------------------------------
+                    mCanRecord = false;
+                    Toast.makeText(MainActivity.sContext,"Error: downloading last train!",Toast.LENGTH_LONG).show();
+                    hideProgressBar();
                 }
             });
-            
+
             // TODO: Download last trained .arff: ( !!! OVERRIDE CURRENT !!! )
 
         }
@@ -479,16 +493,6 @@ public class Recorder {
             );
             FirebaseController.uploadFile(featureRef, AppUtil.trainFeatureFile );
 
-            // Upload trained model file:
-            StorageReference modelRef = FirebaseUtils.firebaseStorage.getReference().child(
-                    FirebaseUtils.STORAGE_DATA_KEY
-                            + "/" + AppUtil.sAuth.getUid()
-                            + "/" + FirebaseUtils.STORAGE_TRAIN_KEY
-                            + "/" + FirebaseUtils.STORAGE_MODEL_KEY
-                            + "/" + AppUtil.trainModelFile.getName()
-            );
-            FirebaseController.uploadFile(modelRef, AppUtil.trainModelFile );
-
             mCurrentFileCount = 0;
 
         //*//} else {
@@ -602,6 +606,18 @@ public class Recorder {
             Log.e(TAG, "Model Generating failed! (feature file: " + feature_in.getAbsolutePath() + ")");
             e.printStackTrace();
         }
+    }
+
+    private void uploadModel(File model_file){
+        // Upload trained model file:
+        StorageReference modelRef = FirebaseUtils.firebaseStorage.getReference().child(
+                FirebaseUtils.STORAGE_DATA_KEY
+                        + "/" + AppUtil.sAuth.getUid()
+                        + "/" + FirebaseUtils.STORAGE_TRAIN_KEY
+                        + "/" + FirebaseUtils.STORAGE_MODEL_KEY
+                        + "/" + model_file.getName()
+        );
+        FirebaseController.uploadFile(modelRef, AppUtil.trainModelFile );
     }
 
     private void createModel() {
@@ -771,6 +787,8 @@ public class Recorder {
         MainActivity.sInstance.showProgressBar();
         // Create model from trained data:
         createModelFromFeature( AppUtil.trainFeatureFile ,AppUtil.trainModelFile );
+        // Upload model:
+        uploadModel(AppUtil.trainModelFile);
         // Hide progress bar:
         MainActivity.sInstance.hideProgressBar();
     }
@@ -905,5 +923,13 @@ public class Recorder {
         graph2.removeAllSeries();
         graph2.addSeries( series2 );
     }
-    
+
+    private void showProgressBar(){
+        MainActivity.sInstance.showProgressBar();
+    }
+
+    private void hideProgressBar(){
+        MainActivity.sInstance.hideProgressBar();
+    }
+
 }

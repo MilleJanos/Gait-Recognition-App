@@ -1,17 +1,15 @@
-package ms.sapientia.ro;
+package ms.sapientia.ro.feature_extractor;
 
-import java.util.ArrayList;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 import ms.sapientia.ro.commonclasses.Accelerometer;
 import ms.sapientia.ro.feature_extractor.Feature;
 import ms.sapientia.ro.feature_extractor.FeatureExtractorException;
-import ms.sapientia.ro.feature_extractor.Settings;
-import ms.sapientia.ro.feature_extractor.Util;
 
 /**
  * This is a class with static methods meant to extract features from a dataset
@@ -40,11 +38,11 @@ public class FeatureExtractor {
      * @param dataset ArrayList containing the data as Accelerometer object
      * @param userId subject Id
      * @return ArrayList containing the resulting Feature objects
-     * @throws FeatureExtractorLibrary.FeatureExtractorException if userId is
+     * @throws FeatureExtractorException if userId is
      * empty
-     * @throws FeatureExtractorLibrary.FeatureExtractorException if Settings are
+     * @throws FeatureExtractorException if Settings are
      * not properly given
-     * @throws FeatureExtractorLibrary.FeatureExtractorException if dataset is
+     * @throws FeatureExtractorException if dataset is
      * empty
      * @since 23 ‎July, ‎2018
      */
@@ -75,13 +73,13 @@ public class FeatureExtractor {
      * @param dataset ArrayList containing the data as Accelerometer object
      * @param userId subject Id
      * @param filename output file name that will contain the features
-     * @throws FeatureExtractorLibrary.FeatureExtractorException if userId is
+     * @throws FeatureExtractorException if userId is
      * empty
-     * @throws FeatureExtractorLibrary.FeatureExtractorException if Settings are
+     * @throws FeatureExtractorException if Settings are
      * not properly given
-     * @throws FeatureExtractorLibrary.FeatureExtractorException if dataset is
+     * @throws FeatureExtractorException if dataset is
      * empty
-     * @throws FeatureExtractorLibrary.FeatureExtractorException if filename is
+     * @throws FeatureExtractorException if filename is
      * empty
      * @since 23 ‎July, ‎2018
      */
@@ -114,9 +112,9 @@ public class FeatureExtractor {
      * @param inputFileName file name that contains the userID in
      * rawdata_userId_date_time format and the input data
      * @return ArrayList containing the resulting Feature objects
-     * @throws FeatureExtractorLibrary.FeatureExtractorException if Settings are
+     * @throws FeatureExtractorException if Settings are
      * not properly given
-     * @throws FeatureExtractorLibrary.FeatureExtractorException if filename is
+     * @throws FeatureExtractorException if filename is
      * empty
      * @since 23 ‎July, ‎2018
      */
@@ -147,9 +145,9 @@ public class FeatureExtractor {
      * @version 1.1
      * @param inputFileName file name containing the input data
      * @param outputFileName output file name that will contain the features
-     * @throws FeatureExtractorLibrary.FeatureExtractorException if Settings are
+     * @throws FeatureExtractorException if Settings are
      * not properly given
-     * @throws FeatureExtractorLibrary.FeatureExtractorException if filename is
+     * @throws FeatureExtractorException if filename is
      * empty
      * @since 23 ‎July, ‎2018
      */
@@ -177,7 +175,7 @@ public class FeatureExtractor {
         if(Settings.isUsingPreprocessing()){
             dataset = preprocess(dataset);
         }
-
+        
         ArrayList<Feature> features = new ArrayList<>();
 
         double[] cordX = {};
@@ -203,7 +201,7 @@ public class FeatureExtractor {
             cordY = new double[WINSIZE + 1];
             Amag = new double[WINSIZE + 1];
 
-            while (position < WINSIZE && i < (dataset.size() - skippedDataPointsCount)) { //while it is in the same frame
+            while (position < WINSIZE && i < (dataset.size() - skippedDataPointsCount)) { //while it is in the same frame 
                 //also skip last N frames
                 cordX[position] = dataset.get(i).getX();
                 cordY[position] = dataset.get(i).getY();
@@ -271,7 +269,7 @@ public class FeatureExtractor {
         if(Settings.isUsingPreprocessing()){
             dataset = preprocess(dataset);
         }
-
+        
         ArrayList<Feature> features = new ArrayList<>();
 
         double[] cordX = {};
@@ -390,7 +388,7 @@ public class FeatureExtractor {
         if(Settings.isUsingPreprocessing()){
             dataset = preprocess(dataset);
         }
-
+        
         double[] cordX = {};
         double[] cordZ = {};
         double[] cordY = {};
@@ -564,7 +562,7 @@ public class FeatureExtractor {
         if(Settings.isUsingPreprocessing()){
             dataset = preprocess(dataset);
         }
-
+        
         double[] cordX = {};
         double[] cordZ = {};
         double[] cordY = {};
@@ -596,7 +594,7 @@ public class FeatureExtractor {
                 cordY = new double[WINSIZE + 1];
                 Amag = new double[WINSIZE + 1];
 
-                while (position < WINSIZE && i < (dataset.size() - skippedDataPointsCount)) { //while it is in the same frame
+                while (position < WINSIZE && i < (dataset.size() - skippedDataPointsCount)) { //while it is in the same frame 
                     //also skip last step
                     cordX[position] = dataset.get(i).getX();
                     cordY[position] = dataset.get(i).getY();
@@ -743,7 +741,7 @@ public class FeatureExtractor {
         if(Settings.isUsingPreprocessing()){
             dataset = preprocess(dataset);
         }
-
+        
         double[] cordX = {};
         double[] cordZ = {};
         double[] cordY = {};
@@ -890,7 +888,7 @@ public class FeatureExtractor {
                     Double.parseDouble(items[3]),
                     Integer.parseInt(items[4])));
         }
-
+        
         if(Settings.isUsingPreprocessing()){
             dataset = preprocess(dataset);
         }
@@ -917,7 +915,7 @@ public class FeatureExtractor {
             cordY = new double[WINSIZE + 1];
             Amag = new double[WINSIZE + 1];
 
-            while (position < WINSIZE && i < (dataset.size() - skippedDataPointsCount)) { //while it is in the same frame
+            while (position < WINSIZE && i < (dataset.size() - skippedDataPointsCount)) { //while it is in the same frame 
                 //also skip last step
                 cordX[position] = dataset.get(i).getX();
                 cordY[position] = dataset.get(i).getY();
@@ -1020,7 +1018,7 @@ public class FeatureExtractor {
         if(Settings.isUsingPreprocessing()){
             dataset = preprocess(dataset);
         }
-
+        
         double[] cordX = {};
         double[] cordZ = {};
         double[] cordY = {};
@@ -1103,7 +1101,7 @@ public class FeatureExtractor {
                     //System.out.println(counter +" < "+ dataset.size() + " && " + cyclometer + " < " + dataset.get(counter).getStep()+ " && " + cyclometer + " < " + lastStep);
                     //extracting features from vectors if the step has ended
                     if (counter < dataset.size() && (cyclometer < dataset.get(counter).getStep() && cyclometer < lastStep)) { //CHECK TODO
-                        ///not outOfBounds                          end of step                     not last step
+                        ///not outOfBounds                          end of step                     not last step 
                         ///                 because we ignore the last step
                         //-------FEATURES
                         //min
@@ -1218,12 +1216,12 @@ public class FeatureExtractor {
                 throw new FeatureExtractorException(TAG + "Corrupted input file error");
             }
             dataset.add(new Accelerometer(Long.parseLong(items[0]),
-                    Double.parseDouble(items[1]),	// TEST:  Double.parseDouble( Math.abs(item[1] ),
+                    Double.parseDouble(items[1]),
                     Double.parseDouble(items[2]),
                     Double.parseDouble(items[3]),
                     Integer.parseInt(items[4])));
         }
-
+        
         if(Settings.isUsingPreprocessing()){
             dataset = preprocess(dataset);
         }
@@ -1261,7 +1259,7 @@ public class FeatureExtractor {
                 cordY = new double[WINSIZE + 1];
                 Amag = new double[WINSIZE + 1];
 
-                while (position < WINSIZE && i < (dataset.size() - skippedDataPointsCount)) { //while it is in the same frame
+                while (position < WINSIZE && i < (dataset.size() - skippedDataPointsCount)) { //while it is in the same frame 
                     //also skip last step
                     cordX[position] = dataset.get(i).getX();
                     cordY[position] = dataset.get(i).getY();
@@ -1467,7 +1465,9 @@ public class FeatureExtractor {
         header.append("@attribute bin8_magnitude numeric\n");
         header.append("@attribute bin9_magnitude numeric\n");
 
-        header.append("@attribute userID {" + userId + "}\n\n");
+        header.append("@attribute userID {");
+        header.append(userId);
+        header.append("}\n\n");
 
         header.append("@data\n");
 

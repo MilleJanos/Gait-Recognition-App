@@ -113,6 +113,8 @@
                             android:id="@+id/train_new_switch"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:buttonTint="@color/colorBlack"
                             android:layout_marginStart="100dp"
                             android:fontFamily="@font/alef"
                             android:textSize="20sp"

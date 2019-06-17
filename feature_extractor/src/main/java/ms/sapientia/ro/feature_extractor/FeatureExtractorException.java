@@ -15,7 +15,7 @@ package ms.sapientia.ro.feature_extractor;
  */
 public class FeatureExtractorException extends Exception {
 
-    public FeatureExtractorException(String message) {
+    FeatureExtractorException(String message) {
         super(message);
     }
 }

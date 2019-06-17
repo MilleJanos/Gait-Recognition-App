@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.Set;
 
 import ms.sapientia.ro.commonclasses.Accelerometer;
-import ms.sapientia.ro.feature_extractor.IUtil;
-import ms.sapientia.ro.feature_extractor.Settings;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -31,6 +29,9 @@ public class Util implements IUtil {
     private ArrayList attributes;
     //private Attribute userId;
 
+    /**
+     * Constructor
+     */
     public Util() {}
     
     /**
@@ -54,7 +55,14 @@ public class Util implements IUtil {
                 i += Settings.getPreprocessingInterval(); //skipping the useless data
                 i -= incrementationValue;
             } else { //keeping the useful data
-                for (int j = i; j<i+incrementationValue && j<inputData.size();j++) {
+                int boundary;
+                if(i + incrementationValue < inputData.size()){
+                    boundary = i + incrementationValue;
+                }
+                else{
+                    boundary = inputData.size();
+                }
+                for (int j = i; j < boundary; ++j) {
                     outputData.add(inputData.get(j));
                 }
             }

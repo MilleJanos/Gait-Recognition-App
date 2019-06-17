@@ -127,6 +127,12 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
     }
 
     public void click_train_new_switch(View view){
+        if( mPresenter.isServiceRunning(BackgroundService.NAME) ){
+            Toast.makeText(MainActivity.sContext, "Turn off the service before!", Toast.LENGTH_SHORT).show();
+            // set it how it was before click
+            ((CheckBox) view).setChecked( ! ((CheckBox) view).isChecked() );
+            return;
+        }
         AppUtil.sTrainNewOne = ((CheckBox) view).isChecked();
     }
 
