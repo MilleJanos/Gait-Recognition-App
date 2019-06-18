@@ -1,7 +1,5 @@
 package ms.sapientia.ro.gaitrecognitionapp.model;
 
-import java.util.ArrayList;
-
 import ms.sapientia.ro.gaitrecognitionapp.service.Recorder;
 
 public class MyFirebaseUser extends User {
@@ -14,13 +12,13 @@ public class MyFirebaseUser extends User {
     public static final String RAW_COUNT_KEY = "raw_count";
     public static final String FEATURE_COUNT_KEY = "feature_count";
     public static final String MODEL_COUNT_KEY = "model_count";
-    public static final String RAW_FILES_KEY = "raw_files";
-    public static final String FEATURE_FILES_KEY = "feature_files";
-    public static final String MODEL_FILES_KEY = "model_files";
+    //F//public static final String RAW_FILES_KEY = "raw_files";
+    //F//public static final String FEATURE_FILES_KEY = "feature_files";
+    //F//public static final String MODEL_FILES_KEY = "model_files";
     public static final String SELECTED_MODE_KEY = "selected_mode";
     public static final String PROFILE_PICTURE_IDX_KEY = "profile_picture_idx";
-    public static final String TRAIN_FEATURE_COUNT_KEY = "train_feature_count";
-    public static final String TRAIN_MODEL_COUNT_KEY = "train_model_count";
+    public static final String MERGED_FEATURE_COUNT_KEY = "merged_feature_count";
+    public static final String MERGED_MODEL_COUNT_KEY = "merged_model_count";
 
 
     public int current_train_id = -1;
@@ -29,9 +27,9 @@ public class MyFirebaseUser extends User {
     public double authenticaiton_avg = 0;
     public int feature_count = 0;
     public int model_count = 0;
-    public ArrayList<String> raw_files = new ArrayList<>();
-    public ArrayList<String> feature_files = new ArrayList<>();
-    public ArrayList<String> model_files = new ArrayList<>();
+    //F//public ArrayList<String> raw_files = new ArrayList<>();
+    //F//public ArrayList<String> feature_files = new ArrayList<>();
+    //F//public ArrayList<String> model_files = new ArrayList<>();
     public Recorder.Mode selected_mode = Recorder.Mode.MODE_TRAIN;
     public int train_feature_count = 0;
     public int train_model_count = 0;

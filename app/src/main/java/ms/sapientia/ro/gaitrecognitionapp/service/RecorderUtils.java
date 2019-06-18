@@ -121,38 +121,6 @@ public class RecorderUtils {
         return DateFormat.format("yyyyMMdd_HHmmss", date.getTime()).toString();
     }
 
-    public static void createFileIfNotExists(File file){
-        //File myInternalFilesRoot = new File(RecorderUtils.internalFilesRoot.getAbsolutePath() /*+ customDIR*/);
-        //if (!myInternalFilesRoot.exists()) {
-        //    myInternalFilesRoot.mkdirs();
-        //    Log.i(TAG, "Path not exists (" + myInternalFilesRoot.getAbsolutePath() + ") --> .mkdirs()");
-        //}
-
-        String path = file.getParentFile().getAbsolutePath();
-        String name = file.getName();
-
-        File folders = new File( path );
-
-        if ( ! folders.exists() ) {
-            try {
-                //retFile.createNewFile();
-                folders.mkdirs();
-            } catch (Exception e) {
-                e.printStackTrace();
-                Log.e(TAG, "File can't be created: " + folders.getAbsolutePath() );
-            }
-        }
-
-        if ( ! file.exists() ) {
-            try {
-                file.createNewFile();
-                //retFile.mkdirs();
-            } catch (Exception e) {
-                e.printStackTrace();
-                Log.e(TAG, "File can't be created: " + file.getAbsolutePath() );
-            }
-        }
-    }
 
 //    // Initial Files
 //    public static void initInternalFiles(){
@@ -245,23 +213,6 @@ public class RecorderUtils {
         return ad;
     }
 
-    /**
-     * Method that hides the keyboard in the given activity
-     *
-     * @param activity the activity sContext where the method will hide the keyboard
-     */
-    public static void hideKeyboard(Activity activity) {
-        // If keyboard is shown then hide:
-        InputMethodManager imm = (InputMethodManager) activity.getSystemService(MainActivity.INPUT_METHOD_SERVICE); // TODO: MainActivity ?
-        // Find the currently focused mView, so we can grab the correct window token from it.
-        View activityOnFocusView = activity.getCurrentFocus();
-        // If no mView currently has focus, create a new one, just so we can grab a window token from it
-        if (activityOnFocusView == null) {
-            activityOnFocusView = new View(activity);
-        }
-        imm.hideSoftInputFromWindow(activityOnFocusView.getWindowToken(), 0);
-    }
-
     public static double checkUserInPercentage(/*Activity activity, String userRawDataFilePath, String userFeatureFilePath, String dummyFeatureFilePath, String userModelFilePath, String userId*/) {
 
         double percentage = -1;
@@ -301,24 +252,6 @@ public class RecorderUtils {
     }
 
 
-    public static void copy(File src, File dst) throws IOException {
-        InputStream in = new FileInputStream(src);
-        try {
-            OutputStream out = new FileOutputStream(dst);
-            try {
-                // Transfer bytes from in to out
-                byte[] buf = new byte[1024];
-                int len;
-                while ((len = in.read(buf)) > 0) {
-                    out.write(buf, 0, len);
-                }
-            } finally {
-                out.close();
-            }
-        } finally {
-            in.close();
-        }
-    }
 
 
 

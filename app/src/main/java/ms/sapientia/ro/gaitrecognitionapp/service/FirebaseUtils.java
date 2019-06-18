@@ -42,7 +42,7 @@ public class FirebaseUtils {
             public static final String STORAGE_FEATURE_KEY = "feature";
             public static final String STORAGE_MODEL_KEY = "model";
             public static final String STORAGE_OTHER_KEY = "other";
-            public static final String STORAGE_TRAIN_KEY = "train";
+            public static final String STORAGE_MERGED_KEY = "merged";
 
     //public static final String STORAGE_FEATURES_KEY = "features";
     //public static final String STORAGE_FILES_KEY = "files";

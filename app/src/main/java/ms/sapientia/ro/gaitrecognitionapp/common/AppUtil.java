@@ -36,9 +36,9 @@ public class AppUtil {
     public static File rawdataUserFile;
     public static File featureUserFile;
     public static File modelUserFile;
-    public static File featureNegativeFile;  // local stored dummy file from firebase
-    public static File trainFeatureFile;
-    public static File trainModelFile;
+    public static File featureNegativeFile;
+    public static File mergedFeatureFile;   // merged feature files
+    public static File mergedModelFile;     // model create from merged feature files
     // Mode:
     //public static Recorder.Mode sMode = Recorder.Mode.MODE_TRAIN;   // Default: Train
     public static boolean sTrainNewOne = true;                      // Default: Train new one
@@ -63,7 +63,7 @@ public class AppUtil {
         internalFilesRoot = new File(MainActivity.sInstance.getFilesDir().toString());
 
         // Create folders to internal files location
-        createFoldersIfNotExists(internalFilesRoot);
+        FileUtil.createFoldersIfNotExists(internalFilesRoot);
 
         //// internal files path:
         //String raw = AppUtil.internalFilesRoot.getAbsolutePath() + AppUtil.customDIR + "/rawdata_" + sAuth.getUid() + "_" + AppUtil.recordDateAndTimeFormatted + ".csv";
@@ -77,48 +77,22 @@ public class AppUtil {
         //featureUserFile     = new File(fea);
         //modelUserFile       = new File(mdl);
         //featureNegativeFile = new File(neg);
-        //trainFeatureFile    = new File(trn);
+        //mergedFeatureFile    = new File(trn);
         //
         //// Create files if they does not exist
         //createFileIfNotExists(rawdataUserFile);
         //createFileIfNotExists(featureUserFile);
         //createFileIfNotExists(modelUserFile);
         //createFileIfNotExists(featureNegativeFile);
-        //createFileIfNotExists(trainFeatureFile);
+        //createFileIfNotExists(mergedFeatureFile);
         //
         ////region Print this 4 paths
         //Log.i(TAG, "PATH: rawdataUserFile.getAbsolutePath()     = "    + rawdataUserFile.getAbsolutePath());
         //Log.i(TAG, "PATH: featureUserFile.getAbsolutePath()     = "    + featureUserFile.getAbsolutePath());
         //Log.i(TAG, "PATH: modelUserFile.getAbsolutePath()       = "    + modelUserFile.getAbsolutePath());
         //Log.i(TAG, "PATH: featureNegativeFile.getAbsolutePath() = "    + featureNegativeFile.getAbsolutePath());
-        //Log.i(TAG, "PATH: trainFeatureFile.getAbsolutePath()    = "    + trainFeatureFile.getAbsolutePath());
+        //Log.i(TAG, "PATH: mergedFeatureFile.getAbsolutePath()    = "    + mergedFeatureFile.getAbsolutePath());
         ////endregion
-    }
-
-    /**
-     * This method creates the file if not exists.
-     * @param file file to create
-     */
-    public static void createFileIfNotExists(File file) {
-        if ( ! file.exists()) {
-            try {
-                file.createNewFile();
-            } catch (Exception e) {
-                e.printStackTrace();
-                Log.e(TAG, "File can't be created: " + file.getAbsolutePath());
-            }
-        }
-    }
-
-    /**
-     * This method creates the folders to the input file DIR.
-     * @param file folders root to create
-     */
-    public static void createFoldersIfNotExists(File file) {
-        if ( ! file.exists()) {
-            file.mkdirs();
-            Log.i(TAG, "Path not exists (" + file.getAbsolutePath() + ") --> .mkdirs()");
-        }
     }
 
     /**

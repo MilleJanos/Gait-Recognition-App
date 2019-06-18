@@ -10,7 +10,6 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.StorageTask;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -123,11 +122,11 @@ public class FirebaseController {
         data.put(MyFirebaseUser.RAW_COUNT_KEY,user.raw_count);
         data.put(MyFirebaseUser.FEATURE_COUNT_KEY,user.feature_count);
         data.put(MyFirebaseUser.MODEL_COUNT_KEY,user.model_count);
-        data.put(MyFirebaseUser.RAW_FILES_KEY, user.raw_files);
-        data.put(MyFirebaseUser.FEATURE_FILES_KEY, user.feature_files);
-        data.put(MyFirebaseUser.MODEL_FILES_KEY, user.model_files);
-        data.put(MyFirebaseUser.TRAIN_FEATURE_COUNT_KEY, user.train_feature_count);
-        data.put(MyFirebaseUser.TRAIN_MODEL_COUNT_KEY, user.train_model_count);
+        //F//data.put(MyFirebaseUser.RAW_FILES_KEY, user.raw_files);
+        //F//data.put(MyFirebaseUser.FEATURE_FILES_KEY, user.feature_files);
+        //F//data.put(MyFirebaseUser.MODEL_FILES_KEY, user.model_files);
+        data.put(MyFirebaseUser.MERGED_FEATURE_COUNT_KEY, user.train_feature_count);
+        data.put(MyFirebaseUser.MERGED_MODEL_COUNT_KEY, user.train_model_count);
 
         ref.set(data);
 
@@ -184,47 +183,13 @@ public class FirebaseController {
         user.feature_count = Integer.parseInt( map.get(MyFirebaseUser.FEATURE_COUNT_KEY).toString() );
         user.model_count = Integer.parseInt( map.get(MyFirebaseUser.MODEL_COUNT_KEY).toString() );
 
-        user.raw_files = (ArrayList<String>) map.get(MyFirebaseUser.RAW_FILES_KEY);
-        user.feature_files = (ArrayList<String>) map.get(MyFirebaseUser.FEATURE_FILES_KEY);
-        user.model_files = (ArrayList<String>) map.get(MyFirebaseUser.MODEL_FILES_KEY);
+        //F//user.raw_files = (ArrayList<String>) map.get(MyFirebaseUser.RAW_FILES_KEY);
+        //F//user.feature_files = (ArrayList<String>) map.get(MyFirebaseUser.FEATURE_FILES_KEY);
+        //F//user.model_files = (ArrayList<String>) map.get(MyFirebaseUser.MODEL_FILES_KEY);
 
-        user.train_feature_count = Integer.parseInt( map.get(MyFirebaseUser.TRAIN_FEATURE_COUNT_KEY).toString() );
-        user.train_model_count = Integer.parseInt( map.get(MyFirebaseUser.TRAIN_MODEL_COUNT_KEY).toString() );
+        user.train_feature_count = Integer.parseInt( map.get(MyFirebaseUser.MERGED_FEATURE_COUNT_KEY).toString() );
+        user.train_model_count = Integer.parseInt( map.get(MyFirebaseUser.MERGED_MODEL_COUNT_KEY).toString() );
 
         return user;
     }
-
-    // Old code:
-
-    //region OLD: createUserObjectByIdIfNotExists()
-    /*
-    public void createUserObjectByIdIfNotExists(String user_id, ICallback callback ){
-        // TODO
-
-        DocumentReference ref = FirebaseFirestore.getInstance()
-                .collection("user" + "/")
-                .document(user_id);
-
-        ref.get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                DocumentSnapshot document = task.getResult();
-                if (document.exists()) {
-                    Log.d(TAG, "User object already created");
-                    Map<String, Object> obj = document.getData();
-                    callback.Failure();
-                } else {
-                    Log.d(TAG, "No such document --> Create one");
-                    MyFirebaseUser firebaseUser = new MyFirebaseUser(user_id);
-                    setUserObject(firebaseUser);
-                    callback.Success(firebaseUser);
-                }
-            } else {
-                Log.d(TAG, "get failed with ", task.getException());
-                callback.Error(1);
-            }
-        });
-    }
-    */
-    //endregion
-
 }
