@@ -58,10 +58,11 @@ public class Recorder {
     // Tag:
     private static final String TAG = "Recorder";
     // Default members:
-    private static final long DEFAULT_MAX_ACCELEROMETER_ARRAY = 33 * 128;
-    private static final long DEFAULT_INTERVAL_BETWEEN_TESTS = 32 * 128;    //30*128; // after analyzing data how m
+    private static final long DEFAULT_MAX_ACCELEROMETER_ARRAY = 120*128;//=15,360        //33 * 128;
+    private static final long DEFAULT_INTERVAL_BETWEEN_TESTS = 100*128;//=12,800       //32 * 128;    //30*128; // after analyzing data how m
     private static final int DEFAULT_PREPROCESSING_INTERVAL = 128;
     private static final long DEFAULT_FILES_COUNT_BEFORE_MODEL_GENERATING = 3;
+    private static final long MIN_TRAIN_LENGTH = 10000;
     // Current used:
     private static long sMaxAccelerometerArray;
     private static long sIntervalBetweenTests;
@@ -117,6 +118,7 @@ public class Recorder {
     private MediaPlayer mp_bing;
     private MediaPlayer mp_feature;
     private MediaPlayer mp_model;
+    private MediaPlayer mp_bing2;
 
     // Constructor:
 
@@ -183,6 +185,7 @@ public class Recorder {
 
     private void initSound() {
         mp_bing = MediaPlayer.create(mContext, R.raw.relentless);
+        mp_bing2 = MediaPlayer.create(mContext, R.raw.open_ended);
         mp_feature = MediaPlayer.create(mContext, R.raw.feature);
         mp_model = MediaPlayer.create(mContext, R.raw.model);
     }
@@ -204,19 +207,19 @@ public class Recorder {
             AppUtil.mergedFeatureFile = new File(path);
             FileUtil.createFileIfNotExists(AppUtil.mergedFeatureFile);
 
-            // Increase number of feature and model count:
-            AppUtil.sUser.merged_feature_count++;
-            AppUtil.sUser.merged_model_count++;
-
-            // Save numbers to firebase:
-            FirebaseController.setUserObject(AppUtil.sUser);
+            // // Increase number of feature and model count:
+            // AppUtil.sUser.merged_feature_count++;
+            // AppUtil.sUser.merged_model_count++;
+            //
+            // // Save numbers to firebase:
+            // FirebaseController.setUserObject(AppUtil.sUser);
 
             mCanRecord = true;
 
         }else {
             // Train last trained file:
 
-            downloadLastMergedFeature(new IFileCallback(){
+            downloadLastMergedFeature(AppUtil.sUser.id, new IFileCallback(){
 
                 @Override
                 public void Success(File file) {
@@ -260,6 +263,10 @@ public class Recorder {
             mIsRecording = false;
 
             // Only for for _2 method:
+            if( mAccelerometerArray.size() < MIN_TRAIN_LENGTH ){
+                Toast.makeText(MainActivity.sContext,"No enoght data! Please Try again.", Toast.LENGTH_LONG).show();
+                return;
+            }
             processRecordedData();
 
             // // After training - create model
@@ -394,16 +401,54 @@ public class Recorder {
 
     private void sensorChanged_2(long timeStamp, float x, float y, float z) {
 
-        // if the list is full, then remove first then (Circle effect):
-        if(mAccelerometerArray.size() == 10 * sMaxAccelerometerArray - 1 ){
-            mAccelerometerArray.removeFirst();
+        if ( mMode == Mode.MODE_TRAIN ) {
+            // Record until stops.
+
+            if( mAccelerometerArray.size() == MIN_TRAIN_LENGTH ){
+                mp_bing2.start();
+            }
+
+            // if the list is full, then remove first then (Circle effect):
+            if (mAccelerometerArray.size() == sMaxAccelerometerArray - 1) {
+                mAccelerometerArray.removeFirst();
+            }
         }
+
+        if ( mMode == Mode.MODE_AUTHENTICATE ){
+            // Validate user in every mCurrentIntervalBetweenTests.
+
+            if(mCurrentIntervalBetweenTests == sIntervalBetweenTests){
+
+                processRecordedData();
+
+                mode_authenticate();
+
+                mCurrentIntervalBetweenTests = 0;
+            }
+            ++mCurrentIntervalBetweenTests;
+
+            // if the list is full, then remove first then (Circle effect):
+            if (mAccelerometerArray.size() == sMaxAccelerometerArray - 1) {
+                mAccelerometerArray.removeFirst();
+            }
+        }
+
+        if ( mMode == Mode.MODE_COLLECT_DATA ){
+
+            // TODO
+
+        }
+
         // add to last:
-        mAccelerometerArray.addLast(new Accelerometer(timeStamp,x,y,z, mCurretStepCount));
+        mAccelerometerArray.addLast(new Accelerometer(timeStamp, x, y, z, mCurretStepCount));
+
 
     }
 
     private void processRecordedData(){
+
+        // show progress bar:
+        showProgressBar();
 
         // Init Internal Raw File:
         String path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "rawdata" + "/" + RecorderUtils.getCurrentDateFormatted() + "/" + "rawdata.csv";
@@ -429,7 +474,8 @@ public class Recorder {
         ArrayDeque preProcAD = RecorderUtils.listToArrayDeque(preprocessedList);
         RecorderUtils.saveRawAccelerometerDataIntoCsvFile(preProcAD, AppUtil.rawdataUserFile, RecorderUtils.RAWDATA_DEFAULT_HEADER);
 
-
+        // hide progress bar
+        hideProgressBar();
 
         switch (mMode){
 
@@ -474,20 +520,6 @@ public class Recorder {
                 @Override
                 public void Do() {
 
-                    // Upload merged feature file to Firebase.
-                    MyFirebaseController.uploadMergedFeatureFileIntoStorage(
-                            AppUtil.mergedFeatureFile,
-                            AppUtil.sUser.id,
-                            null
-                    );
-
-                    // Upload model to Firebase:
-                    MyFirebaseController.uploadMergedModelFileIntoStorage(
-                            AppUtil.mergedModelFile,
-                            AppUtil.sAuth.getUid(),
-                            null
-                    );
-
                     // Upload raw file:
                     MyFirebaseController.uploadRawFileIntoStorage(AppUtil.rawdataUserFile, AppUtil.sUser.id, new ICallback() {
                         @Override
@@ -496,7 +528,6 @@ public class Recorder {
                             // Update uer object:
                             AppUtil.sUser.raw_count++;
                             FirebaseController.setUserObject( AppUtil.sUser );
-
                         }
 
                         @Override
@@ -518,7 +549,7 @@ public class Recorder {
                         public void Success(MyFirebaseUser user) {
 
                             // Update uer object:
-                            AppUtil.sUser.merged_model_count++;
+                            AppUtil.sUser.merged_feature_count++;
                             FirebaseController.setUserObject( AppUtil.sUser );
 
                         }
@@ -533,6 +564,28 @@ public class Recorder {
                         public void Error(int error_code) {
                             Toast.makeText(MainActivity.sContext,"Upload error",Toast.LENGTH_LONG).show();
                             Log.e(TAG, "ERROR 13: Can't upload merged feature.");
+                        }
+                    });
+
+                    // Upload merged model to Firebase:
+                    MyFirebaseController.uploadMergedModelFileIntoStorage(AppUtil.mergedModelFile, AppUtil.sAuth.getUid(), new ICallback() {
+                        @Override
+                        public void Success(MyFirebaseUser user) {
+                            // Update uer object:
+                            AppUtil.sUser.merged_model_count++;
+                            FirebaseController.setUserObject( AppUtil.sUser );
+                        }
+
+                        @Override
+                        public void Failure() {
+                            Toast.makeText(MainActivity.sContext,"Upload error",Toast.LENGTH_LONG).show();
+                            Log.e(TAG, "ERROR 14: Can't upload merged feature.");
+                        }
+
+                        @Override
+                        public void Error(int error_code) {
+                            Toast.makeText(MainActivity.sContext,"Upload error",Toast.LENGTH_LONG).show();
+                            Log.e(TAG, "ERROR 15: Can't upload merged feature.");
                         }
                     });
 
@@ -552,106 +605,55 @@ public class Recorder {
     }
 
     private void mode_authenticate(){
-        //updateGait();
 
-        // DOWNLOAD NEGATIVE FILE:
+        // Download merged feature:
 
-        StorageReference refNeg = FirebaseUtils.firebaseStorage.getReference().child(
-                FirebaseUtils.STORAGE_DATA_KEY
-                + "/" + FirebaseUtils.negativeFeatureFileName
-        );
-
-        String path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "negativeFeature.arff";
-        AppUtil.featureNegativeFile = new File(path);
-        FileUtil.createFileIfNotExists(AppUtil.featureNegativeFile);
-
-        new FirebaseController().downloadFile(refNeg, AppUtil.featureNegativeFile, new IFileCallback() {
+        downloadLastMergedFeature(AppUtil.sUser.id, new IFileCallback() {
             @Override
             public void Success(File file) {
 
-                // DOWNLOAD LAST TRAINED MODEL FILE:
+                // Calculate similarities (%):
+                double score = calculateAuthenticationValue(
+                        AppUtil.mergedFeatureFile,
+                        AppUtil.rawdataUserFile
+                );
 
-                downloadLastMergedModel(new IFileCallback() {
-                    @Override
-                    public void Success(File file) {
+                score = (score<0)?0:score;
 
-                        // File downloadad.
+                Toast.makeText(MainActivity.sContext, "---> " + score + "% <---", Toast.LENGTH_LONG).show();
 
-                        // VERIFY GAIT:
-                        validateGait();
+                mp_bing.start(); // TODO: remove it
 
-                    }
+                // Update avg. score and list
+                if( AppUtil.sUser.authenticaiton_avg != 0 ){
+                    AppUtil.sUser.authenticaiton_avg = (score + AppUtil.sUser.authenticaiton_avg ) / 2;
+                }else{
+                    AppUtil.sUser.authenticaiton_avg = score;
+                }
+                AppUtil.sUser.authenticaiton_values.add( score );
+                FirebaseController.setUserObject( AppUtil.sUser );
 
-                    @Override
-                    public void Failure() {
-                        try {
-                            // File already downloaded.
-
-                            // VERIFY GAIT:
-                            if( AppUtil.mergedModelFile != null )
-                                validateGait();
-
-                        }catch(Exception e){
-                            Toast.makeText(MainActivity.sContext,"Error (3)",Toast.LENGTH_LONG).show();
-                            e.printStackTrace();
-                        }
-                    }
-
-                    @Override
-                    public void Error(int error_code) {
-                        Toast.makeText(MainActivity.sContext,"Error (4)",Toast.LENGTH_LONG).show();
-                    }
-                });
-
+                // DEBUG PRINT:
+                Log.i(TAG, "Success: Files used in Train:\n");
+                Log.i(TAG, "Success: AppUtil.rawdataUserFile =" + AppUtil.rawdataUserFile);
+                Log.i(TAG, "Success: AppUtil.mergedFeatureFile =" + AppUtil.mergedFeatureFile);
+                Log.i(TAG, "Success: score =" + score);
             }
 
             @Override
             public void Failure() {
-                Toast.makeText(MainActivity.sContext,"Error (1)",Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.sContext, "ERROR 5: Download error.", Toast.LENGTH_LONG).show();
+                Log.e(TAG, "ERROR 5: Download error.");
             }
 
             @Override
             public void Error(int error_code) {
-                Toast.makeText(MainActivity.sContext,"Error (2)",Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.sContext, "ERROR 6: Download error.", Toast.LENGTH_LONG).show();
+                Log.e(TAG, "ERROR 6: Download error.");
             }
         });
 
 
-
-    }
-
-    private void validateGait(){
-
-        File lastTrainedModelFile = AppUtil.mergedModelFile;
-
-        // Copy feature file:
-        String path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "rawdata" + "/" + "feature_" + AppUtil.sUser.id + "_" + "copy" + ".arff";
-        File newFeatureFileCopy = new File(path);
-        FileUtil.createFileIfNotExists(newFeatureFileCopy);
-
-        // TODO: ----------------- createFeatureFromRaw(); // AppUtil.rawdataUserFile ==> AppUtil.featureUserFile
-
-        try {
-
-            FileUtil.copy( AppUtil.featureUserFile , newFeatureFileCopy );
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // Calculate similarities (%):
-        double score = calculateAuthenticationValue(
-                lastTrainedModelFile,
-                AppUtil.featureNegativeFile,
-                newFeatureFileCopy
-        );
-
-        score = (score<0)?0:score;
-
-        Toast.makeText(MainActivity.sContext, "---> " + score + "% <---", Toast.LENGTH_LONG).show();
-
-        // Refresh average auth. score in firebase:
-        recalculateScore( score );
     }
 
     private void mode_collect_data(){
@@ -697,6 +699,7 @@ public class Recorder {
 
                 String path = AppUtil.internalFilesRoot + "/" + "feature" + "/" + RecorderUtils.formatDate(RecorderUtils.lastUsedDate) + "/feature_user.arff";
                 AppUtil.featureUserFile = new File(path);
+                FileUtil.createFileIfNotExists( AppUtil.featureUserFile );
 
                 createFeatureFromRaw(
                         AppUtil.rawdataUserFile,
@@ -728,6 +731,13 @@ public class Recorder {
 
                 // 5. Call doIt.Do() method method:
                 doIt.Do();
+                
+                // DEBUG PRINT:
+                Log.i(TAG, "Success: Files used in Train:\n");
+                Log.i(TAG, "Success: AppUtil.rawdataUserFile =" + AppUtil.rawdataUserFile);
+                Log.i(TAG, "Success: AppUtil.featureUserFile =" + AppUtil.featureUserFile);
+                Log.i(TAG, "Success: AppUtil.mergedFeatureFile =" + AppUtil.mergedFeatureFile);
+                Log.i(TAG, "Success: AppUtil.mergedModelFile =" + AppUtil.mergedModelFile);
 
             }
 
@@ -848,7 +858,6 @@ public class Recorder {
         // Play sound:
         mp_model.start(); // TODO remove it
     }
-
 
     /**
      * This methods downloads the negative feature from Firebase.
@@ -974,30 +983,28 @@ public class Recorder {
         }
     }
 
-    private double calculateAuthenticationValue( File model, File negative, File feature_copy ){
+    private double calculateAuthenticationValue( File mergedFeature, File toVerifyRaw ){
         double percentage = -1;
 
         IGaitModelBuilder builder = new GaitModelBuilder();
         Classifier classifier;
         try {
-            classifier = (RandomForest) SerializationHelper.read(new FileInputStream( model.getAbsolutePath() )); //new RandomForest();
+            //old//classifier = (RandomForest) SerializationHelper.read(new FileInputStream( mergedFeature.getAbsolutePath() ));
+            classifier = builder.createModel( mergedFeature.getAbsolutePath() );
 
-            // feature_negative + features_user
-            GaitHelperFunctions.mergeEquallyArffFiles(
-                    negative.getAbsolutePath(),
-                    feature_copy.getAbsolutePath());
 
-            ArrayList<Attribute> attributes = builder.getAttributes( feature_copy.getAbsolutePath() ); ///feature (mar letezo)
+
+            ArrayList<Attribute> attributes = builder.getAttributes( mergedFeature.getAbsolutePath() );
 
             IGaitVerification verifier = new GaitVerification();
             //percentage = verifier.verifyUser(classifier, attributes, FRESH_RAWDATA_WAITING_TO_TEST ); // 3. param - user raw data
-            percentage = verifier.verifyUser(classifier, attributes, negative.getAbsolutePath() );
+            percentage = verifier.verifyUser(classifier, attributes, toVerifyRaw.getAbsolutePath() );
 
             // percentage = Integer.parseInt( ((percentage * 100) + "").substring(0, 2) );
 
-        } catch (FileNotFoundException e) {
-            Log.e(TAG, "*********File not found!");
-            e.printStackTrace();
+        //old//} catch (FileNotFoundException e) {
+        //old//    Log.e(TAG, "*********File not found!");
+        //old//    e.printStackTrace();
         } catch (Exception e) {
             Log.e(TAG, "*********Error!");
             e.printStackTrace();
@@ -1063,20 +1070,26 @@ public class Recorder {
 
     // Download methods:
 
-    private void downloadLastMergedFeature(IFileCallback callback){
+    /**
+     * This method downloads the last merged feature file of a given user.
+     *
+     * @param userId used id
+     * @param callback methods will be run after downloading the file.
+     */
+    private void downloadLastMergedFeature(String userId, IFileCallback callback){
 
         // Download last trained file:
         int lastTrainedArffId = AppUtil.sUser.merged_feature_count - 1;      // last file index = count - 1
-        String fileName = "mergedFeature_" + AppUtil.sUser.id + "_" + lastTrainedArffId + ".arff";
+        String fileName = "mergedFeature_" + userId + "_" + lastTrainedArffId + ".arff";
         String path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "merged" + "/" + fileName;
-        File file = new File( path );
-        FileUtil.createFileIfNotExists( file );
+        AppUtil.mergedFeatureFile = new File( path );
+        FileUtil.createFileIfNotExists( AppUtil.mergedFeatureFile );
 
         // show progress bar:
         showProgressBar();
 
         // Download feature file matching the file parameter name:
-        MyFirebaseController.downloadFeatureFile(file.getName(), file, AppUtil.sUser.id, new IFileCallback() {
+        MyFirebaseController.downloadFeatureFile(AppUtil.mergedFeatureFile.getName(), AppUtil.mergedFeatureFile, userId, new IFileCallback() {
                     @Override
                     public void Success(File file) {
 
@@ -1116,18 +1129,16 @@ public class Recorder {
 
     }
 
-    private void downloadLastMergedModel(IFileCallback callback){
+    /**
+     * This method downloads the last merged feature file of a given user.
+     *
+     * @param userId used id
+     * @param callback methods will be run after downloading the file.
+     */
+    private void downloadLastMergedModel(String userId, IFileCallback callback){
         // Download last trained file:
         int lastTrainedModelId = AppUtil.sUser.merged_model_count - 1; // last file index = count - 1
-        String fileName = "mergedModel_" + AppUtil.sUser.id + "_" + lastTrainedModelId + ".mdl";
-
-        StorageReference ref = FirebaseUtils.firebaseStorage.getReference().child(
-                FirebaseUtils.STORAGE_DATA_KEY
-                        + "/" + AppUtil.sUser.id
-                        + "/" + FirebaseUtils.STORAGE_MERGED_KEY
-                        + "/" + FirebaseUtils.STORAGE_MODEL_KEY
-                        + "/" + fileName
-        );
+        String fileName = "mergedModel_" + userId + "_" + lastTrainedModelId + ".mdl";
         String path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "merged" + "/" + fileName;
         AppUtil.mergedModelFile = new File( path );
         FileUtil.createFileIfNotExists( AppUtil.mergedModelFile);
@@ -1135,22 +1146,35 @@ public class Recorder {
         // show progress bar:
         showProgressBar();
 
-
-        new FirebaseController().downloadFile(ref, AppUtil.mergedModelFile, new IFileCallback() {
+        MyFirebaseController.downloadModelFile(AppUtil.mergedModelFile.getName(), AppUtil.mergedModelFile, userId, new IFileCallback() {
             @Override
             public void Success(File nullFile) {
+
+                // hide progress bar:
+                hideProgressBar();
+
+                // callback method:
                 if(callback != null)
                     callback.Success( new File( path ) );
             }
 
             @Override
             public void Failure() {
+
+                // hide progress bar:
+                hideProgressBar();
+
+                // callback method:
                 if(callback != null)
                     callback.Failure();
             }
 
             @Override
             public void Error(int error_code) {
+                // hide progress bar:
+                hideProgressBar();
+
+                // callback method:
                 if(callback != null)
                     callback.Error(error_code);
             }

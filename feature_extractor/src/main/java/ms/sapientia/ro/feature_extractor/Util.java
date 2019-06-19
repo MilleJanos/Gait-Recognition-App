@@ -29,9 +29,6 @@ public class Util implements IUtil {
     private ArrayList attributes;
     //private Attribute userId;
 
-    /**
-     * Constructor
-     */
     public Util() {}
     
     /**
@@ -55,14 +52,7 @@ public class Util implements IUtil {
                 i += Settings.getPreprocessingInterval(); //skipping the useless data
                 i -= incrementationValue;
             } else { //keeping the useful data
-                int boundary;
-                if(i + incrementationValue < inputData.size()){
-                    boundary = i + incrementationValue;
-                }
-                else{
-                    boundary = inputData.size();
-                }
-                for (int j = i; j < boundary; ++j) {
+                for (int j = i; j<i+incrementationValue && j<inputData.size();j++) {
                     outputData.add(inputData.get(j));
                 }
             }

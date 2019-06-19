@@ -10,6 +10,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.StorageTask;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -128,6 +129,7 @@ public class FirebaseController {
         //F//data.put(IFirebaseUser.MODEL_FILES_KEY, user.model_files);
         data.put(IFirebaseUser.MERGED_FEATURE_COUNT_KEY, user.merged_feature_count);
         data.put(IFirebaseUser.MERGED_MODEL_COUNT_KEY, user.merged_model_count);
+        data.put(IFirebaseUser.AUTH_VALUES_KEY, user.authenticaiton_values);
 
         ref.set(data);
 
@@ -179,7 +181,16 @@ public class FirebaseController {
         user.id = map.get(IFirebaseUser.ID_KEY).toString();
         user.first_name = map.get(IFirebaseUser.FIRST_NAME_KEY).toString();
         user.last_name = map.get(IFirebaseUser.LAST_NAME_KEY).toString();
+
         user.authenticaiton_avg = Double.parseDouble( map.get(IFirebaseUser.AUTHENTICATION_AVG_KEY).toString() );
+
+        //user.authenticaiton_values.clear();
+        //ArrayList<String> auxList = (ArrayList<String>) map.get(IFirebaseUser.AUTH_VALUES_KEY);
+        //for(String s : auxList){
+        //    Double d = Double.parseDouble( s );
+        //    user.authenticaiton_values.add( d );
+        //}
+        user.authenticaiton_values = (ArrayList<Double>) map.get(IFirebaseUser.AUTH_VALUES_KEY);
 
         user.selected_mode = AppUtil.modeStrToMode( map.get(IFirebaseUser.SELECTED_MODE_KEY).toString() );
         user.current_train_id = Integer.parseInt( map.get(IFirebaseUser.CURRENT_TRAIN_ID_KEY).toString() );
@@ -195,6 +206,8 @@ public class FirebaseController {
 
         user.merged_feature_count = Integer.parseInt( map.get(IFirebaseUser.MERGED_FEATURE_COUNT_KEY).toString() );
         user.merged_model_count = Integer.parseInt( map.get(IFirebaseUser.MERGED_MODEL_COUNT_KEY).toString() );
+
+
 
         return user;
     }
