@@ -6,6 +6,7 @@ import java.io.File;
 import java.security.InvalidParameterException;
 
 import ms.sapientia.ro.gaitrecognitionapp.common.FileUtil;
+import ms.sapientia.ro.gaitrecognitionapp.model.ICallback;
 import ms.sapientia.ro.gaitrecognitionapp.model.IFileCallback;
 import ms.sapientia.ro.gaitrecognitionapp.service.FirebaseUtils;
 
@@ -20,7 +21,7 @@ public class MyFirebaseController extends FirebaseController {
     /**
      * This method uploads a file into raw folder under user id folder under user id folder
      */
-    public static void uploadRawFileIntoStorage(File file, String userId){
+    public static void uploadRawFileIntoStorage(File file, String userId, ICallback callback){
         if( file == null ){
             throw new InvalidParameterException("File can't be empty!");
         }
@@ -30,13 +31,14 @@ public class MyFirebaseController extends FirebaseController {
         uploadFileIntoStorage(
                 file,
                 userId,
-                FirebaseUtils.STORAGE_RAW_KEY );
+                FirebaseUtils.STORAGE_RAW_KEY,
+                callback );
     }
 
     /**
      * This method uploads a file into feature folder under user id folder
      */
-    public static void uploadFeatureFileIntoStorage(File file, String userId){
+    public static void uploadFeatureFileIntoStorage(File file, String userId, ICallback callback){
         if( file == null ){
             throw new InvalidParameterException("File can't be empty!");
         }
@@ -46,13 +48,14 @@ public class MyFirebaseController extends FirebaseController {
         uploadFileIntoStorage(
                 file,
                 userId,
-                FirebaseUtils.STORAGE_FEATURE_KEY );
+                FirebaseUtils.STORAGE_FEATURE_KEY,
+                callback );
     }
 
     /**
      * This method uploads a file into model folder under user id folder
      */
-    public static void uploadModelFileIntoStorage(File file, String userId){
+    public static void uploadModelFileIntoStorage(File file, String userId, ICallback callback){
         if( file == null ){
             throw new InvalidParameterException("File can't be empty!");
         }
@@ -62,13 +65,14 @@ public class MyFirebaseController extends FirebaseController {
         uploadFileIntoStorage(
                 file,
                 userId,
-                FirebaseUtils.STORAGE_MODEL_KEY );
+                FirebaseUtils.STORAGE_MODEL_KEY,
+                callback );
     }
 
     /**
      * This method uploads a file into merged/feature folder under user id folder
      */
-    public static void uploadMergedFeatureFileIntoStorage(File file, String userId){
+    public static void uploadMergedFeatureFileIntoStorage(File file, String userId, ICallback callback){
         if( file == null ){
             throw new InvalidParameterException("File can't be empty!");
         }
@@ -78,13 +82,14 @@ public class MyFirebaseController extends FirebaseController {
         uploadFileIntoStorage(
                 file,
                 userId,
-                FirebaseUtils.STORAGE_MERGED_KEY + "/" + FirebaseUtils.STORAGE_FEATURE_KEY );
+                FirebaseUtils.STORAGE_MERGED_KEY + "/" + FirebaseUtils.STORAGE_FEATURE_KEY,
+                callback );
     }
 
     /**
      * This method uploads a file into merged/model folder under user id folder
      */
-    public static void uploadMergedModelFileIntoStorage(File file, String userId){
+    public static void uploadMergedModelFileIntoStorage(File file, String userId, ICallback callback){
         if( file == null ){
             throw new InvalidParameterException("File can't be empty!");
         }
@@ -94,7 +99,8 @@ public class MyFirebaseController extends FirebaseController {
         uploadFileIntoStorage(
                 file,
                 userId,
-                FirebaseUtils.STORAGE_MERGED_KEY + "/" + FirebaseUtils.STORAGE_MODEL_KEY );
+                FirebaseUtils.STORAGE_MERGED_KEY + "/" + FirebaseUtils.STORAGE_MODEL_KEY,
+                callback);
     }
 
     /**
@@ -104,7 +110,7 @@ public class MyFirebaseController extends FirebaseController {
      * @param userId user string id
      * @param subDirectories directories in Firebase
      */
-    private static void uploadFileIntoStorage(File file, String userId, String subDirectories){
+    private static void uploadFileIntoStorage(File file, String userId, String subDirectories, ICallback callback){
 
         StorageReference reference = FirebaseUtils.firebaseStorage.getReference().child(
                 FirebaseUtils.STORAGE_DATA_KEY
@@ -112,7 +118,7 @@ public class MyFirebaseController extends FirebaseController {
                         + "/" + subDirectories
                         + "/" + file.getName()
         );
-        FirebaseController.uploadFile(reference, file);
+        FirebaseController.uploadFile(reference, file, callback);
 
     }
 
