@@ -202,12 +202,15 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
         //restoreSelectedMode();  // sets: AppUtil.sMode
         resetSelection();
 
-        // After downloading the user object set the selected mode:
-        downloadUserObject(AppUtil.sAuth.getUid(), user -> {
-            AppUtil.sUser = user;
-            setSelection( user.selected_mode );
-            hideProgressBar();
-        });
+
+        // After downloading the user object set the selected mode: (already set after login/register)
+        // downloadUserObject(AppUtil.sAuth.getUid(), user -> {
+        //     AppUtil.sUser = user;
+        //     setSelection( user.selected_mode );
+        //     hideProgressBar();
+        // });
+        setSelection( AppUtil.sUser.selected_mode );
+        hideProgressBar();
     }
 
     private void downloadUserObject(String user_id, ISimpleCallback sc){

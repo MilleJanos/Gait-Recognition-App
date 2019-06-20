@@ -19,8 +19,6 @@ import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.ArrayDeque;
@@ -37,7 +35,7 @@ import ms.sapientia.ro.gaitrecognitionapp.common.FileUtil;
 import ms.sapientia.ro.gaitrecognitionapp.logic.FirebaseController;
 import ms.sapientia.ro.gaitrecognitionapp.logic.MyFirebaseController;
 import ms.sapientia.ro.gaitrecognitionapp.model.ICallback;
-import ms.sapientia.ro.gaitrecognitionapp.model.IDoIt;
+import ms.sapientia.ro.gaitrecognitionapp.model.IAfter;
 import ms.sapientia.ro.gaitrecognitionapp.model.IFileCallback;
 import ms.sapientia.ro.gaitrecognitionapp.model.MyFirebaseUser;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
@@ -49,9 +47,7 @@ import ms.sapientia.ro.model_builder.GaitVerification;
 import ms.sapientia.ro.model_builder.IGaitModelBuilder;
 import ms.sapientia.ro.model_builder.IGaitVerification;
 import weka.classifiers.Classifier;
-import weka.classifiers.trees.RandomForest;
 import weka.core.Attribute;
-import weka.core.SerializationHelper;
 
 public class Recorder {
 
@@ -59,7 +55,7 @@ public class Recorder {
     private static final String TAG = "Recorder";
     // Default members:
     private static final long DEFAULT_MAX_ACCELEROMETER_ARRAY = 120*128;//=15,360        //33 * 128;
-    private static final long DEFAULT_INTERVAL_BETWEEN_TESTS = 100*128;//=12,800       //32 * 128;    //30*128; // after analyzing data how m
+    private static final long DEFAULT_INTERVAL_BETWEEN_TESTS = 8000;    //100*128;//=12,800       //32 * 128;    //30*128; // after analyzing data how m
     private static final int DEFAULT_PREPROCESSING_INTERVAL = 128;
     private static final long DEFAULT_FILES_COUNT_BEFORE_MODEL_GENERATING = 3;
     private static final long MIN_TRAIN_LENGTH = 10000;
@@ -165,8 +161,9 @@ public class Recorder {
         initSound();
 
         if( mMode == Mode.MODE_TRAIN ) {
-            mCanRecord = false;     // initTrainFiles will modofy this value
-            initTrainFiles(mTrainNewOne);
+            mCanRecord = true;
+            //mCanRecord = false;     // initTrainFiles will modofy this value
+            //initTrainFiles(mTrainNewOne);
         }else{
             // Auth & Data collect
             mCanRecord = true;
@@ -217,8 +214,8 @@ public class Recorder {
             mCanRecord = true;
 
         }else {
-            // Train last trained file:
-
+            // Train with last merged file:
+            /*
             downloadLastMergedFeature(AppUtil.sUser.id, new IFileCallback(){
 
                 @Override
@@ -241,6 +238,7 @@ public class Recorder {
                     hideProgressBar();
                 }
             });
+            */
 
         }
 
@@ -404,6 +402,8 @@ public class Recorder {
         if ( mMode == Mode.MODE_TRAIN ) {
             // Record until stops.
 
+            // Note: Train mode will triggered processRecordedData() method in stopRecording().
+
             if( mAccelerometerArray.size() == MIN_TRAIN_LENGTH ){
                 mp_bing2.start();
             }
@@ -419,9 +419,9 @@ public class Recorder {
 
             if(mCurrentIntervalBetweenTests == sIntervalBetweenTests){
 
+                mCanRecord = false; // Stop recording while processing
+                mp_bing.start();
                 processRecordedData();
-
-                mode_authenticate();
 
                 mCurrentIntervalBetweenTests = 0;
             }
@@ -511,11 +511,12 @@ public class Recorder {
         //*//if (mCurrentFileCount >= sFilesCountBetweenModelGenerating - 1) {
             // Collected enought arff files to being.
 
-            // Raw --> Feature
+            // Show progress bar
+            showProgressBar();
 
             // Train then upload files:
 
-            train( new IDoIt(){
+            train( new IAfter(){
 
                 @Override
                 public void Do() {
@@ -589,6 +590,9 @@ public class Recorder {
                         }
                     });
 
+                    // Show progress bar
+                    hideProgressBar();
+
                 }
             });
 
@@ -606,23 +610,43 @@ public class Recorder {
 
     private void mode_authenticate(){
 
+        // Stop recording while processing:
+        //mCanRecord = false;
+
         // Download merged feature:
 
         downloadLastMergedFeature(AppUtil.sUser.id, new IFileCallback() {
             @Override
             public void Success(File file) {
 
-                // Calculate similarities (%):
+                // TODO DEBUG
+                // TODO DEBUG
+                // TODO DEBUG
+                AppUtil.mergedFeatureFile = new File(AppUtil.internalFilesRoot.getAbsoluteFile() + "/" + "debug" + "/" + "merged_feature_zsombi.arff");
+                AppUtil.rawdataUserFile   = new File(AppUtil.internalFilesRoot.getAbsoluteFile() + "/" + "debug" + "/" + "rawdata_jancsi_0.csv");
+                // TODO DEBUG
+                // TODO DEBUG
+                // TODO DEBUG
+
+                // Calculate similarities (%), then continue recording:
                 double score = calculateAuthenticationValue(
                         AppUtil.mergedFeatureFile,
-                        AppUtil.rawdataUserFile
+                        AppUtil.rawdataUserFile,
+                        new IAfter(){
+
+                            @Override
+                            public void Do() {
+                                // After procedding continue recording:
+                                mCanRecord = true;
+                            }
+                        }
                 );
 
                 score = (score<0)?0:score;
 
                 Toast.makeText(MainActivity.sContext, "---> " + score + "% <---", Toast.LENGTH_LONG).show();
 
-                mp_bing.start(); // TODO: remove it
+                mp_bing2.start(); // TODO: remove it
 
                 // Update avg. score and list
                 if( AppUtil.sUser.authenticaiton_avg != 0 ){
@@ -634,7 +658,7 @@ public class Recorder {
                 FirebaseController.setUserObject( AppUtil.sUser );
 
                 // DEBUG PRINT:
-                Log.i(TAG, "Success: Files used in Train:\n");
+                Log.i(TAG, "Success: Files used in Authentication:\n");
                 Log.i(TAG, "Success: AppUtil.rawdataUserFile =" + AppUtil.rawdataUserFile);
                 Log.i(TAG, "Success: AppUtil.mergedFeatureFile =" + AppUtil.mergedFeatureFile);
                 Log.i(TAG, "Success: score =" + score);
@@ -642,12 +666,16 @@ public class Recorder {
 
             @Override
             public void Failure() {
+                // After failed process continue recording:
+                mCanRecord = true;
                 Toast.makeText(MainActivity.sContext, "ERROR 5: Download error.", Toast.LENGTH_LONG).show();
                 Log.e(TAG, "ERROR 5: Download error.");
             }
 
             @Override
             public void Error(int error_code) {
+                // After failed process continue recording:
+                mCanRecord = true;
                 Toast.makeText(MainActivity.sContext, "ERROR 6: Download error.", Toast.LENGTH_LONG).show();
                 Log.e(TAG, "ERROR 6: Download error.");
             }
@@ -682,7 +710,7 @@ public class Recorder {
      *
      *  @param doIt method which will becalled in the end of creating model
      */
-    private void train(IDoIt doIt){
+    private void train(IAfter afterIt){
 
         // 1. Download negative feature from Firebase. (If can't download: return):
 
@@ -730,7 +758,7 @@ public class Recorder {
                 MainActivity.sInstance.hideProgressBar();
 
                 // 5. Call doIt.Do() method method:
-                doIt.Do();
+                afterIt.Do();
                 
                 // DEBUG PRINT:
                 Log.i(TAG, "Success: Files used in Train:\n");
@@ -983,7 +1011,7 @@ public class Recorder {
         }
     }
 
-    private double calculateAuthenticationValue( File mergedFeature, File toVerifyRaw ){
+    private double calculateAuthenticationValue( File mergedFeature, File toVerifyRaw , IAfter doIt){
         double percentage = -1;
 
         IGaitModelBuilder builder = new GaitModelBuilder();
@@ -1008,6 +1036,9 @@ public class Recorder {
         } catch (Exception e) {
             Log.e(TAG, "*********Error!");
             e.printStackTrace();
+        } finally {
+            // Continue recording !
+            doIt.Do();
         }
 
         return percentage;
@@ -1033,7 +1064,7 @@ public class Recorder {
         Fragment fragment = fragmentManager.findFragmentById(R.id.fragmentContainer);
 
         if( fragment instanceof ProfileFragment){
-            ProfileFragment.refreshScores();
+            ProfileFragment.refreshProfileInformationsUI();
         }
 
     }
@@ -1253,7 +1284,7 @@ public class Recorder {
 
 
 
-    // Old methods:
+    // Old methods: (TRASH)
 
     private void sensorChanged_OLD(long timeStamp, float x, float y, float z){
 

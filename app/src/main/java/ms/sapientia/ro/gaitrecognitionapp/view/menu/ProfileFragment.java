@@ -3,6 +3,7 @@ package ms.sapientia.ro.gaitrecognitionapp.view.menu;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import android.widget.Toast;
 import ms.sapientia.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.logic.FirebaseController;
+import ms.sapientia.ro.gaitrecognitionapp.model.IAfter;
 import ms.sapientia.ro.gaitrecognitionapp.model.ICallback;
 import ms.sapientia.ro.gaitrecognitionapp.model.MyFirebaseUser;
 import ms.sapientia.ro.gaitrecognitionapp.model.NavigationMenuFragmentItem;
@@ -27,11 +29,12 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
     private ProfileFragmentPresenter mPresenter;
 
     // View members:
-    private TextView userName;
-    private TextView userEmail;
+    private static TextView userName;
+    private static TextView userEmail;
     private static TextView authScore;
     private static TextView collectedScore;
-    private Button clearAuthScoreButton;
+    private static Button refreshButton;
+    private static Button clearButton;
 
 
     @Nullable
@@ -48,7 +51,7 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
         initView(view);
         bindClickListeners();
 
-        initProfileInformations();
+        refreshProfileInformationsUI();
     }
 
     private void initView(View view) {
@@ -56,55 +59,76 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
         userEmail = view.findViewById(R.id.user_email_textview);
         authScore = view.findViewById(R.id.auth_value_textview);
         collectedScore = view.findViewById(R.id.data_collected_value_textview);
-        clearAuthScoreButton = view.findViewById(R.id.clear_average_button);
+        refreshButton = view.findViewById(R.id.refresh_button);
+        clearButton = view.findViewById(R.id.clear_button);
 
     }
 
     private void bindClickListeners() {
-        clearAuthScoreButton.setOnClickListener(v -> click_clear_button());
+        refreshButton.setOnClickListener(v -> refreshProfileInformations() );
+        clearButton.setOnClickListener(v -> resetAuthScore());
     }
 
-    private void click_clear_button(){
-        resetAuthScore();
+    public static void refreshProfileInformationsUI(){
+            setUserName( AppUtil.sUser.last_name, AppUtil.sUser.first_name);
+            setEmail( AppUtil.sAuth.getCurrentUser().getEmail());
+            setAuthenticationScore( AppUtil.sUser.authenticaiton_avg, true );
+            setCollectedDataScore( AppUtil.sUser.raw_count );
     }
 
-    private void initProfileInformations(){
-        userEmail.setText(AppUtil.sUser.last_name + " " + AppUtil.sUser.first_name);
-        refreshScores();
+    private void refreshProfileInformations(){
+        refresh_sUser(() -> refreshProfileInformationsUI());
     }
 
     private void resetAuthScore(){
         AppUtil.sUser.authenticaiton_avg = 0;
+        AppUtil.sUser.authenticaiton_values.clear();
         FirebaseController.setUserObject( AppUtil.sUser );
+        refreshProfileInformationsUI();
     }
 
-    public static void refreshScores(){
+
+    private static void setUserName(String firstName, String lastName){
+        userName.setText( firstName + " " + lastName );
+    }
+
+    private static void setEmail(String email){
+        userEmail.setText( email );
+    }
+
+    private static void setAuthenticationScore(double score, boolean usePercentage){
+        if( usePercentage ){
+            int percentage = (int) Math.floor( score * 100 );
+            authScore.setText ( percentage + "%" );
+        }else{
+            authScore.setText ( score + "");
+        }
+    }
+
+    private static void setCollectedDataScore(double score){
+        collectedScore.setText ( score + "" );
+    }
+
+    private static void refresh_sUser(IAfter afterIt){
         new FirebaseController().getUserObjectById(AppUtil.sUser.id, new ICallback() {
             @Override
             public void Success(MyFirebaseUser user) {
-                setAuthScore(user.authenticaiton_avg);
-
+                AppUtil.sUser = user;
+                afterIt.Do();
             }
 
             @Override
             public void Failure() {
-                Toast.makeText(MainActivity.sContext, "Error: (5)",Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.sContext,"ERROR: 14", Toast.LENGTH_LONG).show();
+                Log.e(TAG, "Failure: ERROR: 14: Can't download user object");
             }
 
             @Override
             public void Error(int error_code) {
-                Toast.makeText(MainActivity.sContext, "Error: (6)",Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.sContext,"ERROR: 15", Toast.LENGTH_LONG).show();
+                Log.e(TAG, "Error: ERROR: 15: Can't download user object");
             }
         });
-    }
-
-    private static void setAuthScore(double score){
-        int percantage = (int) score * 100;
-        authScore.setText ( percantage + "%" );
-    }
-
-    private static void setCollectedDataScore(int score){
-        collectedScore.setText( score + "" );
     }
 
     @Override

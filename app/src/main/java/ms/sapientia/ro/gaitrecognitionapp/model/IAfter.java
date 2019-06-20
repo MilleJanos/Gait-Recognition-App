@@ -1,6 +1,6 @@
 package ms.sapientia.ro.gaitrecognitionapp.model;
 
-public interface IDoIt {
+public interface IAfter {
 
     void Do();
 

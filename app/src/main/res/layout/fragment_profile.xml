@@ -17,6 +17,7 @@
         android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
         android:background="@color/colorPrimary"
         android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"
@@ -142,24 +143,38 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="0dp"
+        android:layout_marginTop="10dp"
         android:layout_marginEnd="32dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/constraintLayout">
 
-
         <Button
-            android:id="@+id/clear_average_button"
+            android:id="@+id/refresh_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:minWidth="150dp"
             android:layout_gravity="center"
             android:layout_margin="2dp"
             android:background="@drawable/button_selector"
             android:fontFamily="@font/aldrich"
-            android:minWidth="240dp"
             android:shadowRadius="@android:integer/config_longAnimTime"
-            android:text="Clear auth. average"
+            android:text="Refresh"
+            android:textAllCaps="false"
+            android:textColor="@color/colorBlack"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/clear_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="150dp"
+            android:layout_gravity="center"
+            android:layout_margin="2dp"
+            android:background="@drawable/button_selector"
+            android:fontFamily="@font/aldrich"
+            android:shadowRadius="@android:integer/config_longAnimTime"
+            android:text="Clear"
             android:textAllCaps="false"
             android:textColor="@color/colorBlack"
             android:textStyle="bold" />
