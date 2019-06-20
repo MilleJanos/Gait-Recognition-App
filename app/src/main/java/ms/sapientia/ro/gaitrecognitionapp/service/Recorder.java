@@ -53,7 +53,7 @@ public class Recorder {
 
     // Tag:
     private static final String TAG = "Recorder";
-    // Default members:
+    // Constant members:
     private static final long DEFAULT_MAX_ACCELEROMETER_ARRAY = 120*128;//=15,360        //33 * 128;
     private static final long DEFAULT_INTERVAL_BETWEEN_TESTS = 8000;    //100*128;//=12,800       //32 * 128;    //30*128; // after analyzing data how m
     private static final int DEFAULT_PREPROCESSING_INTERVAL = 128;
@@ -97,7 +97,7 @@ public class Recorder {
     private Sensor mAccelerometerSensor;
     private SensorManager mSensorManager;
     private SensorEventListener mAccelerometerEventListener;
-    // Members:
+    // Other members:
     private FirebaseAuth mSavedAuth = null;
     private Context mContext;
     private ArrayDeque<Accelerometer> mAccelerometerArray = new ArrayDeque<>();
@@ -163,7 +163,7 @@ public class Recorder {
         if( mMode == Mode.MODE_TRAIN ) {
             mCanRecord = true;
             //mCanRecord = false;     // initTrainFiles will modofy this value
-            //initTrainFiles(mTrainNewOne);
+            //initTrainFiles_OLD(mTrainNewOne);
         }else{
             // Auth & Data collect
             mCanRecord = true;
@@ -187,22 +187,22 @@ public class Recorder {
         mp_model = MediaPlayer.create(mContext, R.raw.model);
     }
 
-    private void initTrainFiles(boolean train_new_one){
+    private void initTrainFiles_OLD(boolean train_new_one){
         String path;
 
         if( train_new_one ){
             // Train new file:
 
-            int tf_count = AppUtil.sUser.merged_feature_count;
-            int tm_count = AppUtil.sUser.merged_model_count;
-
-            path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "merged" + "/" + "mergedModel_" + AppUtil.sUser.id + "_" + tf_count + ".mdl";
-            AppUtil.mergedModelFile = new File(path);
-            FileUtil.createFileIfNotExists(AppUtil.mergedModelFile);
-
-            path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "merged" + "/" + "mergedFeature_" + AppUtil.sUser.id + "_" + tm_count + ".arff";
-            AppUtil.mergedFeatureFile = new File(path);
-            FileUtil.createFileIfNotExists(AppUtil.mergedFeatureFile);
+            // int tf_count = AppUtil.sUser.merged_feature_count;
+            // int tm_count = AppUtil.sUser.merged_model_count;
+            //
+            // path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "merged" + "/" + "mergedModel_" + AppUtil.sUser.id + "_" + tf_count + ".mdl";
+            // AppUtil.mergedModelFile = new File(path);
+            // FileUtil.createFileIfNotExists(AppUtil.mergedModelFile);
+            //
+            // path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "merged" + "/" + "mergedFeature_" + AppUtil.sUser.id + "_" + tm_count + ".arff";
+            // AppUtil.mergedFeatureFile = new File(path);
+            // FileUtil.createFileIfNotExists(AppUtil.mergedFeatureFile);
 
             // // Increase number of feature and model count:
             // AppUtil.sUser.merged_feature_count++;
@@ -458,11 +458,14 @@ public class Recorder {
         // Preprocessing raw data:
         List<Accelerometer> list = new ArrayList(Arrays.asList(mAccelerometerArray.toArray()));
         Util featureUtil = new Util();
-        Settings.setUseDynamicPreprocessingThreshold(true);
-        //Settings.setUseDynamicPreprocessingThreshold(false);
-        //Settings.setPreprocessingThreshold(10.5);
-        Settings.usingPreprocessing(true);
-        Settings.setPreprocessingInterval(sPreprocessingInterval);
+        // Settings.setUseDynamicPreprocessingThreshold(true);
+        // //Settings.setUseDynamicPreprocessingThreshold(false);
+        // //Settings.setPreprocessingThreshold(10.5);
+        // Settings.usingPreprocessing(true);
+        // Settings.setPreprocessingInterval(sPreprocessingInterval);
+        Settings.useRecommendedSettingsWithFrames();
+        Settings.setDefaultUserId( AppUtil.sUser.id );
+
         List<Accelerometer> preprocessedList = featureUtil.preprocess(list);
 
         Log.i(TAG, "Info: Settings.getPreprocessingInterval() = " + Settings.getPreprocessingInterval() );
@@ -521,6 +524,9 @@ public class Recorder {
                 @Override
                 public void Do() {
 
+                    // Note:
+                    // If the file upload suceed, then the user objectt will be updated too.
+
                     // Upload raw file:
                     MyFirebaseController.uploadRawFileIntoStorage(AppUtil.rawdataUserFile, AppUtil.sUser.id, new ICallback() {
                         @Override
@@ -551,6 +557,8 @@ public class Recorder {
 
                             // Update uer object:
                             AppUtil.sUser.merged_feature_count++;
+                            AppUtil.sUser.authenticaiton_avg = 0;
+                            AppUtil.sUser.authenticaiton_values.clear();
                             FirebaseController.setUserObject( AppUtil.sUser );
 
                         }
@@ -619,19 +627,15 @@ public class Recorder {
             @Override
             public void Success(File file) {
 
-                // TODO DEBUG
-                // TODO DEBUG
-                // TODO DEBUG
-                AppUtil.mergedFeatureFile = new File(AppUtil.internalFilesRoot.getAbsoluteFile() + "/" + "debug" + "/" + "merged_feature_zsombi.arff");
-                AppUtil.rawdataUserFile   = new File(AppUtil.internalFilesRoot.getAbsoluteFile() + "/" + "debug" + "/" + "rawdata_jancsi_0.csv");
-                // TODO DEBUG
-                // TODO DEBUG
-                // TODO DEBUG
+                // DEBUG:
+                // AppUtil.mergedFeatureFile = new File(AppUtil.internalFilesRoot.getAbsoluteFile() + "/" + "debug" + "/" + "merged_feature_zsombi.arff");
+                // AppUtil.rawdataUserFile   = new File(AppUtil.internalFilesRoot.getAbsoluteFile() + "/" + "debug" + "/" + "rawdata_jancsi_0.csv");
 
                 // Calculate similarities (%), then continue recording:
                 double score = calculateAuthenticationValue(
                         AppUtil.mergedFeatureFile,
                         AppUtil.rawdataUserFile,
+                        AppUtil.sUser.id,
                         new IAfter(){
 
                             @Override
@@ -644,7 +648,7 @@ public class Recorder {
 
                 score = (score<0)?0:score;
 
-                Toast.makeText(MainActivity.sContext, "---> " + score + "% <---", Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.sContext, "---> " + Math.floor(score * 100) + " % <---", Toast.LENGTH_LONG).show();
 
                 mp_bing2.start(); // TODO: remove it
 
@@ -739,6 +743,10 @@ public class Recorder {
 
                 // 3. Merge negative feature and user's feature into merged feature file:
 
+                path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "merged" + "/" + "mergedFeature_" + AppUtil.sUser.id + "_" + AppUtil.sUser.merged_feature_count + ".arff";
+                AppUtil.mergedFeatureFile = new File(path);
+                FileUtil.createFileIfNotExists(AppUtil.mergedFeatureFile);
+
                 mergeArffFiles(
                         AppUtil.featureNegativeFile,
                         AppUtil.featureUserFile,
@@ -749,6 +757,11 @@ public class Recorder {
                 MainActivity.sInstance.showProgressBar();
 
                 // 4. Create merged model file from merged feature file:
+
+                path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "merged" + "/" + "mergedModel_" + AppUtil.sUser.id + "_" + AppUtil.sUser.merged_model_count + ".mdl";
+                AppUtil.mergedModelFile = new File(path);
+                FileUtil.createFileIfNotExists(AppUtil.mergedModelFile);
+
                 createModelFromFeature(
                         AppUtil.mergedFeatureFile,  // TODO: Timi: change it later !
                         AppUtil.mergedModelFile
@@ -782,33 +795,11 @@ public class Recorder {
 
     }
 
-    /**
-     * This method will generate the final trained model from merged features.
-     */
-    public void finishTrainedData_OLD(){
-        // Show progress bar:
-        MainActivity.sInstance.showProgressBar();
-
-        // Create merged model file from merged feature file:
-        createModelFromFeature(
-                AppUtil.mergedFeatureFile,  // TODO: Timi: change it later !
-                AppUtil.mergedModelFile
-        );
-
-        // Upload model to Firebase:
-        MyFirebaseController.uploadMergedModelFileIntoStorage(
-                AppUtil.mergedModelFile,
-                AppUtil.sAuth.getUid(),
-                null
-        );
-
-        // Hide progress bar:
-        MainActivity.sInstance.hideProgressBar();
-    }
 
     /**
      * This method creates a feature file from a given raw file.
      * Output file and upper folders will be automatically created.
+     *
      * @param inputRawFile input raw file
      * @param outputFeatureFile output feature file
      * @param userId user id contained by feature file
@@ -832,7 +823,8 @@ public class Recorder {
         // Collect Feature files path, until mergeing them all:
         GaitHelperFunctions.createFeaturesFileFromRawFile(
                 inputRawFile.getAbsolutePath(),         // in
-                outputFeatureFile.getAbsolutePath().substring(0, outputFeatureFile.getAbsolutePath().length() - (".arff").length()),   // out   - without ".arff" at the end
+                outputFeatureFile.getAbsolutePath(),
+                //outputFeatureFile.getAbsolutePath().substring(0, outputFeatureFile.getAbsolutePath().length() - (".arff").length()),   // out   - without ".arff" at the end
                 userId                                  // in
         );
 
@@ -1011,7 +1003,7 @@ public class Recorder {
         }
     }
 
-    private double calculateAuthenticationValue( File mergedFeature, File toVerifyRaw , IAfter doIt){
+    private double calculateAuthenticationValue( File mergedFeature, File toVerifyRaw, String userId, IAfter doIt){
         double percentage = -1;
 
         IGaitModelBuilder builder = new GaitModelBuilder();
@@ -1026,7 +1018,7 @@ public class Recorder {
 
             IGaitVerification verifier = new GaitVerification();
             //percentage = verifier.verifyUser(classifier, attributes, FRESH_RAWDATA_WAITING_TO_TEST ); // 3. param - user raw data
-            percentage = verifier.verifyUser(classifier, attributes, toVerifyRaw.getAbsolutePath() );
+            percentage = verifier.verifyUser(classifier, attributes, toVerifyRaw.getAbsolutePath(), userId);
 
             // percentage = Integer.parseInt( ((percentage * 100) + "").substring(0, 2) );
 
@@ -1071,7 +1063,7 @@ public class Recorder {
 
     private void updateGait() {
 
-        double d = RecorderUtils.checkUserInPercentage();
+        double d = RecorderUtils.checkUserInPercentage_OLD();
 
         Toast.makeText(mContext,"--> "+ d +" <--",Toast.LENGTH_LONG).show();
 
@@ -1498,6 +1490,34 @@ public class Recorder {
         }
 
         Log.d(TAG, "createModel: OUT");
+    }
+
+    /**
+     * This method will generate the final merged model from merged features.
+     */
+    public void finishTrainedData_OLD(){
+        // Show progress bar:
+        MainActivity.sInstance.showProgressBar();
+
+        // Create merged model file from merged feature file:
+        String path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "merged" + "/" + "mergedFeature_" + AppUtil.sUser.id + "_" + AppUtil.sUser.merged_feature_count/*tm_count*/ + ".arff";
+        AppUtil.mergedFeatureFile = new File(path);
+        FileUtil.createFileIfNotExists(AppUtil.mergedFeatureFile);
+
+        createModelFromFeature(
+                AppUtil.mergedFeatureFile,  // TODO: Timi: change it later !
+                AppUtil.mergedModelFile
+        );
+
+        // Upload model to Firebase:
+        MyFirebaseController.uploadMergedModelFileIntoStorage(
+                AppUtil.mergedModelFile,
+                AppUtil.sAuth.getUid(),
+                null
+        );
+
+        // Hide progress bar:
+        MainActivity.sInstance.hideProgressBar();
     }
 
     private void mode_train_OLD(){

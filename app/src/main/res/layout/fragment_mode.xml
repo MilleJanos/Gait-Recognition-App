@@ -23,7 +23,7 @@
 
             <Switch
                 android:id="@+id/service_switch"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@color/shadow_lighter_color_2"
                 android:gravity="center"
@@ -35,9 +35,15 @@
                 android:paddingTop="8dp"
                 android:paddingBottom="8dp"
                 android:fontFamily="@font/aldrich"
-                android:switchPadding="10dp"
-                android:switchMinWidth="100dp"
+                android:switchPadding="50dp"
+                android:thumbTintMode="add"
+
+                android:trackTint="@color/shadow_lighter_color_6"
+
                 android:text="Service"
+                android:showText="true"
+                android:textOn="ON"
+                android:textOff="OFF"
                 android:textColor="@color/colorGray9"
                 android:textSize="30sp"
                 app:layout_constraintBottom_toTopOf="@+id/linearLayout"
@@ -110,6 +116,7 @@
                         android:layout_height="wrap_content">
 
                         <CheckBox
+                            android:visibility="gone"
                             android:id="@+id/train_new_switch"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"

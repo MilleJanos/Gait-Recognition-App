@@ -213,7 +213,7 @@ public class RecorderUtils {
         return ad;
     }
 
-    public static double checkUserInPercentage(/*Activity activity, String userRawDataFilePath, String userFeatureFilePath, String dummyFeatureFilePath, String userModelFilePath, String userId*/) {
+    public static double checkUserInPercentage_OLD(/*Activity activity, String userRawDataFilePath, String userFeatureFilePath, String dummyFeatureFilePath, String userModelFilePath, String userId*/) {
 
         double percentage = -1;
 
@@ -236,7 +236,7 @@ public class RecorderUtils {
 
             IGaitVerification verifier = new GaitVerification();
             //percentage = verifier.verifyUser(classifier, attributes, FRESH_RAWDATA_WAITING_TO_TEST ); // 3. param - user raw data
-            percentage = verifier.verifyUser(classifier, attributes, AppUtil.featureNegativeFile.getAbsolutePath() );
+            percentage = verifier.verifyUser(classifier, attributes, AppUtil.featureNegativeFile.getAbsolutePath(), "NOPE");
 
             // percentage = Integer.parseInt( ((percentage * 100) + "").substring(0, 2) );
 

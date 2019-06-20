@@ -4,7 +4,6 @@
  * and open the template in the editor.
  */
 package ms.sapientia.ro.feature_extractor;
-
 /**
  * FeatureExtractorException is a custom exception used in
  * FeatureExtractorLibrary
@@ -15,7 +14,7 @@ package ms.sapientia.ro.feature_extractor;
  */
 public class FeatureExtractorException extends Exception {
 
-    public FeatureExtractorException(String message) {
+    FeatureExtractorException(String message) {
         super(message);
     }
 }
