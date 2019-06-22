@@ -7,6 +7,7 @@
     android:layout_height="match_parent">
 
     <ImageView
+        android:id="@+id/imageView2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/white_alpha_color_99"
@@ -18,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="50dp"
-        android:background="@color/colorPrimary"
+        android:background="@color/colorLightBlueAlpha_90"
         android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -36,6 +37,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="@font/alef"
+            android:textStyle="bold"
             android:text="loading..."
             android:textAlignment="center"
             android:textColor="@color/colorBlack"
@@ -49,7 +51,7 @@
             android:fontFamily="@font/alef"
             android:text="loading..."
             android:textAlignment="center"
-            android:textColor="@color/colorBlack"
+            android:textColor="@color/colorBlue5"
             android:textSize="20dp" />
 
     </LinearLayout>
@@ -58,7 +60,7 @@
         android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorLightBlue"
+        android:background="@color/colorLightBlueAlpha_70"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout2">
@@ -139,12 +141,13 @@
     </android.support.constraint.ConstraintLayout>
 
     <LinearLayout
+        android:id="@+id/linearLayout3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
         android:layout_marginStart="32dp"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="32dp"
+        android:gravity="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/constraintLayout">
@@ -153,11 +156,14 @@
             android:id="@+id/refresh_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="150dp"
             android:layout_gravity="center"
-            android:layout_margin="2dp"
+            android:layout_marginLeft="2dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="2dp"
             android:background="@drawable/button_selector"
             android:fontFamily="@font/aldrich"
+            android:minWidth="150dp"
             android:shadowRadius="@android:integer/config_longAnimTime"
             android:text="Refresh"
             android:textAllCaps="false"
@@ -168,18 +174,221 @@
             android:id="@+id/clear_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="150dp"
             android:layout_gravity="center"
-            android:layout_margin="2dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginRight="2dp"
+            android:layout_marginBottom="2dp"
             android:background="@drawable/button_selector"
             android:fontFamily="@font/aldrich"
+            android:minWidth="150dp"
             android:shadowRadius="@android:integer/config_longAnimTime"
-            android:text="Clear"
+            android:text="Reset auth. score"
             android:textAllCaps="false"
             android:textColor="@color/colorBlack"
             android:textStyle="bold" />
 
     </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/imageView2"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout3">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <!-- Email -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="26dp"
+                android:layout_marginRight="26dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:fontFamily="@font/aldrich"
+                    android:text="Email:"
+                    android:textAlignment="center"
+                    android:textColor="@color/colorGray9"
+                    android:textSize="18dp" />
+
+                <TextView
+                    android:id="@+id/email_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:fontFamily="@font/alef"
+                    android:text="loading ..."
+                    android:textAlignment="center"
+                    android:textColor="@color/colorBlack" />
+
+
+            </LinearLayout>
+
+            <!-- First Name -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="26dp"
+                android:layout_marginRight="26dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:fontFamily="@font/aldrich"
+                    android:text="First name:"
+                    android:textAlignment="center"
+                    android:textColor="@color/colorGray9"
+                    android:textSize="18dp" />
+
+                <TextView
+                    android:id="@+id/first_name_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:fontFamily="@font/alef"
+                    android:text="loading ..."
+                    android:textAlignment="center"
+                    android:textColor="@color/colorBlack" />
+
+
+            </LinearLayout>
+
+            <!-- Last name -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="26dp"
+                android:layout_marginRight="26dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:fontFamily="@font/aldrich"
+                    android:text="Last name:"
+                    android:textAlignment="center"
+                    android:textColor="@color/colorGray9"
+                    android:textSize="18dp" />
+
+                <TextView
+                    android:id="@+id/last_name_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:fontFamily="@font/alef"
+                    android:text="loading ..."
+                    android:textAlignment="center"
+                    android:textColor="@color/colorBlack" />
+
+
+            </LinearLayout>
+
+            <!-- Birth date -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="26dp"
+                android:layout_marginRight="26dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:fontFamily="@font/aldrich"
+                    android:text="Birth date:"
+                    android:textAlignment="center"
+                    android:textColor="@color/colorGray9"
+                    android:textSize="18dp" />
+
+                <TextView
+                    android:id="@+id/birth_date_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:fontFamily="@font/alef"
+                    android:text="loading ..."
+                    android:textAlignment="center"
+                    android:textColor="@color/colorBlack" />
+
+
+            </LinearLayout>
+
+            <!-- Phone number -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="26dp"
+                android:layout_marginRight="26dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:fontFamily="@font/aldrich"
+                    android:text="Phone number:"
+                    android:textAlignment="center"
+                    android:textColor="@color/colorGray9"
+                    android:textSize="18dp" />
+
+                <TextView
+                    android:id="@+id/phone_number_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:fontFamily="@font/alef"
+                    android:text="loading ..."
+                    android:textAlignment="center"
+                    android:textColor="@color/colorBlack" />
+
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/edit_floating_action_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:layout_margin="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:backgroundTint="@color/white_alpha_color_9"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/ic_edit_black">
+
+    </android.support.design.widget.FloatingActionButton>
+
+
 
 
 </android.support.constraint.ConstraintLayout>

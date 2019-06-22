@@ -1,6 +1,7 @@
 package ms.sapientia.ro.gaitrecognitionapp.common;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Point;
 import android.net.ConnectivityManager;
@@ -10,12 +11,14 @@ import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
+import java.security.InvalidParameterException;
 import java.util.Date;
 
 import ms.sapientia.ro.gaitrecognitionapp.model.MyFirebaseUser;
@@ -194,6 +197,29 @@ public class AppUtil {
                 }
             }
         }
+    }
+
+    public static void requestPasswordReset(String email) {
+
+        if(email.length() == 0){
+            throw new InvalidParameterException("Email can't be null");
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.sInstance);
+        builder.setTitle("Confirm");
+        builder.setMessage("Are you sure you want to send password reset request?");
+        builder.setPositiveButton("YES", (dialog, which) -> {
+            AppUtil.sAuth.sendPasswordResetEmail( email )
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            Log.i(TAG, "Reset mPassword request has been sent.");
+                            Toast.makeText(MainActivity.sContext, "Reset mPassword request has been sent!", Toast.LENGTH_LONG).show();
+                        }
+                    });
+        });
+        builder.setNegativeButton("NO", (dialog, which) -> dialog.dismiss());
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 
 

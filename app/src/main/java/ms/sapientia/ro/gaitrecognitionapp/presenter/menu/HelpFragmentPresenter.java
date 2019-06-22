@@ -1,17 +1,21 @@
 package ms.sapientia.ro.gaitrecognitionapp.presenter.menu;
 
-public class ProfileFragmentPresenter {
+public class HelpFragmentPresenter {
 
     // Members
     private View view;
-
-    public ProfileFragmentPresenter(View view){
-        this.view = view;
-    }
 
     // Interface:
     public interface View{
         void showProgressBar();
         void hideProgressBar();
     }
+
+    // Constructor
+    public HelpFragmentPresenter(View view){
+        this.view = view;
+    }
+
+
+
 }

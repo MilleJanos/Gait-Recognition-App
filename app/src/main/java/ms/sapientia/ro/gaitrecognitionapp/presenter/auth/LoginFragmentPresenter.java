@@ -95,7 +95,7 @@ public class LoginFragmentPresenter {
      * @param email_msg email input field error message
      * @param password_msg password input field error message
      */
-    private void setErrors(String email_msg, String password_msg){
+    public void setErrors(String email_msg, String password_msg){
         // Set errors:
         LoginFragment.sInstance.mEmailEditText.setError(email_msg);
         LoginFragment.sInstance.mPasswordEditText.setError(password_msg);
@@ -236,12 +236,14 @@ public class LoginFragmentPresenter {
                MainActivity.sInstance.replaceFragment(new HomeFragment(), "main_fragment");
 
                // GerCreate user object in database if the user does not have:
-               new FirebaseController().getUserObjectById( AppUtil.sAuth.getUid(), new ICallback(){
+               new FirebaseController().getUserObjectById( AppUtil.sAuth.getUid(), new ICallback<MyFirebaseUser>(){
                    @Override
                    public void Success(MyFirebaseUser user) {
                        // If user already has object in firebase:
                        AppUtil.sUser = user;
-                       // Hide progress bar
+                       // Refresh navigation menu drawer userinfo:
+                       MainActivity.sInstance.refreshNavigationMenuDraverNameAndEmail();
+                       // Hide progress bar:
                        view.hideProgressBar();
                    }
                    @Override

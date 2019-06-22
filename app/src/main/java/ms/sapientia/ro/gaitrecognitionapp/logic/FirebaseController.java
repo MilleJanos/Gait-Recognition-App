@@ -16,7 +16,6 @@ import java.util.Map;
 
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.model.ICallback;
-import ms.sapientia.ro.gaitrecognitionapp.model.IFileCallback;
 import ms.sapientia.ro.gaitrecognitionapp.model.IFirebaseUser;
 import ms.sapientia.ro.gaitrecognitionapp.model.MyFirebaseUser;
 
@@ -41,7 +40,7 @@ public class FirebaseController {
      * @param user_id downloadable object's user id
      * @param callback used to write custom commands afrer: onSuccess, onFailure and onError. It can be null
      */
-    public void getUserObjectById(String user_id , ICallback callback ){
+    public void getUserObjectById(String user_id , ICallback<MyFirebaseUser> callback ){
 
         DocumentReference ref = FirebaseFirestore.getInstance()
                 .collection("user" + "/")
@@ -77,7 +76,7 @@ public class FirebaseController {
      * @param file_downloaded downloaded file
      * @param callback calls the methods of the callback if is not null
      */
-    public void downloadFile(StorageReference ref, File file_downloaded, IFileCallback callback){
+    public void downloadFile(StorageReference ref, File file_downloaded, ICallback<File> callback){
 
         try{
 
@@ -115,12 +114,13 @@ public class FirebaseController {
 
         Map<String, Object> data = new HashMap<>();
         data.put(IFirebaseUser.ID_KEY, user.id);
-        data.put(IFirebaseUser.CURRENT_TRAIN_ID_KEY, user.current_train_id);
         data.put(IFirebaseUser.AUTHENTICATION_AVG_KEY, user.authenticaiton_avg);
         data.put(IFirebaseUser.SELECTED_MODE_KEY , AppUtil.modeToStr(user.selected_mode));
         data.put(IFirebaseUser.PROFILE_PICTURE_IDX_KEY, user.profile_picture_idx);
         data.put(IFirebaseUser.FIRST_NAME_KEY,user.first_name);
         data.put(IFirebaseUser.LAST_NAME_KEY,user.last_name);
+        data.put(IFirebaseUser.BIRTH_DATE_KEY,user.birth_date);
+        data.put(IFirebaseUser.PHONE_NUMBER_KEY,user.phone_number);
         data.put(IFirebaseUser.RAW_COUNT_KEY,user.raw_count);
         data.put(IFirebaseUser.FEATURE_COUNT_KEY,user.feature_count);
         data.put(IFirebaseUser.MODEL_COUNT_KEY,user.model_count);
@@ -181,6 +181,8 @@ public class FirebaseController {
         user.id = map.get(IFirebaseUser.ID_KEY).toString();
         user.first_name = map.get(IFirebaseUser.FIRST_NAME_KEY).toString();
         user.last_name = map.get(IFirebaseUser.LAST_NAME_KEY).toString();
+        user.birth_date = Long.parseLong( map.get(IFirebaseUser.BIRTH_DATE_KEY).toString() );
+        user.phone_number = map.get(IFirebaseUser.PHONE_NUMBER_KEY).toString();
 
         user.authenticaiton_avg = Double.parseDouble( map.get(IFirebaseUser.AUTHENTICATION_AVG_KEY).toString() );
 
@@ -193,7 +195,6 @@ public class FirebaseController {
         user.authenticaiton_values = (ArrayList<Double>) map.get(IFirebaseUser.AUTH_VALUES_KEY);
 
         user.selected_mode = AppUtil.modeStrToMode( map.get(IFirebaseUser.SELECTED_MODE_KEY).toString() );
-        user.current_train_id = Integer.parseInt( map.get(IFirebaseUser.CURRENT_TRAIN_ID_KEY).toString() );
         user.profile_picture_idx = Integer.parseInt( map.get(IFirebaseUser.PROFILE_PICTURE_IDX_KEY).toString() );
 
         user.raw_count = Integer.parseInt( map.get(IFirebaseUser.RAW_COUNT_KEY).toString() );

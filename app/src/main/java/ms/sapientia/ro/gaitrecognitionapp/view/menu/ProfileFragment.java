@@ -3,6 +3,7 @@ package ms.sapientia.ro.gaitrecognitionapp.view.menu;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +12,9 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import ms.sapientia.gaitrecognitionapp.R;
+import java.util.Calendar;
+
+import ms.sapientia.ro.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.logic.FirebaseController;
 import ms.sapientia.ro.gaitrecognitionapp.model.IAfter;
@@ -29,12 +32,18 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
     private ProfileFragmentPresenter mPresenter;
 
     // View members:
-    private static TextView userName;
-    private static TextView userEmail;
-    private static TextView authScore;
-    private static TextView collectedScore;
-    private static Button refreshButton;
-    private static Button clearButton;
+    private static TextView mTitleUserName;
+    private static TextView mTitleUserEmail;
+    private static TextView mAuthScore;
+    private static TextView mCollectedScore;
+    private static Button mRefreshButton;
+    private static Button mClearButton;
+    private static TextView mEmailTextView;
+    private static TextView mFirstNameTextView;
+    private static TextView mLastNameTextView;
+    private static TextView mBirthDateTextView;
+    private static TextView mPhoneNumberTextView;
+    private FloatingActionButton mEditFloatingActionButton;
 
 
     @Nullable
@@ -47,33 +56,66 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        MainActivity.sInstance.setTitle("Profile");
+
+        // Set presenter for MainActivity
         mPresenter = new ProfileFragmentPresenter(this);
+
         initView(view);
         bindClickListeners();
+
 
         refreshProfileInformationsUI();
     }
 
     private void initView(View view) {
-        userName = view.findViewById(R.id.user_name_textview);
-        userEmail = view.findViewById(R.id.user_email_textview);
-        authScore = view.findViewById(R.id.auth_value_textview);
-        collectedScore = view.findViewById(R.id.data_collected_value_textview);
-        refreshButton = view.findViewById(R.id.refresh_button);
-        clearButton = view.findViewById(R.id.clear_button);
-
+        mTitleUserName = view.findViewById(R.id.user_name_textview);
+        mTitleUserEmail = view.findViewById(R.id.user_email_textview);
+        mAuthScore = view.findViewById(R.id.auth_value_textview);
+        mCollectedScore = view.findViewById(R.id.data_collected_value_textview);
+        mRefreshButton = view.findViewById(R.id.refresh_button);
+        mClearButton = view.findViewById(R.id.clear_button);
+        mEmailTextView = view.findViewById(R.id.email_textview);
+        mFirstNameTextView = view.findViewById(R.id.first_name_textview);
+        mLastNameTextView = view.findViewById(R.id.last_name_textview);
+        mBirthDateTextView = view.findViewById(R.id.birth_date_textview);
+        mPhoneNumberTextView = view.findViewById(R.id.phone_number_textview);
+        mEditFloatingActionButton = view.findViewById(R.id.edit_floating_action_button);
     }
 
     private void bindClickListeners() {
-        refreshButton.setOnClickListener(v -> refreshProfileInformations() );
-        clearButton.setOnClickListener(v -> resetAuthScore());
+        mRefreshButton.setOnClickListener(v -> refreshProfileInformations() );
+        mClearButton.setOnClickListener(v -> resetAuthScore());
+        mEditFloatingActionButton.setOnClickListener(v -> goToEditProfile());
+        mAuthScore.setOnClickListener( v -> {
+            if ( mAuthScore.getText().equals("N/A") ){
+                Toast.makeText(MainActivity.sContext,"Use authentication mode first!",Toast.LENGTH_LONG).show();
+            }else{
+                displayAuthScores();
+            }
+        });
+    }
+
+    private void goToEditProfile() {
+        MainActivity.sInstance.replaceFragment(new EditProfileFragment(),"edit_profile_fragment");
     }
 
     public static void refreshProfileInformationsUI(){
-            setUserName( AppUtil.sUser.last_name, AppUtil.sUser.first_name);
-            setEmail( AppUtil.sAuth.getCurrentUser().getEmail());
-            setAuthenticationScore( AppUtil.sUser.authenticaiton_avg, true );
-            setCollectedDataScore( AppUtil.sUser.raw_count );
+        setTitleUserName( AppUtil.sUser.last_name, AppUtil.sUser.first_name);
+        setTitleEmail( AppUtil.sAuth.getCurrentUser().getEmail());
+        setAuthenticationScore( AppUtil.sUser.authenticaiton_avg, true );
+        setCollectedDataScore( AppUtil.sUser.raw_count );
+
+        setEmail( AppUtil.sAuth.getCurrentUser().getEmail() );
+        setFirstName( AppUtil.sUser.first_name );
+        setLastName( AppUtil.sUser.last_name );
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis( AppUtil.sUser.birth_date );
+
+        setBirthDate( calendar );
+        setPhoneNumber( AppUtil.sUser.phone_number );
     }
 
     private void refreshProfileInformations(){
@@ -87,30 +129,89 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
         refreshProfileInformationsUI();
     }
 
+    // Top part:
 
-    private static void setUserName(String firstName, String lastName){
-        userName.setText( firstName + " " + lastName );
-    }
-
-    private static void setEmail(String email){
-        userEmail.setText( email );
-    }
-
-    private static void setAuthenticationScore(double score, boolean usePercentage){
-        if( usePercentage ){
-            int percentage = (int) Math.floor( score * 100 );
-            authScore.setText ( percentage + "%" );
+    private static void setTitleUserName(String firstName, String lastName){
+        if( ! firstName.isEmpty()){
+            mTitleUserName.setText( firstName + " " + lastName );
         }else{
-            authScore.setText ( score + "");
+
         }
     }
 
-    private static void setCollectedDataScore(double score){
-        collectedScore.setText ( score + "" );
+    private static void setTitleEmail(String email){
+        if( ! email.isEmpty()){
+            mTitleUserEmail.setText( email );
+        }else{
+
+        }
     }
 
+    // Middle part:
+
+    private static void setAuthenticationScore(double score, boolean usePercentage){
+        if( score != 0 ){
+            if( usePercentage ){
+                int percentage = (int) Math.floor( score * 100 );
+                mAuthScore.setText ( percentage + "%" );
+            }else{
+                mAuthScore.setText ( score + "");
+            }
+        }else{
+            mAuthScore.setText ( "N/A" );
+        }
+
+    }
+
+    private static void setCollectedDataScore(double score){
+        mCollectedScore.setText ( ((int) score) + "" );
+    }
+
+    // Bottom part:
+
+    private static void setEmail(String email) {
+        if( ! email.isEmpty() ){
+            mEmailTextView.setText( email );
+        }else{
+            mEmailTextView.setText("N/A");
+        }
+    }
+
+    private static void setFirstName(String firstName) {
+        if( ! firstName.isEmpty() ){
+            mFirstNameTextView.setText( firstName );
+        }else{
+            mFirstNameTextView.setText("N/A");
+        }
+    }
+
+    private static void setLastName(String lastName) {
+        if( ! lastName.isEmpty() ){
+            mLastNameTextView.setText( lastName );
+        }else{
+            mLastNameTextView.setText("N/A");
+        }
+    }
+
+    private static void setBirthDate(Calendar calendar) {
+        if( calendar.getTimeInMillis() != 0 ){
+            mBirthDateTextView.setText( formatDate( calendar ) );
+        }else{
+            mBirthDateTextView.setText( "N/A" );
+        }
+    }
+
+    private static void setPhoneNumber(String phoneNumber) {
+        if( ! phoneNumber.isEmpty() ){
+            mPhoneNumberTextView.setText( phoneNumber );
+        }else{
+            mPhoneNumberTextView.setText("N/A");
+        }
+    }
+
+
     private static void refresh_sUser(IAfter afterIt){
-        new FirebaseController().getUserObjectById(AppUtil.sUser.id, new ICallback() {
+        new FirebaseController().getUserObjectById(AppUtil.sUser.id, new ICallback<MyFirebaseUser>() {
             @Override
             public void Success(MyFirebaseUser user) {
                 AppUtil.sUser = user;
@@ -129,6 +230,17 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
                 Log.e(TAG, "Error: ERROR: 15: Can't download user object");
             }
         });
+    }
+
+    private static String formatDate(Calendar calendar){
+        int y = calendar.get(Calendar.YEAR);
+        int m = calendar.get(Calendar.MONTH) + 1;
+        int d = calendar.get(Calendar.DAY_OF_MONTH);
+        return m +"/"+ d +"/"+ y;
+    }
+
+    private void displayAuthScores(){
+        // TODO
     }
 
     @Override

@@ -19,7 +19,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import ms.sapientia.gaitrecognitionapp.R;
+import ms.sapientia.ro.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.other.ManualRecorderFragmentPresenter;
 import ms.sapientia.ro.gaitrecognitionapp.service.BackgroundService;

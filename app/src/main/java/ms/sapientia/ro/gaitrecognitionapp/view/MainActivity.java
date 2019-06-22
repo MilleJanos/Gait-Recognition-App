@@ -26,11 +26,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import ms.sapientia.gaitrecognitionapp.R;
+import ms.sapientia.ro.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.MainActivityPresenter;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.LoginFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.RegisterFragment;
+import ms.sapientia.ro.gaitrecognitionapp.view.menu.EditProfileFragment;
+import ms.sapientia.ro.gaitrecognitionapp.view.menu.HelpFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.menu.HomeFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.menu.ModeFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.menu.ProfileFragment;
@@ -142,6 +144,21 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
 
         // Start locked (unlock after login)
         lockNavigationDrawer();
+
+        // Set name and email:
+
+
+    }
+
+    public void refreshNavigationMenuDraverNameAndEmail(){
+
+        String userName = AppUtil.sUser.first_name + " " + AppUtil.sUser.last_name;
+        String email = AppUtil.sAuth.getCurrentUser().getEmail();
+
+        NavigationView navigationView = MainActivity.sInstance.findViewById(R.id.nav_view);
+        View headerView = navigationView.getHeaderView(0);
+        ((TextView) headerView.findViewById(R.id.nav_header_name)).setText( userName );
+        ((TextView) headerView.findViewById(R.id.nav_header_email)).setText( email );
     }
 
     public void lockNavigationDrawer(){
@@ -235,22 +252,18 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
             return;
         }
 
-
-        //if( fragment instanceof EditProfileFragment){
-        //    // if Edit Profile fragment is displayed -> open Profile
-        //    replaceFragment(ProfileFragment,"profile_fragment");
-        //    // set selected item: Home:
-        //    NavigationView navigationView = findViewById(R.id.nav_view);
-        //    navigationView.setCheckedItem(R.id.nav_profile);
-        //    return;
-        //}
+        if( fragment instanceof EditProfileFragment){
+            // if Edit Profile fragment is displayed -> open Profile
+            replaceFragment(new ProfileFragment(),"profile_fragment");
+            // set selected item: Home:
+            ((NavigationView) findViewById(R.id.nav_view)).setCheckedItem(R.id.nav_profile);
+            return;
+        }
 
         // any other cases: Open Home
         replaceFragment(new HomeFragment(), "home_fragment");
         // set selected item: Home:
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setCheckedItem(R.id.nav_home);
-
+        ((NavigationView) findViewById(R.id.nav_view)).setCheckedItem(R.id.nav_home);
 
         //region OLD code
         /*if( fragment instanceof LoginFragment){
@@ -338,7 +351,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
 
         switch (id){
             case R.id.nav_home: {
-                //TODO
                 MainActivity.sInstance.replaceFragment(new HomeFragment(), "home_fragment");
                 break;
             }
@@ -347,18 +359,15 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
                 break;
             }
             case R.id.nav_mode: {
-                //TODO
                 MainActivity.sInstance.replaceFragment(new ModeFragment(), "mode_fragment");
                 break;
             }
-            case R.id.nav_settings: {
-                //TODO
-                //MainActivity.sInstance.replaceFragment(new SettingsFragment(), "settings_fragment");
-                break;
-            }
+            //case R.id.nav_settings: {
+            //    //MainActivity.sInstance.replaceFragment(new SettingsFragment(), "settings_fragment");
+            //    break;
+            //}
             case R.id.nav_help: {
-                //TODO
-                //MainActivity.sInstance.replaceFragment(new HelpFragment(), "help_fragment");
+                MainActivity.sInstance.replaceFragment(new HelpFragment(), "help_fragment");
                 break;
             }
             case R.id.nav_logout: {

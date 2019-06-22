@@ -7,6 +7,9 @@ public class User implements IUser{
     public String id = "";
     public String first_name = "";
     public String last_name = "";
+    public String email = "";
+    public long birth_date = 0;
+    public String phone_number = "";
 
     public User(){
     }

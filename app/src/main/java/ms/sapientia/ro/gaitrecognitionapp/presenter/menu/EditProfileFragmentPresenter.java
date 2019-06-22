@@ -1,11 +1,11 @@
 package ms.sapientia.ro.gaitrecognitionapp.presenter.menu;
 
-public class ProfileFragmentPresenter {
+public class EditProfileFragmentPresenter {
 
     // Members
     private View view;
 
-    public ProfileFragmentPresenter(View view){
+    public EditProfileFragmentPresenter(View view){
         this.view = view;
     }
 

@@ -1,9 +1,11 @@
 package ms.sapientia.ro.gaitrecognitionapp.view.auth;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,8 +13,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import ms.sapientia.gaitrecognitionapp.R;
+import ms.sapientia.ro.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.auth.RegisterFragmentPresenter;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
@@ -165,8 +168,14 @@ public class RegisterFragment extends Fragment implements RegisterFragmentPresen
 
     public void forgottPasswordClick(View view){
 
-        // TODO forgottPasswordClick()
+        String email = mEmailEditText.getText().toString();
 
+        if( email.isEmpty() ){
+            mPresenter.setErrors("Fill email first!",null,null);
+            return;
+        }
+
+        AppUtil.requestPasswordReset( email );
     }
 
     @Override

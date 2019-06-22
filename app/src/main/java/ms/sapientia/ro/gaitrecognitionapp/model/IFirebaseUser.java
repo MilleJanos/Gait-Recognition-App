@@ -5,7 +5,8 @@ public interface IFirebaseUser {
     public static final String ID_KEY = "id";
     public static final String FIRST_NAME_KEY = "first_name";
     public static final String LAST_NAME_KEY = "last_name";
-    public static final String CURRENT_TRAIN_ID_KEY = "current_train_id";
+    public static final String BIRTH_DATE_KEY = "birth_date";
+    public static final String PHONE_NUMBER_KEY = "phone_number";
     public static final String AUTHENTICATION_AVG_KEY = "authentication_avg";
     public static final String AUTH_VALUES_KEY = "authentication_values";
     public static final String RAW_COUNT_KEY = "raw_count";

@@ -8,7 +8,6 @@ public class MyFirebaseUser extends User implements IFirebaseUser {
 
 
 
-    public int current_train_id = -1;
     public int raw_count = 0;
     public int profile_picture_idx = -1;
     public double authenticaiton_avg = 0;

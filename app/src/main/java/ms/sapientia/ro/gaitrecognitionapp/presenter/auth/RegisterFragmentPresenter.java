@@ -1,7 +1,5 @@
 package ms.sapientia.ro.gaitrecognitionapp.presenter.auth;
 
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -10,11 +8,11 @@ import com.google.firebase.auth.SignInMethodQueryResult;
 
 import java.util.regex.Pattern;
 
-import ms.sapientia.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.logic.FirebaseController;
 import ms.sapientia.ro.gaitrecognitionapp.model.MyFirebaseUser;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
+import ms.sapientia.ro.gaitrecognitionapp.view.auth.LoginFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.RegisterFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.menu.HomeFragment;
 
@@ -147,12 +145,15 @@ public class RegisterFragmentPresenter {
                         Toast.makeText(MainActivity.sContext, "Registration succeed", Toast.LENGTH_LONG).show();
 
                         // Remove Register fragment:
-                        //goBackToLoginPage(); // TODO Remove Register fragment before going to Main fragment
+                        //goBackToLoginPage(); // Remove Register fragment before going to Main fragment
 
                         // Open HomeFragment
                         MainActivity.sInstance.replaceFragment(new HomeFragment(), "main_fragment");
 
-                        // Hide progress bar
+                        // Refresh navigation menu drawer userinfo:
+                        MainActivity.sInstance.refreshNavigationMenuDraverNameAndEmail();
+
+                        // Hide progress bar:
                         view.hideProgressBar();
 
                         // Set user object as app member:
@@ -322,10 +323,7 @@ public class RegisterFragmentPresenter {
      * This method removes the RegisterFragment from top of the LoginFragment on fragment stack.
      */
     public void goBackToLoginPage() {
-        // Remove this Register Fragment from top of the fragment stack
-        FragmentManager fragmentManager = MainActivity.sInstance.getSupportFragmentManager();
-        Fragment fragment = fragmentManager.findFragmentById(R.id.fragmentContainer);
-        MainActivity.sInstance.removeFragment(fragment);
+        MainActivity.sInstance.replaceFragment(new LoginFragment(), "login_fragment"); // Without animation
     }
 
     /**
@@ -334,7 +332,7 @@ public class RegisterFragmentPresenter {
      * @param password_msg_1 first password input field error message
      * @param password_msg_2 second password input field error message
      */
-    private void setErrors(String email_msg, String password_msg_1, String password_msg_2){
+    public void setErrors(String email_msg, String password_msg_1, String password_msg_2){
         // Set errors:
         RegisterFragment.sInstance.mEmailEditText.setError(email_msg);
         RegisterFragment.sInstance.mPasswordEditText1.setError(password_msg_1);

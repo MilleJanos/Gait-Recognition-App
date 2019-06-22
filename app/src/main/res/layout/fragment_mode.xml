@@ -4,8 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/image_asphalt_road">
+    android:layout_height="match_parent">
+    <!--android:background="@drawable/image_asphalt_road">-->
 
     <ScrollView
         android:layout_width="match_parent"
@@ -23,7 +23,7 @@
 
             <Switch
                 android:id="@+id/service_switch"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/shadow_lighter_color_2"
                 android:gravity="center"
@@ -35,15 +35,11 @@
                 android:paddingTop="8dp"
                 android:paddingBottom="8dp"
                 android:fontFamily="@font/aldrich"
-                android:switchPadding="50dp"
-                android:thumbTintMode="add"
-
-                android:trackTint="@color/shadow_lighter_color_6"
-
+                android:switchPadding="1dp"
                 android:text="Service"
                 android:showText="true"
-                android:textOn="ON"
-                android:textOff="OFF"
+                android:textOn="I"
+                android:textOff="O"
                 android:textColor="@color/colorGray9"
                 android:textSize="30sp"
                 app:layout_constraintBottom_toTopOf="@+id/linearLayout"

@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import ms.sapientia.gaitrecognitionapp.R;
+import ms.sapientia.ro.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.model.NavigationMenuFragmentItem;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.menu.HomeFragmentPresenter;
@@ -23,6 +23,7 @@ public class HomeFragment extends NavigationMenuFragmentItem implements HomeFrag
 
     // View members:
     TextView helpTextViewButton;
+
 
     // MVP
     private HomeFragmentPresenter mPresenter;
@@ -39,6 +40,8 @@ public class HomeFragment extends NavigationMenuFragmentItem implements HomeFrag
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mPresenter = new HomeFragmentPresenter(this);
+        MainActivity.sInstance.setTitle("Home");
+
         initView(view);
         bindClickListeners();
 

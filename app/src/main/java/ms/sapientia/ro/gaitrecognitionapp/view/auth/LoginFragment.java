@@ -13,7 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import ms.sapientia.gaitrecognitionapp.R;
+import ms.sapientia.ro.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.Animator;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.auth.LoginFragmentPresenter;
@@ -160,7 +160,14 @@ public class LoginFragment extends Fragment implements LoginFragmentPresenter.Vi
 
     public void forgottPasswordClick(View view){
 
-        // TODO forgottPasswordClick()
+        String email = mEmailEditText.getText().toString();
+
+        if( email.isEmpty() ){
+            mPresenter.setErrors("Fill email first!",null);
+            return;
+        }
+
+        AppUtil.requestPasswordReset( email );
 
     }
 

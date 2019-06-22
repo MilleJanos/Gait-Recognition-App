@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.StorageReference;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
@@ -26,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import ms.sapientia.gaitrecognitionapp.R;
+import ms.sapientia.ro.gaitrecognitionapp.R;
 import ms.sapientia.ro.commonclasses.Accelerometer;
 import ms.sapientia.ro.feature_extractor.Settings;
 import ms.sapientia.ro.feature_extractor.Util;
@@ -34,9 +35,8 @@ import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.common.FileUtil;
 import ms.sapientia.ro.gaitrecognitionapp.logic.FirebaseController;
 import ms.sapientia.ro.gaitrecognitionapp.logic.MyFirebaseController;
-import ms.sapientia.ro.gaitrecognitionapp.model.ICallback;
 import ms.sapientia.ro.gaitrecognitionapp.model.IAfter;
-import ms.sapientia.ro.gaitrecognitionapp.model.IFileCallback;
+import ms.sapientia.ro.gaitrecognitionapp.model.ICallback;
 import ms.sapientia.ro.gaitrecognitionapp.model.MyFirebaseUser;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 import ms.sapientia.ro.gaitrecognitionapp.view.menu.ModeFragment;
@@ -49,16 +49,10 @@ import ms.sapientia.ro.model_builder.IGaitVerification;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
 
-public class Recorder {
+public class Recorder implements IRecorder {
 
     // Tag:
     private static final String TAG = "Recorder";
-    // Constant members:
-    private static final long DEFAULT_MAX_ACCELEROMETER_ARRAY = 120*128;//=15,360        //33 * 128;
-    private static final long DEFAULT_INTERVAL_BETWEEN_TESTS = 8000;    //100*128;//=12,800       //32 * 128;    //30*128; // after analyzing data how m
-    private static final int DEFAULT_PREPROCESSING_INTERVAL = 128;
-    private static final long DEFAULT_FILES_COUNT_BEFORE_MODEL_GENERATING = 3;
-    private static final long MIN_TRAIN_LENGTH = 10000;
     // Current used:
     private static long sMaxAccelerometerArray;
     private static long sIntervalBetweenTests;
@@ -295,108 +289,6 @@ public class Recorder {
 
     // Sensor on changed method:
 
-    private void sensorChanged(long timeStamp, float x, float y, float z) {
-
-        if(mCurrentIntervalBetweenTests == sIntervalBetweenTests) {
-            // Limit reached.
-
-            // Init Internal Raw File:
-            String path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "rawdata" + "/" + RecorderUtils.getCurrentDateFormatted() + "/" + "rawdata.csv";
-            AppUtil.rawdataUserFile = new File(path);
-            FileUtil.createFileIfNotExists(AppUtil.rawdataUserFile);
-
-            // Preprocessing raw data:
-            List<Accelerometer> list = new ArrayList(Arrays.asList(mAccelerometerArray.toArray()));
-            Util featureUtil = new Util();
-            Settings.setUseDynamicPreprocessingThreshold(true);
-            //Settings.setUseDynamicPreprocessingThreshold(false);
-            //Settings.setPreprocessingThreshold(10.5);
-            Settings.usingPreprocessing(true);
-            Settings.setPreprocessingInterval(sPreprocessingInterval);
-            List<Accelerometer> preprocessedList = featureUtil.preprocess(list);
-
-            Log.i(TAG, "Info: Settings.getPreprocessingInterval() = " + Settings.getPreprocessingInterval() );
-            Log.i(TAG, "Info: Settings.getPreprocessingThreshold() = " + Settings.getPreprocessingThreshold() );
-            Log.i(TAG, "Info: Settings.isUsingPreprocessing() = " + Settings.isUsingPreprocessing() );
-            Log.i(TAG, "Info: Settings.isUsingPreprocessing() = " + Settings.isUsingDynamicPreprocessingThreshold() );
-
-            // Save raw file into file:
-            ArrayDeque preProcAD = RecorderUtils.listToArrayDeque(preprocessedList);
-            RecorderUtils.saveRawAccelerometerDataIntoCsvFile(preProcAD, AppUtil.rawdataUserFile, RecorderUtils.RAWDATA_DEFAULT_HEADER);
-
-            // Upload raw file:
-            MyFirebaseController.uploadRawFileIntoStorage(
-                    AppUtil.rawdataUserFile,
-                    AppUtil.sUser.id,
-                    null
-            );
-
-             // region OLD CODE
-            /*
-            // Download user object from database:
-            class Callback implements ICallback{
-
-                @Override
-                public void Success(MyFirebaseUser obj) {
-                    Log.d(TAG, "Success: ");
-                }
-
-                @Override
-                public void Failure(MyFirebaseUser obj) {
-                    
-                }
-
-                @Override
-                public void Error(int error_code) {
-
-                }
-            }
-            FirebaseController.getUserObjectById( mSavedAuth.getUid(), new Callback());
-            */
-            //endregion
-
-            // DEBUG -----------------------------------------------
-            //Print_UnPreprocessed_and_Preprocessed_array(list, preprocessedList);
-            // \DEBUG ----------------------------------------------
-
-            switch (mMode){
-
-                case MODE_TRAIN:{
-                    // Create feature from raw
-                    // Create (trained) model from feature
-                    mode_train();
-                    break;
-                }
-
-                case MODE_AUTHENTICATE:{
-                    // Download ..............
-                    mode_authenticate();
-                    break;
-                }
-
-                case MODE_COLLECT_DATA:{
-                    // upload raw files ..........
-                    mode_collect_data();
-                    break;
-                }
-            }
-
-            // Reset counter
-            mCurrentIntervalBetweenTests = 0;
-        }
-
-        // if the list is full, then remove first then (Circle effect):
-        if(mAccelerometerArray.size() == sMaxAccelerometerArray - 1 ){
-            mAccelerometerArray.removeFirst();
-        }
-        // add to last:
-        mAccelerometerArray.addLast(new Accelerometer(timeStamp,x,y,z, mCurretStepCount));
-        // iteration end: increase counters:
-        ++mCurrentRecordCount;
-        ++mCurrentIntervalBetweenTests;
-
-    }
-
     private void sensorChanged_2(long timeStamp, float x, float y, float z) {
 
         if ( mMode == Mode.MODE_TRAIN ) {
@@ -451,7 +343,7 @@ public class Recorder {
         showProgressBar();
 
         // Init Internal Raw File:
-        String path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "rawdata" + "/" + RecorderUtils.getCurrentDateFormatted() + "/" + "rawdata.csv";
+        String path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "rawdata" + "/" + "rawdata_" + RecorderUtils.getCurrentDateFormatted() + ".csv";
         AppUtil.rawdataUserFile = new File(path);
         FileUtil.createFileIfNotExists(AppUtil.rawdataUserFile);
 
@@ -511,11 +403,12 @@ public class Recorder {
      * the files and user object fill be uploaded/updated in the database.
      */
     private void mode_train(){
-        //*//if (mCurrentFileCount >= sFilesCountBetweenModelGenerating - 1) {
-            // Collected enought arff files to being.
 
-            // Show progress bar
-            showProgressBar();
+                //*//if (mCurrentFileCount >= sFilesCountBetweenModelGenerating - 1) {
+                // Collected enought arff files to being.
+
+                // Show progress bar
+                showProgressBar();
 
             // Train then upload files:
 
@@ -530,7 +423,7 @@ public class Recorder {
                     // Upload raw file:
                     MyFirebaseController.uploadRawFileIntoStorage(AppUtil.rawdataUserFile, AppUtil.sUser.id, new ICallback() {
                         @Override
-                        public void Success(MyFirebaseUser user) {
+                        public void Success(Object user) {
 
                             // Update uer object:
                             AppUtil.sUser.raw_count++;
@@ -551,9 +444,10 @@ public class Recorder {
                     });
 
                     // Upload merged feature file:
-                    MyFirebaseController.uploadMergedFeatureFileIntoStorage(AppUtil.mergedFeatureFile, AppUtil.sUser.id, new ICallback() {
+                    MyFirebaseController.uploadMergedFeatureFileIntoStorage(AppUtil.mergedFeatureFile, AppUtil.sUser.id, new ICallback()
+                    {
                         @Override
-                        public void Success(MyFirebaseUser user) {
+                        public void Success(Object user) {
 
                             // Update uer object:
                             AppUtil.sUser.merged_feature_count++;
@@ -579,7 +473,7 @@ public class Recorder {
                     // Upload merged model to Firebase:
                     MyFirebaseController.uploadMergedModelFileIntoStorage(AppUtil.mergedModelFile, AppUtil.sAuth.getUid(), new ICallback() {
                         @Override
-                        public void Success(MyFirebaseUser user) {
+                        public void Success(Object user) {
                             // Update uer object:
                             AppUtil.sUser.merged_model_count++;
                             FirebaseController.setUserObject( AppUtil.sUser );
@@ -623,7 +517,7 @@ public class Recorder {
 
         // Download merged feature:
 
-        downloadLastMergedFeature(AppUtil.sUser.id, new IFileCallback() {
+        downloadLastMergedFeature(AppUtil.sUser.id, new ICallback<File>() {
             @Override
             public void Success(File file) {
 
@@ -718,10 +612,10 @@ public class Recorder {
 
         // 1. Download negative feature from Firebase. (If can't download: return):
 
-        String path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "feature_negative_dummy.arff";
+        String path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "feature_negative.arff";
         AppUtil.featureNegativeFile = new File( path );
 
-        downloadNegativeFeature(AppUtil.featureNegativeFile, new IFileCallback() {
+        MyFirebaseController.downloadNegativeFeature(AppUtil.featureNegativeFile, new ICallback<File>() {
             @Override
             public void Success(File file) {
 
@@ -729,7 +623,7 @@ public class Recorder {
 
                 // 2. Create user's feature from user's raw data:
 
-                String path = AppUtil.internalFilesRoot + "/" + "feature" + "/" + RecorderUtils.formatDate(RecorderUtils.lastUsedDate) + "/feature_user.arff";
+                String path = AppUtil.internalFilesRoot + "/" + "feature" + "/feature_" + RecorderUtils.formatDate(RecorderUtils.lastUsedDate) + ".arff";
                 AppUtil.featureUserFile = new File(path);
                 FileUtil.createFileIfNotExists( AppUtil.featureUserFile );
 
@@ -823,8 +717,7 @@ public class Recorder {
         // Collect Feature files path, until mergeing them all:
         GaitHelperFunctions.createFeaturesFileFromRawFile(
                 inputRawFile.getAbsolutePath(),         // in
-                outputFeatureFile.getAbsolutePath(),
-                //outputFeatureFile.getAbsolutePath().substring(0, outputFeatureFile.getAbsolutePath().length() - (".arff").length()),   // out   - without ".arff" at the end
+                outputFeatureFile.getAbsolutePath(),    // out      //outputFeatureFile.getAbsolutePath().substring(0, outputFeatureFile.getAbsolutePath().length() - (".arff").length()),   // out   - without ".arff" at the end
                 userId                                  // in
         );
 
@@ -879,32 +772,6 @@ public class Recorder {
         mp_model.start(); // TODO remove it
     }
 
-    /**
-     * This methods downloads the negative feature from Firebase.
-     * After download will call the respective IFileCallback method.
-     * Output file will be automatically created.
-     *
-     * @param intoFile output downloaded file.
-     * @param callback callback with 3 implemented methods (use null in case you don't need it).
-     */
-    private void downloadNegativeFeature(File intoFile, IFileCallback callback){
-
-        // Create output file:
-        FileUtil.createFileIfNotExists(intoFile);
-
-        // Create output file:
-
-        FileUtil.createFileIfNotExists(intoFile);
-
-        // Set storage refrence:
-        StorageReference reference = FirebaseUtils.firebaseStorage.getReference().child(
-                FirebaseUtils.STORAGE_DATA_KEY
-                + "/" + FirebaseUtils.negativeFeatureFileName);
-
-        // Download then call callback methods:
-        new FirebaseController().downloadFile(reference, AppUtil.featureNegativeFile, callback);
-
-    }
 
     /**
      * This method merges two files into a third one.
@@ -970,7 +837,7 @@ public class Recorder {
      * @param toMerge input list of files
      * @param outputMergedFile output file
      */
-    private void mergeArffFilesIntoOne(ArrayList<String> toMerge, File outputMergedFile) {
+    private void mergeArffFileList(ArrayList<String> toMerge, File outputMergedFile) {
         
         // Handle inputs:
         if( toMerge == null ){
@@ -1022,9 +889,9 @@ public class Recorder {
 
             // percentage = Integer.parseInt( ((percentage * 100) + "").substring(0, 2) );
 
-        //old//} catch (FileNotFoundException e) {
-        //old//    Log.e(TAG, "*********File not found!");
-        //old//    e.printStackTrace();
+            //old//} catch (FileNotFoundException e) {
+            //old//    Log.e(TAG, "*********File not found!");
+            //old//    e.printStackTrace();
         } catch (Exception e) {
             Log.e(TAG, "*********Error!");
             e.printStackTrace();
@@ -1034,57 +901,6 @@ public class Recorder {
         }
 
         return percentage;
-    }
-
-    private void recalculateScore( double score ){
-
-        // Add new score to old:
-        double oldScore = AppUtil.sUser.authenticaiton_avg;
-
-        if ( oldScore == 0){
-            // If is the first First time:
-            AppUtil.sUser.authenticaiton_avg = score;
-        }else{
-            AppUtil.sUser.authenticaiton_avg = ( oldScore + score ) / 2;
-        }
-
-        // Save to firebase:
-        FirebaseController.setUserObject( AppUtil.sUser );
-
-        // Refresh if Profile page is open:
-        FragmentManager fragmentManager = MainActivity.sInstance.getSupportFragmentManager();
-        Fragment fragment = fragmentManager.findFragmentById(R.id.fragmentContainer);
-
-        if( fragment instanceof ProfileFragment){
-            ProfileFragment.refreshProfileInformationsUI();
-        }
-
-    }
-
-    private void updateGait() {
-
-        double d = RecorderUtils.checkUserInPercentage_OLD();
-
-        Toast.makeText(mContext,"--> "+ d +" <--",Toast.LENGTH_LONG).show();
-
-        Log.i(TAG, "==============================");
-        Log.i(TAG, "============="+ d +"============");
-        Log.i(TAG, "==============================");
-
-    }
-
-    private void createFeatureUserFileCopy(){
-        RecorderUtils.featureUserFile_Copy = new File(AppUtil.internalFilesRoot + "/" + "feature" + "/" + RecorderUtils.formatDate(RecorderUtils.lastUsedDate) + "/" + "aux_feature_user.arff");
-        FileUtil.createFileIfNotExists(RecorderUtils.featureUserFile_Copy);
-
-        try {
-
-            FileUtil.copy(AppUtil.featureUserFile, RecorderUtils.featureUserFile_Copy);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            Log.e(TAG, "createFeatureUserFileCopy: File not found ! ( "+ AppUtil.featureUserFile +" or "+ RecorderUtils.featureUserFile_Copy +")");
-        }
     }
 
     public ArrayDeque<Accelerometer> getAcceleromerList(){
@@ -1099,7 +915,7 @@ public class Recorder {
      * @param userId used id
      * @param callback methods will be run after downloading the file.
      */
-    private void downloadLastMergedFeature(String userId, IFileCallback callback){
+    private void downloadLastMergedFeature(String userId, ICallback callback){
 
         // Download last trained file:
         int lastTrainedArffId = AppUtil.sUser.merged_feature_count - 1;      // last file index = count - 1
@@ -1112,7 +928,7 @@ public class Recorder {
         showProgressBar();
 
         // Download feature file matching the file parameter name:
-        MyFirebaseController.downloadFeatureFile(AppUtil.mergedFeatureFile.getName(), AppUtil.mergedFeatureFile, userId, new IFileCallback() {
+        MyFirebaseController.downloadFeatureFile(AppUtil.mergedFeatureFile.getName(), AppUtil.mergedFeatureFile, userId, new ICallback<File>() {
                     @Override
                     public void Success(File file) {
 
@@ -1158,7 +974,7 @@ public class Recorder {
      * @param userId used id
      * @param callback methods will be run after downloading the file.
      */
-    private void downloadLastMergedModel(String userId, IFileCallback callback){
+    private void downloadLastMergedModel(String userId, ICallback callback){
         // Download last trained file:
         int lastTrainedModelId = AppUtil.sUser.merged_model_count - 1; // last file index = count - 1
         String fileName = "mergedModel_" + userId + "_" + lastTrainedModelId + ".mdl";
@@ -1169,7 +985,7 @@ public class Recorder {
         // show progress bar:
         showProgressBar();
 
-        MyFirebaseController.downloadModelFile(AppUtil.mergedModelFile.getName(), AppUtil.mergedModelFile, userId, new IFileCallback() {
+        MyFirebaseController.downloadModelFile(AppUtil.mergedModelFile.getName(), AppUtil.mergedModelFile, userId, new ICallback<File>() {
             @Override
             public void Success(File nullFile) {
 
@@ -1276,329 +1092,6 @@ public class Recorder {
 
 
 
-    // Old methods: (TRASH)
-
-    private void sensorChanged_OLD(long timeStamp, float x, float y, float z){
-
-        // No action until Negative feature is not downloaded.
-        if ( ! RecorderUtils.downloadingNegativeFeatureFile) {
-            // Negative data is downloaded.
-
-            if(mCurrentIntervalBetweenTests == sIntervalBetweenTests) {
-                // Reached the limit.
-
-                // PlaySound
-                mp_bing.start(); // TODO: remove sound
-
-                // Init Internal Files
-                //RecorderUtils.initInternalFiles();
-                String path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "rawdata" + "/" + RecorderUtils.getCurrentDateFormatted() + "/" + "rawdata.csv";
-                AppUtil.rawdataUserFile = new File(path);
-                FileUtil.createFileIfNotExists(AppUtil.rawdataUserFile);
-
-                // Preprocessing raw data
-                List<Accelerometer> list = new ArrayList(Arrays.asList(mAccelerometerArray.toArray()));
-                Util featureUtil = new Util();
-                Settings.setUseDynamicPreprocessingThreshold(true);
-                Settings.setPreprocessingInterval(sPreprocessingInterval);
-                List<Accelerometer> preprocessedList = featureUtil.preprocess(list);
-
-                // Save raw data
-                //String rawdataStr = mAccelerometerArrayToString(mAccelerometerArray);
-                ArrayDeque copy = RecorderUtils.listToArrayDeque(list);
-                RecorderUtils.saveRawAccelerometerDataIntoCsvFile(copy, AppUtil.rawdataUserFile, RecorderUtils.RAWDATA_DEFAULT_HEADER);
-
-                switch (mMode){
-
-                    case MODE_TRAIN:{
-                        // Merge collected Arff Files,
-                        // then upload to Firebase
-                        mode_train_OLD();
-                        break;
-                    }
-
-                    case MODE_AUTHENTICATE:{
-                        mode_authenticate();
-                        break;
-                    }
-
-                    case MODE_COLLECT_DATA:{
-                        // upload raw files
-                        mode_collect_data();
-                        break;
-                    }
-                }
-
-                // Reset counter
-                mCurrentIntervalBetweenTests = 0;
-
-
-            }
-            // if the list is full, then remove first then (Circle effect):
-            if(mAccelerometerArray.size() == sMaxAccelerometerArray - 1 ){
-                mAccelerometerArray.removeFirst();
-            }
-            // add to last:
-            mAccelerometerArray.addLast(new Accelerometer(timeStamp,x,y,z, mCurretStepCount));
-            // iteration end: increase counters:
-            ++mCurrentRecordCount;
-            ++mCurrentIntervalBetweenTests;
-            // printAccelerometerList(mAccelerometerArray); // print every iteration
-
-
-        }  /*NO ACTIONS UNTIL Feature negative dummy is not downloaded*/
-
-
-    }
-
-    /**
-     * Converts array of Accelerometers to string.
-     *
-     * ArrayList<Accelerometer> mAccelerometerArray ==> String str
-     *
-     * output format:   "timestamp,x,y,z,currentStepCount,timestamp,x,y,z,currentStepCount,timestamp,x,y,z,timestamp,currentStepCount, ... ,end"
-     *
-     * @return the converted string.
-     *
-     * @author Mille Janos
-     */
-    public String mAccelerometerArrayToString_OLD(ArrayDeque<Accelerometer> arrayDeque) {
-        Log.d(TAG, ">>>RUN>>>mAccelerometerArrayToString()");
-        StringBuilder sb = new StringBuilder();
-        int i = 0;
-        for(Accelerometer a : arrayDeque){
-            if(i != arrayDeque.size()-1 ){
-                sb.append(a.getTimeStamp())
-                        .append(",")
-                        .append(a.getX())
-                        .append(",")
-                        .append(a.getY())
-                        .append(",")
-                        .append(a.getZ())
-                        .append(",")
-                        .append(mCurretStepCount)
-                        .append(",");
-            }else{
-                sb.append(a.getTimeStamp())
-                        .append(",")
-                        .append(a.getX())
-                        .append(",")
-                        .append(a.getY())
-                        .append(",")
-                        .append(a.getZ())
-                        .append(",")
-                        .append(mCurretStepCount);
-            }
-        }
-        return sb.toString();
-    }
-
-    private void downloadNegativeFeature_OLD(){
-        // Download Dummy
-        if ( AppUtil.rawdataUserFile != null && AppUtil.rawdataUserFile.length() > 0) { // if the file is not empty
-
-            // Create new file with new date:
-            AppUtil.featureNegativeFile = new File(AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "feature_negative_dummy.arff");
-            FileUtil.createFileIfNotExists(AppUtil.featureNegativeFile);
-
-            StorageReference reference = FirebaseUtils.firebaseStorage.getReference().child(
-                    FirebaseUtils.STORAGE_DATA_KEY
-                            + "/" + FirebaseUtils.negativeFeatureFileName
-            );
-            if (true /*RecorderUtils.downloadingNegativeFeatureFile IS EMPTY*/) {        // If it's not downloaded
-
-                //if (RecorderUtils.downloadingNegativeFeatureFile == false) {              // and if it's not downloading at the moment, then: download
-
-                RecorderUtils.downloadingNegativeFeatureFile = true;
-
-                new FirebaseController().downloadFile(reference, AppUtil.featureNegativeFile, new IFileCallback(){
-
-                    @Override
-                    public void Success(File file) {
-                        Toast.makeText(mContext, "Negative Data downloaded", Toast.LENGTH_SHORT).show();
-
-                        generateStuff_OLD();
-
-                        // updateGait();   // uses last created feature file
-                        RecorderUtils.downloadingNegativeFeatureFile = false;
-                    }
-
-                    @Override
-                    public void Failure() {
-                        Toast.makeText(mContext, "Error downloading Negative Data!", Toast.LENGTH_LONG).show();
-                        RecorderUtils.downloadingNegativeFeatureFile = false;
-                    }
-
-                    @Override
-                    public void Error(int error_code) {
-                        Toast.makeText(mContext, "Error downloading Negative Data!", Toast.LENGTH_LONG).show();
-                        RecorderUtils.downloadingNegativeFeatureFile = false;
-                    }
-                });
-                //}
-            }else{
-
-                Toast.makeText(mContext, "Negative Data already downloaded", Toast.LENGTH_SHORT).show();
-
-                generateStuff_OLD();
-
-                //updateGait();   // uses last created feature file
-
-
-            }
-        } else {
-            Log.e(TAG, "sensorChanged: Rawdata path is empty!");
-        }
-    }
-
-    private void generateStuff_OLD(){
-        // TODO --------------- createFeatureFromRaw();
-
-        mergeArffFiles_OLD();
-        mUserFeatureFilesPath.clear();
-
-        createModel_OLD();
-
-        createFeatureUserFileCopy();
-    }
-
-    private void createModel_OLD() {
-        Log.d(TAG, "createModel: IN");
-
-        try {
-            IGaitModelBuilder builder = new GaitModelBuilder();
-
-            Classifier classifier = builder.createModel(
-                    //RecorderUtils.featureUserFile.getAbsolutePath()     // in
-                    RecorderUtils.featureMergedFile.getAbsolutePath()     // in
-            );
-
-            mp_model.start();
-
-            AppUtil.modelUserFile = new File(AppUtil.internalFilesRoot + "/" + "feature" + "/" + RecorderUtils.formatDate(RecorderUtils.lastUsedDate) + "/" + "model.mdl");
-            FileUtil.createFileIfNotExists(AppUtil.modelUserFile);
-
-            ((GaitModelBuilder) builder).saveModel(
-                    classifier,                               // in
-                    AppUtil.modelUserFile.getAbsolutePath()   // in
-            );
-
-        } catch (Exception e) {
-            Toast.makeText(mContext, "Model Generating failed!", Toast.LENGTH_LONG).show();
-            Log.e(TAG, "Model Generating failed!");
-            e.printStackTrace();
-        }
-
-        Log.d(TAG, "createModel: OUT");
-    }
-
-    /**
-     * This method will generate the final merged model from merged features.
-     */
-    public void finishTrainedData_OLD(){
-        // Show progress bar:
-        MainActivity.sInstance.showProgressBar();
-
-        // Create merged model file from merged feature file:
-        String path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "merged" + "/" + "mergedFeature_" + AppUtil.sUser.id + "_" + AppUtil.sUser.merged_feature_count/*tm_count*/ + ".arff";
-        AppUtil.mergedFeatureFile = new File(path);
-        FileUtil.createFileIfNotExists(AppUtil.mergedFeatureFile);
-
-        createModelFromFeature(
-                AppUtil.mergedFeatureFile,  // TODO: Timi: change it later !
-                AppUtil.mergedModelFile
-        );
-
-        // Upload model to Firebase:
-        MyFirebaseController.uploadMergedModelFileIntoStorage(
-                AppUtil.mergedModelFile,
-                AppUtil.sAuth.getUid(),
-                null
-        );
-
-        // Hide progress bar:
-        MainActivity.sInstance.hideProgressBar();
-    }
-
-    private void mode_train_OLD(){
-        // mCurrentFileCount = 0; // TODO, Ez vajon szukseges ide ? (test)
-        // Log.d(TAG, "mCurrentFileCount = " + mCurrentFileCount);
-
-
-        // If we collected enought arff files to being
-        if (mCurrentFileCount >= sFilesCountBetweenModelGenerating - 1) {
-            // Collected enought arff files to being.
-
-            downloadNegativeFeature(AppUtil.featureNegativeFile, new IFileCallback() {
-                @Override
-                public void Success(File file) {
-
-                }
-
-                @Override
-                public void Failure() {
-
-                }
-
-                @Override
-                public void Error(int error_code) {
-
-                }
-            });
-
-            // Reset required file counter;
-            mCurrentFileCount = 0;
-
-        } else {
-            // No enought data, continue collecting:
-
-            // TODO ------------- createFeatureFromRaw();
-
-            /*
-            mergeArffFiles();
-            mUserFeatureFilesPath.clear();
-
-            createModel();
-
-            createFeatureUserFileCopy();
-
-            updateGait();
-            */
-
-            // Increase required file count:
-            ++mCurrentFileCount;
-        }
-    }
-
-    private void mergeArffFiles_OLD(){
-        long num = sFilesCountBetweenModelGenerating;
-        RecorderUtils.featureMergedFile = new File(AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "feature" + "/"+ RecorderUtils.formatDate(RecorderUtils.lastUsedDate) + "/"  + "feature_merged_last_"+num+".arff");
-        FileUtil.createFileIfNotExists(RecorderUtils.featureMergedFile);
-
-        try {
-
-            GaitHelperFunctions.mergeFeatureFiles(
-                    mUserFeatureFilesPath,
-                    RecorderUtils.featureMergedFile.getAbsolutePath()
-            );
-
-        } catch (IOException e) {
-            Log.e(TAG, "mergeArffFiles: mergeRawFiles: IOException !" );
-            e.printStackTrace();
-        }
-    }
-
-    private void arrayLeftShift_OLD(){
-        long c = 0;
-        for(Accelerometer a : mAccelerometerArray){
-            if(c == 0){
-                ++c;
-            }else{
-                //mAccelerometerArray.
-            }
-
-        }
-    }
 
 
 

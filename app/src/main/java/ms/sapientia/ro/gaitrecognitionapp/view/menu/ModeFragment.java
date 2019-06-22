@@ -1,5 +1,6 @@
 package ms.sapientia.ro.gaitrecognitionapp.view.menu;
 
+import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -14,11 +15,9 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import ms.sapientia.gaitrecognitionapp.R;
+import ms.sapientia.ro.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.logic.FirebaseController;
-import ms.sapientia.ro.gaitrecognitionapp.model.ICallback;
-import ms.sapientia.ro.gaitrecognitionapp.model.ISimpleCallback;
 import ms.sapientia.ro.gaitrecognitionapp.model.MyFirebaseUser;
 import ms.sapientia.ro.gaitrecognitionapp.model.NavigationMenuFragmentItem;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.menu.ModeFragmentPresenter;
@@ -46,9 +45,9 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
     private MyFirebaseUser auxUser;
     // Colors:
     private int selectedColor = Color.BLACK;
-    private int notSelectedColor = Color.GRAY;
+    private int notSelectedColor = R.color.white_alpha_color_3;
     private int selectedDescriptionColor = Color.DKGRAY;
-    private int notSelectedDescriptionColor = Color.GRAY;
+    private int notSelectedDescriptionColor = R.color.white_alpha_color_3;
 
 
     @Nullable
@@ -62,6 +61,9 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        MainActivity.sInstance.setTitle("Mode");
+
         initView(view);
         bindClickListeners();
         mPresenter = new ModeFragmentPresenter(this);
@@ -151,6 +153,7 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
         setSelection(mode);
     }
 
+    @SuppressLint("ResourceAsColor")
     private void resetSelection(){
         // Set Titles color:
         ((TextView) mTrainSection.getChildAt(0)).setTextColor( notSelectedColor );
@@ -213,55 +216,6 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
         hideProgressBar();
     }
 
-    private void downloadUserObject(String user_id, ISimpleCallback sc){
-
-        showProgressBar();
-
-        new FirebaseController().getUserObjectById(user_id, new ICallback() {
-            @Override
-            public void Success(MyFirebaseUser user) {
-                sc.Do( user );
-            }
-
-            @Override
-            public void Failure() {
-                Toast.makeText(MainActivity.sContext, "Error downloading user informations!", Toast.LENGTH_LONG).show();
-                hideProgressBar();
-            }
-
-            @Override
-            public void Error(int error_code) {
-                Toast.makeText(MainActivity.sContext, "Error downloading user informations!", Toast.LENGTH_LONG).show();
-                hideProgressBar();
-            }
-        });
-    }
-
-    ///**
-    // * Radio button view items will call this
-    // * method automatic.
-    // * @param checked_id radio button checked button id
-    // */
-    //public void RadioButtonClicked(int checked_id) {
-    //    // Is the button now checked?
-    //    //boolean checked = ((RadioButton) view).isChecked();
-    //
-    //    // Check which radio button was clicked
-    //    switch(checked_id) {
-    //
-    //        case R.id.item_train:
-    //            mPresenter.Prepare4Train();
-    //            break;
-    //
-    //        case R.id.item_auth:
-    //            mPresenter.Prepare4Authentication();
-    //            break;
-    //
-    //        case R.id.item_collect_data:
-    //            mPresenter.Prepare4DataCollection();
-    //            break;
-    //    }
-    //}
 
     @Override
     public void showProgressBar() {

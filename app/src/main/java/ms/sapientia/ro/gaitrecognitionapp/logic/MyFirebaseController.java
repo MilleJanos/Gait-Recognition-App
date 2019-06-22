@@ -5,14 +5,14 @@ import com.google.firebase.storage.StorageReference;
 import java.io.File;
 import java.security.InvalidParameterException;
 
+import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.common.FileUtil;
 import ms.sapientia.ro.gaitrecognitionapp.model.ICallback;
-import ms.sapientia.ro.gaitrecognitionapp.model.IFileCallback;
 import ms.sapientia.ro.gaitrecognitionapp.service.FirebaseUtils;
 
 /**
  * This class is made to create custom upload and download transactions
- * only for Gait Recognition application.
+ * for Let Me In application.
  */
 public class MyFirebaseController extends FirebaseController {
 
@@ -134,7 +134,7 @@ public class MyFirebaseController extends FirebaseController {
      * @param userId user id
      * @param callback callback methods (leave null in case you don't want methods to call)
      */
-    public static void downloadFeatureFile(String downloadableFileName, File intoFile, String userId, IFileCallback callback){
+    public static void downloadFeatureFile(String downloadableFileName, File intoFile, String userId, ICallback<File> callback){
 
         // Handle inputs:
         if( downloadableFileName.isEmpty() ){
@@ -174,7 +174,7 @@ public class MyFirebaseController extends FirebaseController {
      * @param userId user id
      * @param callback callback methods (leave null in case you don't want methods to call)
      */
-    public static void downloadModelFile(String downloadableFileName, File intoFile, String userId, IFileCallback callback){
+    public static void downloadModelFile(String downloadableFileName, File intoFile, String userId, ICallback<File> callback){
 
         // Handle inputs:
         if( downloadableFileName.isEmpty() ){
@@ -204,7 +204,28 @@ public class MyFirebaseController extends FirebaseController {
 
     }
 
+    /**
+     * This methods downloads the negative feature from Firebase.
+     * After download will call the respective IFileCallback method.
+     * Output file will be automatically created.
+     *
+     * @param intoFile output downloaded file.
+     * @param callback callback with 3 implemented methods (use null in case you don't need it).
+     */
+    public static void downloadNegativeFeature(File intoFile, ICallback<File> callback){
 
+        // Create output file:
+        FileUtil.createFileIfNotExists(intoFile);
+
+        // Set storage refrence:
+        StorageReference reference = FirebaseUtils.firebaseStorage.getReference().child(
+                FirebaseUtils.STORAGE_DATA_KEY
+                        + "/" + FirebaseUtils.negativeFeatureFileName);
+
+        // Download then call callback methods:
+        new FirebaseController().downloadFile(reference, AppUtil.featureNegativeFile, callback);
+
+    }
 
 
 }

@@ -74,17 +74,5 @@ public class ModeFragmentPresenter {
     }
 
 
-    public void Prepare4Train(){
-        // TODO
-    }
-
-    public void Prepare4Authentication(){
-        // TODO
-    }
-
-    public void Prepare4DataCollection(){
-        // TODO
-    }
-
 
 }
