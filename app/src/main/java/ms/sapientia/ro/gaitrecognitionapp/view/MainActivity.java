@@ -22,12 +22,14 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import ms.sapientia.ro.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
+import ms.sapientia.ro.gaitrecognitionapp.model.IAfter;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.MainActivityPresenter;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.LoginFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.RegisterFragment;
@@ -60,13 +62,17 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
     // Static members:
     public static MainActivity sInstance;
     public static Context sContext;
+    public static boolean sIsProgressBarShown = false;
+    public static boolean sFirstRun = false; // only run the intro animation once on login page;
 
     // Members:
     private static MainActivityPresenter mPresenter;
     private ProgressBar mProgressBar;
     private TextView mProgressBarTextView;
-    Toolbar mToolbar;
-    DrawerLayout mDrawer;
+    private Toolbar mToolbar;
+    private DrawerLayout mDrawer;
+    private FrameLayout mProgressBarDismiss;
+    public IAfter mOnProgressBarDismissed = null;
 
 
     @Override
@@ -93,6 +99,10 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
         // Get FragmentManager & FragmentTransaction
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        // Bind views and listeners
+        bindViews();
+        bindClickListeners();
 
         //region OLD CODE
         // Create LoginFragment sInstance
@@ -150,6 +160,9 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
 
     }
 
+    /**
+     * This method refreshes the informations from AppUtil sUser and sAuth
+     */
     public void refreshNavigationMenuDraverNameAndEmail(){
 
         String userName = AppUtil.sUser.first_name + " " + AppUtil.sUser.last_name;
@@ -161,6 +174,9 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
         ((TextView) headerView.findViewById(R.id.nav_header_email)).setText( email );
     }
 
+    /**
+     * This method locks the navigation drawer in closed state.
+     */
     public void lockNavigationDrawer(){
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
@@ -168,6 +184,9 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
         hideToolbar();
     }
 
+    /**
+     * This method ullocks the navigation drawer.
+     */
     public void unlockNavigationDrawer(){
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
@@ -175,10 +194,16 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
         showToolbar();
     }
 
+    /**
+     * This method shows the toolbar.
+     */
     private void hideToolbar(){
         getSupportActionBar().hide();
     }
 
+    /**
+     * This method hides the toolbar.
+     */
     private void showToolbar(){
         getSupportActionBar().show();
     }
@@ -188,7 +213,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
      * using findViewById().
      */
     protected void bindViews() {
-
+        mProgressBarDismiss = findViewById(R.id.progress_bar_darker_frameLayout);
     }
 
     /**
@@ -196,7 +221,16 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
      * to click listeners.
      */
     protected void bindClickListeners() {
+        mProgressBarDismiss.setOnClickListener( v -> {
+            Dismiss();
+        });
+    }
 
+    public void Dismiss(){
+        if( mOnProgressBarDismissed != null ){
+            mOnProgressBarDismissed.Do();
+            hideProgressBar();
+        }
     }
 
     /**
@@ -331,9 +365,20 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
     /**
      * This method makes the progress bar visible.
      */
+    public void showProgressBar(IAfter after) {
+        mOnProgressBarDismissed = after;
+        mProgressBar.setVisibility(View.VISIBLE);
+        mProgressBarDismiss.setVisibility( View.VISIBLE );
+        sIsProgressBarShown = true;
+    }
+
+    /**
+     * This method makes the progress bar visible.
+     */
     @Override
     public void showProgressBar() {
         mProgressBar.setVisibility(View.VISIBLE);
+        sIsProgressBarShown = true;
     }
 
     /**
@@ -342,6 +387,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
     @Override
     public void hideProgressBar() {
         mProgressBar.setVisibility(View.INVISIBLE);
+        mProgressBarDismiss.setVisibility( View.GONE );
+        sIsProgressBarShown = false;
     }
 
     @Override

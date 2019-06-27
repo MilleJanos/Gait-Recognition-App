@@ -2,27 +2,38 @@ package ms.sapientia.ro.gaitrecognitionapp.model;
 
 public class TopicObject {
 
-    private String mTitle;
-    private String mDescription;
+    private int id;
+    private String question;
+    private String answer;
 
-    public TopicObject(String mTitle, String mDescription) {
-        this.mTitle = mTitle;
-        this.mDescription = mDescription;
+    public TopicObject(int id, String question, String description) {
+        this.id = id;
+        this.question = question;
+        this.answer = description;
     }
 
-    public String getmTitle() {
-        return mTitle;
+    public int getId() {
+        return id;
     }
 
-    public void setmTitle(String mTitle) {
-        this.mTitle = mTitle;
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public String getmDescription() {
-        return mDescription;
+    public String getQuestion() {
+        return question;
     }
 
-    public void setmDescription(String mDescription) {
-        this.mDescription = mDescription;
+    public void setQuestion(String question) {
+        this.question = question;
     }
+
+    public String getAnswer() {
+        return answer;
+    }
+
+    public void setAnswer(String answer) {
+        this.answer = answer;
+    }
+
 }

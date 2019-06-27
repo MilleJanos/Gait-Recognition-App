@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.logic.FirebaseController;
+import ms.sapientia.ro.gaitrecognitionapp.model.IAfter;
 import ms.sapientia.ro.gaitrecognitionapp.model.MyFirebaseUser;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.LoginFragment;
@@ -24,6 +25,7 @@ public class RegisterFragmentPresenter {
 
     // Interface:
     public interface View{
+        void showProgressBar(IAfter after);
         void showProgressBar();
         void hideProgressBar();
     }
@@ -32,6 +34,9 @@ public class RegisterFragmentPresenter {
     public RegisterFragmentPresenter(View view){
         this.view = view;
     }
+
+    // Members:
+    private boolean mRegisterIsDismissed;
 
     // Methods:
 
@@ -54,7 +59,14 @@ public class RegisterFragmentPresenter {
     public void Register(String email, String password) {
 
         // Show progress bar:
-        view.showProgressBar();
+        view.showProgressBar(new IAfter() {
+            @Override
+            public void Do() {
+                mRegisterIsDismissed = true;
+                Toast.makeText(MainActivity.sContext,"Registration cancelled.", Toast.LENGTH_SHORT).show();
+            }
+        });
+        mRegisterIsDismissed = false;
 
         // Check is email is correct or not:
         if( AppUtil.requireInternetConnection() ){
@@ -138,6 +150,10 @@ public class RegisterFragmentPresenter {
 
                         // Registration succeed:
 
+                        if( mRegisterIsDismissed = true){
+                            return;
+                        }
+
                         String id = AppUtil.sAuth.getUid();
                         MyFirebaseUser user = new MyFirebaseUser( id );
 
@@ -147,14 +163,8 @@ public class RegisterFragmentPresenter {
                         // Remove Register fragment:
                         //goBackToLoginPage(); // Remove Register fragment before going to Main fragment
 
-                        // Open HomeFragment
-                        MainActivity.sInstance.replaceFragment(new HomeFragment(), "main_fragment");
-
                         // Refresh navigation menu drawer userinfo:
                         MainActivity.sInstance.refreshNavigationMenuDraverNameAndEmail();
-
-                        // Hide progress bar:
-                        view.hideProgressBar();
 
                         // Set user object as app member:
                         AppUtil.sUser = user;
@@ -162,9 +172,21 @@ public class RegisterFragmentPresenter {
                         // Save into app member:
                         FirebaseController.setUserObject( user );
 
+                        // Hide progress bar:
+                        view.hideProgressBar();
+
+                        // Open HomeFragment
+                        MainActivity.sInstance.replaceFragment(new HomeFragment(), "main_fragment");
+
+
                     }else{
 
                         // Registraiton failed:
+
+                        if( mRegisterIsDismissed = true){
+                            return;
+                        }
+
                         Log.i(TAG, "Registration failed", task.getException());
                         Toast.makeText(MainActivity.sContext, "Registration failed", Toast.LENGTH_LONG).show();
 

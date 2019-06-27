@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import ms.sapientia.ro.gaitrecognitionapp.R;
+import ms.sapientia.ro.gaitrecognitionapp.common.Animator;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.logic.FirebaseController;
 import ms.sapientia.ro.gaitrecognitionapp.model.MyFirebaseUser;
@@ -71,6 +72,10 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
 
         // SetLastState
         restoreLastState();
+
+        Animator.Slide(view.findViewById(R.id.item_train), 0, 0, -100, 0, 1000);
+        Animator.Slide(view.findViewById(R.id.item_auth), 0, 0, -130, 0, 1000);
+        Animator.Slide(view.findViewById(R.id.item_collect_data), 0, 0, -160, 0, 1000);
 
     }
 

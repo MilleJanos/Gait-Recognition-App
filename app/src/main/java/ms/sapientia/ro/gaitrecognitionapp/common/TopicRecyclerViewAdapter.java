@@ -1,4 +1,4 @@
-package ms.sapientia.ro.gaitrecognitionapp.model;
+package ms.sapientia.ro.gaitrecognitionapp.common;
 
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -10,6 +10,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import ms.sapientia.ro.gaitrecognitionapp.R;
+import ms.sapientia.ro.gaitrecognitionapp.model.TopicObject;
 
 public class TopicRecyclerViewAdapter extends RecyclerView
         .Adapter<TopicRecyclerViewAdapter.TopicObjectHolder> {
@@ -21,13 +22,15 @@ public class TopicRecyclerViewAdapter extends RecyclerView
     public static class TopicObjectHolder extends RecyclerView.ViewHolder
             implements View
             .OnClickListener {
-        TextView title;
-        TextView description;
+        TextView idTextView;
+        TextView questionTextView;
+        TextView answerTextView;
 
         public TopicObjectHolder(View itemView) {
             super(itemView);
-            title = (TextView) itemView.findViewById(R.id.title_textView);
-            description = (TextView) itemView.findViewById(R.id.desc_auth_textview);
+            idTextView = (TextView) itemView.findViewById(R.id.question_id_textView);
+            questionTextView = (TextView) itemView.findViewById(R.id.question_textView);
+            answerTextView = (TextView) itemView.findViewById(R.id.answer_textView);
             Log.i(TAG, "Adding Listener");
             itemView.setOnClickListener(this);
         }
@@ -58,13 +61,9 @@ public class TopicRecyclerViewAdapter extends RecyclerView
 
     @Override
     public void onBindViewHolder(TopicObjectHolder holder, int position) {
-        try {
-            holder.title.setText(mDataset.get(position).getmTitle());
-            holder.description.setText(mDataset.get(position).getmDescription());
-        }catch (Exception e){
-            Log.i(TAG, "onBindViewHolder: position: " +position);
-            e.printStackTrace();
-        }
+        holder.idTextView.setText( toTopicIdFormat( mDataset.get(position).getId() ) );
+        holder.questionTextView.setText( mDataset.get(position).getQuestion() );
+        holder.answerTextView.setText( mDataset.get(position).getAnswer() );
     }
 
     public void addItem(TopicObject dataObj, int index) {
@@ -84,6 +83,25 @@ public class TopicRecyclerViewAdapter extends RecyclerView
 
     public interface MyClickListener {
         public void onItemClick(int position, View v);
+    }
+
+    public String toTopicIdFormat(int id){
+        String preChar = "Q";
+        int padding = 4;
+        String returnStr = preChar;
+        String numStr = Integer.toString(id);
+
+        if( numStr.length() > 4 ){
+            return "Q" + numStr;
+        }
+
+        for( int i=0; i< padding - numStr.length(); ++i ){
+            returnStr += "0";
+        }
+
+        returnStr += numStr;
+
+        return  returnStr;
     }
 
 }

@@ -3,9 +3,11 @@ package ms.sapientia.ro.gaitrecognitionapp.common;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Display;
@@ -220,6 +222,21 @@ public class AppUtil {
         builder.setNegativeButton("NO", (dialog, which) -> dialog.dismiss());
         AlertDialog alert = builder.create();
         alert.show();
+    }
+
+    public static void sendEmail(String to, String subject, String body){
+        // Intent intent = new Intent(Intent.ACTION_SEN);
+        // intent.setType("text/plain");
+        // intent.putExtra(Intent.EXTRA_EMAIL, to);
+        // intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        //
+        // intent.putExtra(Intent.EXTRA_TEXT, body);
+        // MainActivity.sInstance.startActivity(Intent.createChooser(intent, "Send Email"));
+        Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
+                "mailto",to, null));
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        emailIntent.putExtra(Intent.EXTRA_TEXT, body);
+        MainActivity.sInstance.startActivity(Intent.createChooser(emailIntent, "Send email..."));
     }
 
 

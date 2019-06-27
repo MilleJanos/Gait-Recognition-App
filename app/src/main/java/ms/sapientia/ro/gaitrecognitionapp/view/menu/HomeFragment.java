@@ -1,14 +1,18 @@
 package ms.sapientia.ro.gaitrecognitionapp.view.menu;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.NavigationView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import ms.sapientia.ro.gaitrecognitionapp.R;
+import ms.sapientia.ro.gaitrecognitionapp.common.Animator;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.model.NavigationMenuFragmentItem;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.menu.HomeFragmentPresenter;
@@ -22,8 +26,10 @@ public class HomeFragment extends NavigationMenuFragmentItem implements HomeFrag
     private static final String TAG = "HomeFragment";
 
     // View members:
-    TextView helpTextViewButton;
-
+    private TextView mHelpTextViewButton;
+    private ImageView mOpenDrawerHelpImageViewButton;
+    private ImageView mOpenDrawerHelpImageView;
+    private boolean mAnimationLock; // to prevent spamming the mOpenDrawerHelpImageViewButton button
 
     // MVP
     private HomeFragmentPresenter mPresenter;
@@ -50,28 +56,47 @@ public class HomeFragment extends NavigationMenuFragmentItem implements HomeFrag
 
         // Init. internal files:
         AppUtil.initInternalFiles();
+
     }
 
-
     private void initView(View view) {
-        helpTextViewButton = view.findViewById(R.id.help_textviewbutton);
+        mHelpTextViewButton = view.findViewById(R.id.help_textviewbutton);
+        mOpenDrawerHelpImageViewButton = view.findViewById(R.id.open_drawer_help_button);
+        mOpenDrawerHelpImageView = view.findViewById(R.id.help_arrow_imageView);
+        mOpenDrawerHelpImageView.setVisibility( View.INVISIBLE );
     }
 
     private void bindClickListeners() {
-        helpTextViewButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                goToHelpPage();
+        mHelpTextViewButton.setOnClickListener(v -> goToHelpPage());
+
+        mOpenDrawerHelpImageViewButton.setOnClickListener( v -> {
+
+            if( ! mAnimationLock ) {
+
+                mAnimationLock = true; // Lock
+
+                // Show arrow:
+                mOpenDrawerHelpImageView.setVisibility(View.VISIBLE);
+                // Move then hide arrow:
+                Animator.Slide(mOpenDrawerHelpImageView, 0, 0, 100, 0, 1000);
+
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        Animator.Slide(mOpenDrawerHelpImageView, 0, 0, 0, -60, 1000);
+                        mOpenDrawerHelpImageView.setVisibility(View.INVISIBLE);
+                        mAnimationLock = false; // Unlock
+                    }
+                }, 1500);
             }
         });
+
     }
 
     private void goToHelpPage(){
-
-        // TODO
-
+        MainActivity.sInstance.replaceFragment(new HelpFragment(), "help_fragment");
+        ((NavigationView) MainActivity.sInstance.findViewById(R.id.nav_view)).setCheckedItem(R.id.nav_help);
     }
-
 
     @Override
     public void showProgressBar() {

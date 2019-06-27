@@ -256,7 +256,7 @@ public class Recorder implements IRecorder {
 
             // Only for for _2 method:
             if( mAccelerometerArray.size() < MIN_TRAIN_LENGTH ){
-                Toast.makeText(MainActivity.sContext,"No enoght data! Please Try again.", Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.sContext,"No enough data! Please Try again.", Toast.LENGTH_LONG).show();
                 return;
             }
             processRecordedData();

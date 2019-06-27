@@ -11,11 +11,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import ms.sapientia.ro.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.Animator;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
+import ms.sapientia.ro.gaitrecognitionapp.model.IAfter;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.auth.LoginFragmentPresenter;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 
@@ -24,6 +26,8 @@ public class LoginFragment extends Fragment implements LoginFragmentPresenter.Vi
     public static LoginFragment sInstance;
 
     // View members:
+    private ImageView mIconImageView;
+    private TextView mTitleTextView;
     public EditText mEmailEditText;
     public EditText mPasswordEditText;
     private Button mLoginButton;
@@ -48,9 +52,11 @@ public class LoginFragment extends Fragment implements LoginFragmentPresenter.Vi
         bindClickListeners();
         sInstance = this;
 
-        Animator.LogoIntro(view.findViewById(R.id.ic_imageview));
-        Animator.Slide(view.findViewById(R.id.login_title_textview),-1000,0,0,0);
-
+        if( ! MainActivity.sFirstRun ) {
+            MainActivity.sFirstRun = true;
+            Animator.LogoIntro(view.findViewById(R.id.ic_imageview));
+            Animator.Slide(view.findViewById(R.id.login_title_textview), -1000, 0, 0, 0);
+        }
         //region check SDK
         //ConstraintLayout layout = (ConstraintLayout) getView().findViewById(R.id.login_fragment);
         //final int sdk = android.os.Build.VERSION.SDK_INT;
@@ -63,6 +69,8 @@ public class LoginFragment extends Fragment implements LoginFragmentPresenter.Vi
     }
 
     private void initView(View view){
+        mIconImageView = getView().findViewById(R.id.ic_imageview);
+        mTitleTextView = getView().findViewById(R.id.login_title_textview);
         mEmailEditText = getView().findViewById(R.id.email_editText);
         mPasswordEditText = getView().findViewById(R.id.password_editText);
         mLoginButton = getView().findViewById(R.id.login_button);
@@ -132,6 +140,11 @@ public class LoginFragment extends Fragment implements LoginFragmentPresenter.Vi
     }
 
     public void loginButtonClick(View view){
+
+        if( MainActivity.sIsProgressBarShown ){
+            return;
+        }
+
         // Reset errors:
         mPresenter.resetErrors(mEmailEditText, mPasswordEditText);
 
@@ -155,10 +168,21 @@ public class LoginFragment extends Fragment implements LoginFragmentPresenter.Vi
     }
 
     public void registerButtonClick(View view){
+
+        if( MainActivity.sIsProgressBarShown ){
+            return;
+        }
+
+        // mPresenter.animateViewItemsOut(mIconImageView, mTitleTextView, mEmailEditText, mPasswordEditText, mForgottPasswordTextViewButton, mLoginButton, mRegisterTextViewButton);
+
         mPresenter.goToRegisterPage();
     }
 
     public void forgottPasswordClick(View view){
+
+        if( MainActivity.sIsProgressBarShown ){
+            return;
+        }
 
         String email = mEmailEditText.getText().toString();
 
@@ -169,6 +193,11 @@ public class LoginFragment extends Fragment implements LoginFragmentPresenter.Vi
 
         AppUtil.requestPasswordReset( email );
 
+    }
+
+    @Override
+    public void showProgressBar(IAfter after) {
+        MainActivity.sInstance.showProgressBar( after );
     }
 
     @Override

@@ -52,7 +52,11 @@ public class Animator {
     }
 
 
-    public static void Slide(View view_item, float fromXDelta, float toXDelta, float fromYDelta, float toYDelta){
+    public static void Slide(View view_item, float fromXDelta, float toXDelta, float fromYDelta, float toYDelta ){
+         Slide(view_item,  fromXDelta,  toXDelta,  fromYDelta,  toYDelta, ANIMATION_DURATION);
+    }
+
+    public static void Slide(View view_item, float fromXDelta, float toXDelta, float fromYDelta, float toYDelta, long duration){
 
         // Convert DPI to Pixels
         float fromXDeltaInPixel = DpiToPixelConverter(fromXDelta);
@@ -62,7 +66,7 @@ public class Animator {
 
         // Translate:
         TranslateAnimation translateAnimation = new TranslateAnimation(fromXDeltaInPixel, toXDeltaInPixel, fromYDeltaInPixel, toYDeltaInPixel);
-        translateAnimation.setDuration(ANIMATION_DURATION);
+        translateAnimation.setDuration( duration );
 
 
         // Animation Set: (Translate+Alpha)

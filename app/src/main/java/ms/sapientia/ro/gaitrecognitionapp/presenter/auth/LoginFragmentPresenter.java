@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.logic.FirebaseController;
+import ms.sapientia.ro.gaitrecognitionapp.model.IAfter;
 import ms.sapientia.ro.gaitrecognitionapp.model.ICallback;
 import ms.sapientia.ro.gaitrecognitionapp.model.MyFirebaseUser;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
@@ -25,6 +26,7 @@ public class LoginFragmentPresenter {
 
     // Interface:
     public interface View{
+        void showProgressBar(IAfter after);
         void showProgressBar();
         void hideProgressBar();
     }
@@ -35,6 +37,7 @@ public class LoginFragmentPresenter {
     }
 
     // Methods:
+    private boolean mLoginIsDismissed;
 
     /**
      * Verifies email and password format and length.
@@ -148,7 +151,14 @@ public class LoginFragmentPresenter {
     public void Login(String email, String password){
 
         // Show progress bar:
-        view.showProgressBar();
+        view.showProgressBar(new IAfter(){
+            @Override
+            public void Do() {
+                mLoginIsDismissed = true;
+                Toast.makeText(MainActivity.sContext,"Login cancelled.", Toast.LENGTH_SHORT).show();
+            }
+        });
+        mLoginIsDismissed = false;
 
         // Check is email is correct or not:
         if( AppUtil.requireInternetConnection() ){
@@ -232,8 +242,9 @@ public class LoginFragmentPresenter {
 
                // User now is logged in.
 
-               // Open HomeFragment
-               MainActivity.sInstance.replaceFragment(new HomeFragment(), "main_fragment");
+               if( mLoginIsDismissed ){
+                   return;
+               }
 
                // GerCreate user object in database if the user does not have:
                new FirebaseController().getUserObjectById( AppUtil.sAuth.getUid(), new ICallback<MyFirebaseUser>(){
@@ -245,6 +256,8 @@ public class LoginFragmentPresenter {
                        MainActivity.sInstance.refreshNavigationMenuDraverNameAndEmail();
                        // Hide progress bar:
                        view.hideProgressBar();
+                       // Open HomeFragment
+                       MainActivity.sInstance.replaceFragment(new HomeFragment(), "main_fragment");
                    }
                    @Override
                    public void Failure() {
@@ -257,6 +270,8 @@ public class LoginFragmentPresenter {
                        AppUtil.sUser = user;
                        // Hide progress bar
                        view.hideProgressBar();
+                       // Open HomeFragment
+                       MainActivity.sInstance.replaceFragment(new HomeFragment(), "main_fragment");
                    }
                    @Override
                    public void Error(int error_code) {
@@ -269,6 +284,11 @@ public class LoginFragmentPresenter {
            }else{
 
                // Login attempt failed.
+
+               if( mLoginIsDismissed ){
+                   return;
+               }
+
                setErrors(null,"Wrong password");
 
                // Hide progress bar
@@ -348,6 +368,27 @@ public class LoginFragmentPresenter {
         return 0;
     }
 
-
+    // public void animateViewItemsIn(ImageView logo, TextView title, EditText email, EditText password, TextView forgetPassword, Button login, TextView goToRegister){
+    //
+    //     Animator.Slide(logo, -300, 0, 0, 0, 500);
+    //     Animator.Slide(title, -300, 0, 0, 0, 500);
+    //     Animator.Slide(email, -300, 0, 0, 0, 500);
+    //     Animator.Slide(password, -300, 0, 0, 0, 500);
+    //     Animator.Slide(forgetPassword, -300, 0, 0, 0, 500);
+    //     Animator.Slide(login, -300, 0, 0, 0, 500);
+    //     Animator.Slide(goToRegister, -300, 0, 0, 0, 500);
+    //     Animator.Slide(logo, -300, 0, 0, 0, 500);
+    // }
+    //
+    // public void animateViewItemsOut(ImageView logo, TextView title, EditText email, EditText password, TextView forgetPassword, Button login, TextView goToRegister){
+    //     Animator.Slide(logo, 0, -300, 0, 0, 500);
+    //     Animator.Slide(title, 0, -300, 0, 0, 500);
+    //     Animator.Slide(email, 0, -300, 0, 0, 500);
+    //     Animator.Slide(password, 0, -300, 0, 0, 500);
+    //     Animator.Slide(forgetPassword, 0, -300, 0, 0, 500);
+    //     Animator.Slide(login, 0, -300, 0, 0, 500);
+    //     Animator.Slide(goToRegister, 0, -300, 0, 0, 500);
+    //     Animator.Slide(logo, 0, -300, 0, 0, 500);
+    // }
 
 }

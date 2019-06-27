@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import ms.sapientia.ro.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
+import ms.sapientia.ro.gaitrecognitionapp.model.IAfter;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.auth.RegisterFragmentPresenter;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 
@@ -39,6 +40,8 @@ public class RegisterFragment extends Fragment implements RegisterFragmentPresen
 
     // MVP
     private RegisterFragmentPresenter mPresenter;
+
+
 
     @Nullable
     @Override
@@ -146,6 +149,11 @@ public class RegisterFragment extends Fragment implements RegisterFragmentPresen
     }
 
     public void registerButtonClick(View view){
+
+        if( MainActivity.sIsProgressBarShown ){
+            return;
+        }
+
         // Reset errors:
         mPresenter.resetErrors(mEmailEditText, mPasswordEditText1, mPasswordEditText1);
 
@@ -163,10 +171,19 @@ public class RegisterFragment extends Fragment implements RegisterFragmentPresen
     }
 
     public void loginButtonClick(View view){
+
+        if( MainActivity.sIsProgressBarShown ){
+            return;
+        }
+
         mPresenter.goBackToLoginPage();
     }
 
     public void forgottPasswordClick(View view){
+
+        if( MainActivity.sIsProgressBarShown ){
+            return;
+        }
 
         String email = mEmailEditText.getText().toString();
 
@@ -177,6 +194,12 @@ public class RegisterFragment extends Fragment implements RegisterFragmentPresen
 
         AppUtil.requestPasswordReset( email );
     }
+
+    @Override
+    public void showProgressBar(IAfter after) {
+        MainActivity.sInstance.showProgressBar( after );
+    }
+
 
     @Override
     public void showProgressBar() {
