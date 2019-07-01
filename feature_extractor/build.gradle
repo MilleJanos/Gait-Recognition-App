@@ -1,9 +1,12 @@
 apply plugin: 'java-library'
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     api fileTree(include: ['wekaSTRIPPED.jar'], dir: '../commonjars/libs')
     //api fileTree(include: ['weka.jar'], dir: '../commonjars/libs')
+    //
+    //api fileTree(include: ['Accelerometer.java'], dir: '../commonclasses/src/main/java/ms/sapientia/ro/commonclasses')
+    implementation project(':commonclasses')
 }
 
 sourceCompatibility = "7"

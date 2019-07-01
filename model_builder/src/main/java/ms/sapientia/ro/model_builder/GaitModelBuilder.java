@@ -1,14 +1,10 @@
 package ms.sapientia.ro.model_builder;
 
-
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -16,10 +12,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import weka.classifiers.Classifier;
-//import weka.classifiers.evaluation.Evaluation;
+import weka.classifiers.Evaluation;
 import weka.classifiers.trees.RandomForest;
 import weka.core.Attribute;
-import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SerializationHelper;
 import weka.core.converters.ArffLoader;
@@ -33,7 +28,7 @@ public class GaitModelBuilder implements IGaitModelBuilder {
      * @param arffFile - a .arff type file which contains user's features
      * @return a classifier
      */
-    public Classifier createModel(String arffFile) {
+    public Classifier createModel(String arffFile) throws Exception {
         // Load ARFF file
         /*BufferedReader reader = null;
         try {
@@ -56,6 +51,7 @@ public class GaitModelBuilder implements IGaitModelBuilder {
             loader.setSource(new File(arffFile));
         } catch (IOException e) {
             Logger.getLogger(GaitHelperFunctions.class.getName()).log(Level.SEVERE, null, e);
+            throw new Exception(e);
         }
 
         Instances data = null;
@@ -63,6 +59,7 @@ public class GaitModelBuilder implements IGaitModelBuilder {
             data = loader.getDataSet();
         } catch (IOException e) {
             Logger.getLogger(GaitHelperFunctions.class.getName()).log(Level.SEVERE, null, e);
+            throw new Exception(e);
         }
         data.setClassIndex(data.numAttributes() - 1);
 
@@ -72,6 +69,7 @@ public class GaitModelBuilder implements IGaitModelBuilder {
             classifier.buildClassifier(data);
         } catch (Exception ex) {
             Logger.getLogger(GaitHelperFunctions.class.getName()).log(Level.SEVERE, null, ex);
+            throw new Exception(ex);
         }
         Enumeration<Attribute> attribs = data.enumerateAttributes();
         attributes = new ArrayList<Attribute>();
@@ -85,56 +83,6 @@ public class GaitModelBuilder implements IGaitModelBuilder {
         attributes.add( new Attribute("userid", userids));
 
         return classifier;
-    }
-
-
-    public Classifier createModel(InputStream arffStream){
-
-        BufferedReader reader = new BufferedReader(new InputStreamReader(arffStream));
-
-        ArffLoader.ArffReader arff = null;
-        try {
-            arff = new ArffLoader.ArffReader(reader, 1000);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Instances data = arff.getStructure();
-        data.setClassIndex(data.numAttributes() - 1);
-        Instance inst = null;
-        while ( true ) {
-
-            try {
-                inst = arff.readInstance(data);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (inst == null){
-                break;
-            }
-            data.add(inst);
-        }
-        data.setClassIndex(data.numAttributes() - 1);
-
-        // Create classifier
-        Classifier classifier = new RandomForest();
-        try {
-            classifier.buildClassifier(data);
-        } catch (Exception ex) {
-            Logger.getLogger(GaitHelperFunctions.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        Enumeration<Attribute> attribs = data.enumerateAttributes();
-        attributes = new ArrayList<Attribute>();
-        while (attribs.hasMoreElements()) {
-            Attribute attribute = attribs.nextElement();
-            attributes.add( attribute );
-        }
-        List<String> userids = new ArrayList<>();
-        userids.add("user");
-        userids.add("dummy");
-        attributes.add( new Attribute("userid", userids));
-
-        return classifier;
-
     }
 
     /**
@@ -142,7 +90,7 @@ public class GaitModelBuilder implements IGaitModelBuilder {
      * @param arffFile - a .arff type file which contains user's features
      * @return a List of Attributes gained from the .arff file
      */
-    public ArrayList<Attribute> getAttributes(String arffFile) {
+    public ArrayList<Attribute> getAttributes(String arffFile) throws Exception {
         if (attributes != null) {
             return attributes;
         }
@@ -151,12 +99,14 @@ public class GaitModelBuilder implements IGaitModelBuilder {
             reader = new BufferedReader(new FileReader(arffFile));
         } catch (FileNotFoundException ex) {
             Logger.getLogger(GaitHelperFunctions.class.getName()).log(Level.SEVERE, null, ex);
+            throw new Exception(ex);
         }
         ArffLoader.ArffReader arff = null;
         try {
             arff = new ArffLoader.ArffReader(reader);
         } catch (IOException ex) {
             Logger.getLogger(GaitHelperFunctions.class.getName()).log(Level.SEVERE, null, ex);
+            throw new Exception(ex);
         }
 
         Instances data = arff.getData();
@@ -179,7 +129,7 @@ public class GaitModelBuilder implements IGaitModelBuilder {
      * @param path - the file path of the file which contains user's features
      * @return Instances of user's features
      */
-    public Instances loadDataset(String path) {
+    public Instances loadDataset(String path) throws Exception {
         Instances dataset = null;
         try {
             dataset = ConverterUtils.DataSource.read(path);
@@ -188,6 +138,7 @@ public class GaitModelBuilder implements IGaitModelBuilder {
             }
         } catch (Exception ex) {
             Logger.getLogger(GaitModelBuilder.class.getName()).log(Level.SEVERE, null, ex);
+            throw new Exception(ex);
         }
 
         return dataset;
@@ -198,7 +149,7 @@ public class GaitModelBuilder implements IGaitModelBuilder {
      * @param traindataset - get Instances from training data
      * @return a Classifier created from given Instnces
      */
-    public Classifier buildClassifier(Instances traindataset) {
+    public Classifier buildClassifier(Instances traindataset) throws Exception {
         RandomForest m = new RandomForest();
 
         try {
@@ -206,6 +157,7 @@ public class GaitModelBuilder implements IGaitModelBuilder {
 
         } catch (Exception ex) {
             Logger.getLogger(GaitModelBuilder.class.getName()).log(Level.SEVERE, null, ex);
+            throw new Exception(ex);
         }
         return m;
     }
@@ -217,29 +169,31 @@ public class GaitModelBuilder implements IGaitModelBuilder {
      * @param testdataset - evaluate the model with these test data
      * @return a summary of the evaluation
      */
-//    public String evaluateModel(Classifier model, Instances traindataset, Instances testdataset) {
-//        Evaluation eval = null;
-//        try {
-//            // Evaluate classifier with test dataset
-//            eval = new Evaluation(traindataset);
-//            eval.evaluateModel(model, testdataset);
-//        } catch (Exception ex) {
-//            Logger.getLogger(GaitModelBuilder.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//        return eval.toSummaryString("", true);
-//    }
+    public String evaluateModel(Classifier model, Instances traindataset, Instances testdataset) throws Exception {
+        Evaluation eval = null;
+        try {
+            // Evaluate classifier with test dataset
+            eval = new Evaluation(traindataset);
+            eval.evaluateModel(model, testdataset);
+        } catch (Exception ex) {
+            Logger.getLogger(GaitModelBuilder.class.getName()).log(Level.SEVERE, null, ex);
+            throw new Exception(ex);
+        }
+        return eval.toSummaryString("", true);
+    }
 
     /**
      *
      * @param model - this is the model which we want to save
      * @param modelpath - this is a path (contains the file name), where we want to save the model
      */
-    public void saveModel(Classifier model, String modelpath) {
+    public void saveModel(Classifier model, String modelpath) throws Exception {
 
         try {
             SerializationHelper.write(modelpath, model);
         } catch (Exception ex) {
             Logger.getLogger(GaitModelBuilder.class.getName()).log(Level.SEVERE, null, ex);
+            throw new Exception(ex);
         }
     }
 }

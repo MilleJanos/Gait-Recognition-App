@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@color/switchTrackNormal" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@color/colorBlack" />
+        </shape>
+    </item>
+    <item android:width="40dp"
+        android:height="40dp">>
+        <bitmap android:src="@color/colorGray9"
+            android:tint="@color/switchThumbBgActive" />
+    </item>
+</layer-list>

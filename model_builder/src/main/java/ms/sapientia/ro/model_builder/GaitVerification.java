@@ -1,6 +1,11 @@
 package ms.sapientia.ro.model_builder;
 
-import ms.sapientia.ro.feature_extractor.Accelerometer;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import ms.sapientia.ro.feature_extractor.*;
+import ms.sapientia.ro.commonclasses.Accelerometer;
 import ms.sapientia.ro.feature_extractor.Feature;
 import ms.sapientia.ro.feature_extractor.FeatureExtractor;
 import ms.sapientia.ro.feature_extractor.FeatureExtractorException;
@@ -12,18 +17,12 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static ms.sapientia.ro.feature_extractor.FeatureExtractor.extractFeaturesFromArrayListToArrayListOfFeatures;
-
 
 public class GaitVerification implements IGaitVerification {
     private double verifyUser(Classifier classifier, ArrayList<Attribute> attributes, ArrayList<Accelerometer> rawdata, IUtil utility, String userName) {
         ArrayList<Feature> features = null;
         try{
-            features = extractFeaturesFromArrayListToArrayListOfFeatures(rawdata, userName);
+            features = FeatureExtractor.extractFeaturesFromArrayListToArrayListOfFeatures(rawdata, userName);
         }
         catch (FeatureExtractorException ex){
             Logger.getLogger(GaitVerification.class.getName()).log(Level.SEVERE, null, ex);
@@ -36,7 +35,7 @@ public class GaitVerification implements IGaitVerification {
 
         double probability = 0;
         for(int i=0; i <= features.size(); i++){
-            // for (Feature f : features) {
+        // for (Feature f : features) {
             //double values[] = this.feature2DoubleArray(f, NUM_FEATURES);
             try {
                 double result[] = classifier.distributionForInstance(instances.get(i));
@@ -99,7 +98,7 @@ public class GaitVerification implements IGaitVerification {
         ArrayList<Feature> features = null;
         try{
             //String userName = "ttJMxBAjuHNVLCKhaXNvBTFDbIc2";
-            features = extractFeaturesFromArrayListToArrayListOfFeatures(rawdata, userName);
+            features = FeatureExtractor.extractFeaturesFromArrayListToArrayListOfFeatures(rawdata, userName);
         }
         catch (FeatureExtractorException ex){
             Logger.getLogger(GaitVerification.class.getName()).log(Level.SEVERE, null, ex);
@@ -130,11 +129,13 @@ public class GaitVerification implements IGaitVerification {
         return probability/features.size();
     }
 
-    public double verifyUser(Classifier classifier, ArrayList<Attribute> attributes, String rawdata_file) {
-        Settings.usingFrames(128);
-        Settings.setInputHasHeader(false);
-        Settings.setOutputHasHeader(true);
-        Settings.setOutputFileType(Settings.FileType.ARFF);
+    public double verifyUser(Classifier classifier, ArrayList<Attribute> attributes, String rawdata_file, String user_id) {
+        //Settings.usingFrames(128);
+        //Settings.setInputHasHeader(false);
+        //Settings.setOutputHasHeader(true);
+        //Settings.setOutputFileType(Settings.FileType.ARFF);
+        Settings.useRecommendedSettingsWithFrames();
+        Settings.setDefaultUserId (user_id );
 
         //Settings.setDefaultUserId("mj");
         System.out.println(Settings.getAllSettings());

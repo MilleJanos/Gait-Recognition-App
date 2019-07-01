@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <!--android:background="@drawable/image_asphalt_road">-->
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/white_alpha_color_99"/>
+
+            <Switch
+                android:id="@+id/service_switch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/shadow_lighter_color_2"
+                android:gravity="center"
+                android:layout_marginStart="32dp"
+                android:layout_marginEnd="32dp"
+                android:layout_marginBottom="0dp"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:fontFamily="@font/aldrich"
+                android:switchPadding="1dp"
+                android:text="Service"
+                android:showText="true"
+                android:textOn="I"
+                android:textOff="O"
+                android:textColor="@color/colorGray9"
+                android:textSize="30sp"
+                app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+                app:layout_constraintStart_toStartOf="parent" />
+                <!--android:thumb="@drawable/switch_thumb_custom"-->
+                <!--android:track="@drawable/switch_track_custom"-->
+
+
+            <LinearLayout
+                android:id="@+id/linearLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/shadow_lighter_color_2"
+                android:padding="10dp"
+                android:layout_marginStart="32dp"
+                android:layout_marginTop="140dp"
+                android:layout_marginEnd="32dp"
+                android:layout_marginBottom="80dp"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+
+                <!-- My Radio: Train -->
+
+                <LinearLayout
+                    android:id="@+id/item_train"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="40dp"
+                    android:orientation="vertical">
+
+                    <TextView
+
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/aldrich"
+                        android:text="Train"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="26sp" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/item_train_image"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:layout_marginStart="20dp"
+                            android:src="@drawable/ic_train_alpha" />
+
+                        <TextView
+                            android:id="@+id/desc_train_textview"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:fontFamily="@font/alef"
+                            android:text="Train with data extracted from your walk. Use only on straight and flat area."
+                            android:textColor="@color/colorGray9"
+                            android:textSize="18sp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <CheckBox
+                            android:visibility="gone"
+                            android:id="@+id/train_new_switch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:buttonTint="@color/colorBlack"
+                            android:layout_marginStart="100dp"
+                            android:fontFamily="@font/alef"
+                            android:textSize="20sp"
+                            android:text="Train new one"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- My Radio: Authenticate -->
+
+                <LinearLayout
+                    android:id="@+id/item_auth"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="40dp"
+                    android:orientation="vertical">
+
+                    <TextView
+
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/aldrich"
+                        android:text="Authentication"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="26sp" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/item_auth_image"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:layout_marginStart="20dp"
+                            android:src="@drawable/ic_padlock_alpha" />
+
+                        <TextView
+                            android:id="@+id/desc_auth_textview"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:fontFamily="@font/alef"
+                            android:text="Use trained walk data to authenticate yourself."
+                            android:textColor="@color/colorGray9"
+                            android:textSize="18sp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- My Radio: Collect Data -->
+
+                <LinearLayout
+                    android:id="@+id/item_collect_data"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="40dp"
+                    android:orientation="vertical">
+
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/aldrich"
+                        android:text="Collect Data"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="26sp" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/item_collect_data_image"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:layout_marginStart="20dp"
+                            android:src="@drawable/ic_data_alpha" />
+
+                        <TextView
+                            android:id="@+id/desc_collect_data_textview"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:fontFamily="@font/alef"
+                            android:text="Collect data for manual processing."
+                            android:textColor="@color/colorGray9"
+                            android:textSize="18sp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <com.jjoe64.graphview.GraphView
+                    android:id="@+id/graph_view_1"
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"/>
+
+                <com.jjoe64.graphview.GraphView
+                    android:id="@+id/graph_view_2"
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"/>
+
+            </LinearLayout>
+
+        </android.support.constraint.ConstraintLayout>
+
+
+
+    </ScrollView>
+
+</android.support.constraint.ConstraintLayout>
+
