@@ -3,12 +3,17 @@ package ms.sapientia.ro.gaitrecognitionapp.view.menu;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,6 +21,7 @@ import java.util.Calendar;
 
 import ms.sapientia.ro.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
+import ms.sapientia.ro.gaitrecognitionapp.common.AuthScoreRecyclerViewAdapter;
 import ms.sapientia.ro.gaitrecognitionapp.logic.FirebaseController;
 import ms.sapientia.ro.gaitrecognitionapp.model.IAfter;
 import ms.sapientia.ro.gaitrecognitionapp.model.ICallback;
@@ -27,13 +33,13 @@ import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 public class ProfileFragment extends NavigationMenuFragmentItem implements ProfileFragmentPresenter.View {
 
     private static final String TAG = "ProfileFragment";
-
     // MVP:
-    private ProfileFragmentPresenter mPresenter;
-
+    private static ProfileFragmentPresenter mPresenter;
     // View members:
     private static TextView mTitleUserName;
     private static TextView mTitleUserEmail;
+    private static LinearLayout mAuthScoreLinearLayout;
+    private static LinearLayout mCollectedLinearLayout;
     private static TextView mAuthScore;
     private static TextView mCollectedScore;
     private static Button mRefreshButton;
@@ -44,7 +50,12 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
     private static TextView mBirthDateTextView;
     private static TextView mPhoneNumberTextView;
     private FloatingActionButton mEditFloatingActionButton;
-
+    private ImageView mHideImageView;
+    private ConstraintLayout mAuthScoreWindowLinearLayout;
+    // Recycler View Members:
+    private static RecyclerView mRecyclerView;
+    private static RecyclerView.Adapter mAdapter;
+    private static RecyclerView.LayoutManager mLayoutManager;
 
     @Nullable
     @Override
@@ -65,6 +76,7 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
         initView(view);
         bindClickListeners();
 
+        initRecyclerView(view);
 
         refreshProfileInformationsUI();
     }
@@ -72,6 +84,8 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
     private void initView(View view) {
         mTitleUserName = view.findViewById(R.id.user_name_textview);
         mTitleUserEmail = view.findViewById(R.id.user_email_textview);
+        mAuthScoreLinearLayout = view.findViewById(R.id.auth_linearlayout);
+        mCollectedLinearLayout = view.findViewById(R.id.data_collected_linearlayout);
         mAuthScore = view.findViewById(R.id.auth_value_textview);
         mCollectedScore = view.findViewById(R.id.data_collected_value_textview);
         mRefreshButton = view.findViewById(R.id.refresh_button);
@@ -82,19 +96,22 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
         mBirthDateTextView = view.findViewById(R.id.birth_date_textview);
         mPhoneNumberTextView = view.findViewById(R.id.phone_number_textview);
         mEditFloatingActionButton = view.findViewById(R.id.edit_floating_action_button);
+        mHideImageView = view.findViewById(R.id.hide_image_view);
+        mAuthScoreWindowLinearLayout = view.findViewById(R.id.score_container_frameLayout);
     }
 
     private void bindClickListeners() {
         mRefreshButton.setOnClickListener(v -> refreshProfileInformations() );
         mClearButton.setOnClickListener(v -> resetAuthScore());
         mEditFloatingActionButton.setOnClickListener(v -> goToEditProfile());
-        mAuthScore.setOnClickListener( v -> {
+        mAuthScoreLinearLayout.setOnClickListener( v -> {
             if ( mAuthScore.getText().equals("N/A") ){
                 Toast.makeText(MainActivity.sContext,"Use authentication mode first!",Toast.LENGTH_LONG).show();
             }else{
                 displayAuthScores();
             }
         });
+        mHideImageView.setOnClickListener( v -> hideAuthScores() );
     }
 
     private void goToEditProfile() {
@@ -116,6 +133,8 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
 
         setBirthDate( calendar );
         setPhoneNumber( AppUtil.sUser.phone_number );
+
+        refreshRecycler();
     }
 
     private void refreshProfileInformations(){
@@ -127,6 +146,7 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
         AppUtil.sUser.authenticaiton_values.clear();
         FirebaseController.setUserObject( AppUtil.sUser );
         refreshProfileInformationsUI();
+        hideAuthScores();
     }
 
     // Top part:
@@ -135,7 +155,7 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
         if( ! firstName.isEmpty()){
             mTitleUserName.setText( firstName + " " + lastName );
         }else{
-
+            mTitleUserName.setText( "" );
         }
     }
 
@@ -240,7 +260,12 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
     }
 
     private void displayAuthScores(){
-        // TODO
+        mAuthScoreWindowLinearLayout.setVisibility( View.VISIBLE );
+        refreshRecycler();
+    }
+
+    private void hideAuthScores(){
+        mAuthScoreWindowLinearLayout.setVisibility( View.INVISIBLE );
     }
 
     @Override
@@ -252,4 +277,33 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
     public void hideProgressBar() {
         MainActivity.sInstance.hideProgressBar();
     }
+
+    // Auth Score recycler view:
+
+    /**
+     * This method initiates the Recycler View.
+     * @param view view of the fragment.
+     */
+    private void initRecyclerView(android.view.View view){
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.auth_score_recycler_view);
+        mRecyclerView.setHasFixedSize(true);
+        mLayoutManager = new LinearLayoutManager(MainActivity.sContext);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mAdapter = new AuthScoreRecyclerViewAdapter( mPresenter.getDataSet() );
+        mRecyclerView.setAdapter(mAdapter);
+
+        // Code to Add an item with default animation
+        //((TopicRecyclerViewAdapter) mAdapter).addItem(obj, index);
+
+        // Code to remove an item with default animation
+        //((TopicRecyclerViewAdapter) mAdapter).deleteItem(index);
+    }
+
+    private static void refreshRecycler(){
+        if( mAdapter != null && mRecyclerView != null ) {
+            mAdapter = new AuthScoreRecyclerViewAdapter(mPresenter.getDataSet());
+            mRecyclerView.setAdapter(mAdapter);
+        }
+    }
+
 }

@@ -6,8 +6,6 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.SignInMethodQueryResult;
 
-import java.util.regex.Pattern;
-
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.logic.FirebaseController;
 import ms.sapientia.ro.gaitrecognitionapp.model.IAfter;
@@ -51,7 +49,7 @@ public class LoginFragmentPresenter {
         int errorCode;
 
         /// Check email:
-        errorCode = isEmailFormatWrong(email);
+        errorCode = AppUtil.isEmailFormatWrong(email);
 
         switch (errorCode){
             case 1:{
@@ -69,7 +67,7 @@ public class LoginFragmentPresenter {
         }
 
         /// Check password:
-        errorCode = isPasswordFormatWrong(password);
+        errorCode = AppUtil.isPasswordFormatWrong(password);
 
         switch (errorCode){
             case 1:{
@@ -296,76 +294,6 @@ public class LoginFragmentPresenter {
            }
         });
 
-    }
-
-
-    /**
-     * Check the email if is valid format.
-     * Returns the error code:
-     *  0 if email is Correct
-     *  1 if email is empty
-     *  2 if email contains extra spaces
-     *  3 if email format is wrong
-     * @param email to verify
-     * @return error code
-     */
-    private int isEmailFormatWrong(String email){
-        // Length:
-        if( email.length() == 0 ){
-            return 1;
-        }
-        // Extra space
-        if( ! email.trim().equals(email) ){
-            return 2;
-        }
-        // Content
-        Pattern email_address_pattern = Pattern.compile(
-                "[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{1,256}" +
-                        "\\@" +
-                        "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" +
-                        "(" +
-                        "\\." +
-                        "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
-                        ")+"
-        );
-        if( ! email_address_pattern.matcher(email).matches() ){
-            return 3;
-        }
-        return 0;
-    }
-
-    /**
-     * Check the email if is valid format.
-     * Returns the error code:
-     *  0 if password his Correct
-     *  1 if password is empty
-     *  2 if password is shorter then 6
-     *  3 if password contains space
-     *  4 if password format is wrong
-     * @param password to verify
-     * @return error code
-     */
-    private int isPasswordFormatWrong(String password){
-        // Empty
-        if( password.length() == 0 ){
-            return 1;
-        }
-        // Length
-        if( password.length() < 6 ){
-            return 2;
-        }
-        // Extra space
-        if( ! password.trim().equals(password) ){
-            return 3;
-        }
-        // Content
-        Pattern password_address_pattern = Pattern.compile(
-                "[a-zA-Z0-9_]+"
-        );
-        if( ! password_address_pattern.matcher(password).matches() ){
-            return 4;
-        }
-        return 0;
     }
 
     // public void animateViewItemsIn(ImageView logo, TextView title, EditText email, EditText password, TextView forgetPassword, Button login, TextView goToRegister){

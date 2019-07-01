@@ -1,19 +1,18 @@
 package ms.sapientia.ro.gaitrecognitionapp.service;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.MediaPlayer;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.StorageReference;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
@@ -27,20 +26,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import ms.sapientia.ro.gaitrecognitionapp.R;
 import ms.sapientia.ro.commonclasses.Accelerometer;
 import ms.sapientia.ro.feature_extractor.Settings;
 import ms.sapientia.ro.feature_extractor.Util;
+import ms.sapientia.ro.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.common.FileUtil;
 import ms.sapientia.ro.gaitrecognitionapp.logic.FirebaseController;
 import ms.sapientia.ro.gaitrecognitionapp.logic.MyFirebaseController;
 import ms.sapientia.ro.gaitrecognitionapp.model.IAfter;
 import ms.sapientia.ro.gaitrecognitionapp.model.ICallback;
-import ms.sapientia.ro.gaitrecognitionapp.model.MyFirebaseUser;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 import ms.sapientia.ro.gaitrecognitionapp.view.menu.ModeFragment;
-import ms.sapientia.ro.gaitrecognitionapp.view.menu.ProfileFragment;
 import ms.sapientia.ro.model_builder.GaitHelperFunctions;
 import ms.sapientia.ro.model_builder.GaitModelBuilder;
 import ms.sapientia.ro.model_builder.GaitVerification;
@@ -104,7 +101,10 @@ public class Recorder implements IRecorder {
     public enum Mode{ MODE_TRAIN, MODE_AUTHENTICATE, MODE_COLLECT_DATA }
     private Mode mMode = Mode.MODE_TRAIN;
     private boolean mTrainNewOne = true;
+    private boolean mPreprocessDismissed;
+    private boolean mTrainDismissed;
     // Sound Members:
+    private boolean mDebugSound = false;
     private MediaPlayer mp_bing;
     private MediaPlayer mp_feature;
     private MediaPlayer mp_model;
@@ -138,9 +138,7 @@ public class Recorder implements IRecorder {
                     float y = event.values[1];
                     float z = event.values[2];
                     // Record:
-                    //sensorChanged_OLD(timeStamp, x, y, z);
-                    //sensorChanged(timeStamp, x, y, z);
-                    sensorChanged_2(timeStamp, x, y, z);
+                    sensorChanged(timeStamp, x, y, z);
                 }
             }
 
@@ -154,14 +152,15 @@ public class Recorder implements IRecorder {
 
         initSound();
 
-        if( mMode == Mode.MODE_TRAIN ) {
-            mCanRecord = true;
-            //mCanRecord = false;     // initTrainFiles will modofy this value
-            //initTrainFiles_OLD(mTrainNewOne);
-        }else{
-            // Auth & Data collect
-            mCanRecord = true;
-        }
+        mCanRecord = true;
+        //if( mMode == Mode.MODE_TRAIN ) {
+        //    mCanRecord = true;
+        //    mCanRecord = false;     // initTrainFiles will modofy this value
+        //    initTrainFiles_OLD(mTrainNewOne);
+        //}else{
+        //    // Auth & Data collect
+        //    mCanRecord = true;
+        //}
 
     }
 
@@ -289,7 +288,7 @@ public class Recorder implements IRecorder {
 
     // Sensor on changed method:
 
-    private void sensorChanged_2(long timeStamp, float x, float y, float z) {
+    private void sensorChanged(long timeStamp, float x, float y, float z) {
 
         if ( mMode == Mode.MODE_TRAIN ) {
             // Record until stops.
@@ -312,7 +311,9 @@ public class Recorder implements IRecorder {
             if(mCurrentIntervalBetweenTests == sIntervalBetweenTests){
 
                 mCanRecord = false; // Stop recording while processing
-                mp_bing.start();
+                if( mDebugSound ) {
+                    mp_bing.start();
+                }
                 processRecordedData();
 
                 mCurrentIntervalBetweenTests = 0;
@@ -340,7 +341,14 @@ public class Recorder implements IRecorder {
     private void processRecordedData(){
 
         // show progress bar:
-        showProgressBar();
+        showProgressBar(new IAfter() {
+            @Override
+            public void Do() {
+                mPreprocessDismissed = true;
+                Toast.makeText(MainActivity.sContext,"Cancelled!", Toast.LENGTH_SHORT).show();
+            }
+        });
+        mPreprocessDismissed = false;
 
         // Init Internal Raw File:
         String path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "rawdata" + "/" + "rawdata_" + RecorderUtils.getCurrentDateFormatted() + ".csv";
@@ -371,6 +379,10 @@ public class Recorder implements IRecorder {
 
         // hide progress bar
         hideProgressBar();
+
+        if( mPreprocessDismissed ){
+            return;
+        }
 
         switch (mMode){
 
@@ -404,11 +416,23 @@ public class Recorder implements IRecorder {
      */
     private void mode_train(){
 
-                //*//if (mCurrentFileCount >= sFilesCountBetweenModelGenerating - 1) {
-                // Collected enought arff files to being.
+        //*//if (mCurrentFileCount >= sFilesCountBetweenModelGenerating - 1) {
+        // Collected enought arff files to being.
 
-                // Show progress bar
-                showProgressBar();
+            // Show progress bar
+            showProgressBar(new IAfter() {
+                @Override
+                public void Do() {
+                    mTrainDismissed = true;
+                    askForRetrain("Train cancelled.", "Do you want to retry training?", new IAfter() {
+                        @Override
+                        public void Do() {
+                            mode_train();
+                        }
+                    });
+                }
+            });
+            mTrainDismissed = false;
 
             // Train then upload files:
 
@@ -542,9 +566,9 @@ public class Recorder implements IRecorder {
 
                 score = (score<0)?0:score;
 
-                Toast.makeText(MainActivity.sContext, "---> " + Math.floor(score * 100) + " % <---", Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.sContext, "---> " + ((int) Math.floor(score * 100)) + " % <---", Toast.LENGTH_LONG).show();
 
-                mp_bing2.start(); // TODO: remove it
+                mp_bing2.start();
 
                 // Update avg. score and list
                 if( AppUtil.sUser.authenticaiton_avg != 0 ){
@@ -593,6 +617,34 @@ public class Recorder implements IRecorder {
                 ref,
                 AppUtil.rawdataUserFile,
                 null);
+    }
+
+    private void askForRetrain(String title, String message, IAfter after){
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.sContext);
+
+        builder.setTitle(title);
+        builder.setMessage(message);
+
+        builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int which) {
+
+                after.Do();
+                dialog.dismiss();
+            }
+        });
+
+        builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Do nothing
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 
     // Other methods:
@@ -678,12 +730,24 @@ public class Recorder implements IRecorder {
 
             @Override
             public void Failure() {
-                Toast.makeText(MainActivity.sContext, "ERROR 1: Download error!", Toast.LENGTH_LONG).show();
+                //Toast.makeText(MainActivity.sContext, "ERROR 1: Download error!", Toast.LENGTH_LONG).show();
+                askForRetrain("Train failed. (ERROR 1)", "Retry?", new IAfter() {
+                    @Override
+                    public void Do() {
+                        mode_train();
+                    }
+                });
             }
 
             @Override
             public void Error(int error_code) {
-                Toast.makeText(MainActivity.sContext, "ERROR 2: Download error!", Toast.LENGTH_LONG).show();
+                //Toast.makeText(MainActivity.sContext, "ERROR 2: Download error!", Toast.LENGTH_LONG).show();
+                askForRetrain("Train failed (ERROR 2).", "Retry?", new IAfter() {
+                    @Override
+                    public void Do() {
+                        mode_train();
+                    }
+                });
             }
         });
 
@@ -725,7 +789,9 @@ public class Recorder implements IRecorder {
         mUserFeatureFilesPath.add( outputFeatureFile.getAbsolutePath() ); // TODO is this used ? or we need it ?
 
         // Play sound:
-        mp_feature.start(); // TODO: Remove sound
+        if( mDebugSound ) {
+            mp_feature.start();
+        }
     }
 
     /**
@@ -769,7 +835,9 @@ public class Recorder implements IRecorder {
         }
 
         // Play sound:
-        mp_model.start(); // TODO remove it
+        if( mDebugSound ) {
+            mp_model.start();
+        }
     }
 
 
@@ -1024,6 +1092,10 @@ public class Recorder implements IRecorder {
     }
 
     // Progress bar controller methods:
+
+    private void showProgressBar(IAfter after){
+        MainActivity.sInstance.showProgressBar(after);
+    }
 
     private void showProgressBar(){
         MainActivity.sInstance.showProgressBar();

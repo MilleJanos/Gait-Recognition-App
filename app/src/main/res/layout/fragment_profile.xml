@@ -38,7 +38,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/alef"
             android:textStyle="bold"
-            android:text="loading..."
+            android:text="name"
             android:textAlignment="center"
             android:textColor="@color/colorBlack"
             android:textSize="20dp" />
@@ -49,7 +49,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:fontFamily="@font/alef"
-            android:text="loading..."
+            android:text="email"
             android:textAlignment="center"
             android:textColor="@color/colorBlue5"
             android:textSize="20dp" />
@@ -191,6 +191,7 @@
     </LinearLayout>
 
     <ScrollView
+        android:id="@+id/scrollView2"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
@@ -372,6 +373,42 @@
         </LinearLayout>
 
     </ScrollView>
+
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/score_container_frameLayout"
+        android:visibility="invisible"
+        android:layout_width="170dp"
+        android:layout_height="300dp"
+        android:layout_marginStart="40dp"
+        android:layout_marginBottom="28dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:background="@color/shadow_lighter_color_9">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/auth_score_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="50dp"
+            android:layout_marginBottom="1dp"
+            android:layout_marginLeft="1dp"
+            android:layout_marginRight="1dp">
+
+        </android.support.v7.widget.RecyclerView>
+
+        <ImageView
+            android:id="@+id/hide_image_view"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/ic_arrow_drop_down_circle"
+            android:tint="@color/colorBlue5"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </android.support.constraint.ConstraintLayout>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/edit_floating_action_button"

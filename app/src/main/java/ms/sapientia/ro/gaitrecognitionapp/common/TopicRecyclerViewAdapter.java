@@ -12,8 +12,7 @@ import java.util.ArrayList;
 import ms.sapientia.ro.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.model.TopicObject;
 
-public class TopicRecyclerViewAdapter extends RecyclerView
-        .Adapter<TopicRecyclerViewAdapter.TopicObjectHolder> {
+public class TopicRecyclerViewAdapter extends RecyclerView.Adapter<TopicRecyclerViewAdapter.TopicObjectHolder> {
 
     private static String TAG = "MyRecyclerViewAdapter";
     private ArrayList<TopicObject> mDataset;

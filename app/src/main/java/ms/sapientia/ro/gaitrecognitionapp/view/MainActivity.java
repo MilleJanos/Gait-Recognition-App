@@ -165,7 +165,14 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
      */
     public void refreshNavigationMenuDraverNameAndEmail(){
 
-        String userName = AppUtil.sUser.first_name + " " + AppUtil.sUser.last_name;
+        String userName;
+        if( AppUtil.sUser.first_name.isEmpty() || AppUtil.sUser.last_name.isEmpty() ){
+            ((TextView) findViewById(R.id.nav_header_name)).setTextColor( R.color.colorGray5 );
+            userName = "Press here to set your name.";
+        }else{
+            ((TextView) findViewById(R.id.nav_header_name)).setTextColor( R.color.colorBlack );
+            userName = AppUtil.sUser.first_name + " " + AppUtil.sUser.last_name;
+        }
         String email = AppUtil.sAuth.getCurrentUser().getEmail();
 
         NavigationView navigationView = MainActivity.sInstance.findViewById(R.id.nav_view);
@@ -224,6 +231,23 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
         mProgressBarDismiss.setOnClickListener( v -> {
             Dismiss();
         });
+
+        NavigationView navigationView = MainActivity.sInstance.findViewById(R.id.nav_view);
+        View headerView = navigationView.getHeaderView(0);
+
+        headerView.findViewById(R.id.nav_header_name).setOnClickListener( v -> {
+            goToEditProfile();
+        });
+
+        headerView.findViewById(R.id.nav_header_email).setOnClickListener( v -> {
+            goToEditProfile();
+        });
+
+    }
+
+    private void goToEditProfile(){
+        MainActivity.sInstance.replaceFragment(new EditProfileFragment(), "edit_profile_fragment");
+        ((NavigationView) MainActivity.sInstance.findViewById(R.id.nav_view)).setCheckedItem(R.id.nav_profile);
     }
 
     public void Dismiss(){
