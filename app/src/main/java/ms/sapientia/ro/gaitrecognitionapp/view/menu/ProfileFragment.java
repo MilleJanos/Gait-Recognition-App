@@ -121,7 +121,7 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
     public static void refreshProfileInformationsUI(){
         setTitleUserName( AppUtil.sUser.last_name, AppUtil.sUser.first_name);
         setTitleEmail( AppUtil.sAuth.getCurrentUser().getEmail());
-        setAuthenticationScore( AppUtil.sUser.authenticaiton_avg, true );
+        setAuthenticationScore( AppUtil.sUser.authenticaiton_values.get(AppUtil.sUser.authenticaiton_values.size() - 1 ), true );
         setCollectedDataScore( AppUtil.sUser.raw_count );
 
         setEmail( AppUtil.sAuth.getCurrentUser().getEmail() );

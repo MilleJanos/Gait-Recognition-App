@@ -46,9 +46,9 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
     private MyFirebaseUser auxUser;
     // Colors:
     private int selectedColor = Color.BLACK;
-    private int notSelectedColor = R.color.white_alpha_color_3;
-    private int selectedDescriptionColor = Color.DKGRAY;
-    private int notSelectedDescriptionColor = R.color.white_alpha_color_3;
+    private int notSelectedColor = Color.DKGRAY;
+    private int selectedDescriptionColor = Color.BLACK;
+    private int notSelectedDescriptionColor = Color.DKGRAY;
 
 
     @Nullable
