@@ -2,6 +2,7 @@ package ms.sapientia.ro.gaitrecognitionapp.view;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -16,13 +17,13 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,6 +32,7 @@ import ms.sapientia.ro.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.model.IAfter;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.MainActivityPresenter;
+import ms.sapientia.ro.gaitrecognitionapp.service.BackgroundService;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.LoginFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.RegisterFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.menu.EditProfileFragment;
@@ -64,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
     public static Context sContext;
     public static boolean sIsProgressBarShown = false;
     public static boolean sFirstRun = false; // only run the intro animation once on login page;
+    public static boolean sStartedFromNotification = true;
 
     // Members:
     private static MainActivityPresenter mPresenter;
@@ -130,8 +133,11 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
         // Init Navigation Menu Drawer:
         initNavigationMenuDrawer();
 
-        // Lock navigation drawer
+        // Lock navigation drawer:
         lockNavigationDrawer();
+
+        // Check if app is started by Notification click:
+        askForStoppingService();
     }
 
     private void initToolbar(){
@@ -345,7 +351,15 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
         //endregion
     }
 
-
+    public void askForStoppingService(){
+        // ONLY FOR FUTURE USAGES
+        String boolStr = getIntent().getStringExtra("started_by_notification");
+        if( boolStr != null && boolStr.equals("true") ){
+            sStartedFromNotification = true;
+        }else{
+            sStartedFromNotification = false;
+        }
+    }
 
     /**
      * Removes the fragment from fragment stack.

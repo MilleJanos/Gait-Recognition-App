@@ -4,6 +4,7 @@ package ms.sapientia.ro.gaitrecognitionapp.view.auth;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -19,6 +20,7 @@ import ms.sapientia.ro.gaitrecognitionapp.common.Animator;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.model.IAfter;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.auth.LoginFragmentPresenter;
+import ms.sapientia.ro.gaitrecognitionapp.service.BackgroundService;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 
 public class LoginFragment extends Fragment implements LoginFragmentPresenter.View {
@@ -33,6 +35,7 @@ public class LoginFragment extends Fragment implements LoginFragmentPresenter.Vi
     private Button mLoginButton;
     private TextView mRegisterTextViewButton;
     private TextView mForgottPasswordTextViewButton;
+    private ConstraintLayout mStopServiceConstLayoutButton;
 
     // MVP:
     private LoginFragmentPresenter mPresenter;
@@ -76,6 +79,7 @@ public class LoginFragment extends Fragment implements LoginFragmentPresenter.Vi
         mLoginButton = getView().findViewById(R.id.login_button);
         mRegisterTextViewButton = getView().findViewById(R.id.sign_up_textviewbutton);
         mForgottPasswordTextViewButton = getView().findViewById(R.id.forgot_password_textviewbutton);
+        mStopServiceConstLayoutButton = getView().findViewById(R.id.on_login_stop_service_button);
     }
 
     public void bindClickListeners() {
@@ -136,6 +140,10 @@ public class LoginFragment extends Fragment implements LoginFragmentPresenter.Vi
                 }
                 return false;
             }
+        });
+        mStopServiceConstLayoutButton.setOnClickListener( v -> {
+            BackgroundService.sInstance.StopService();
+            mStopServiceConstLayoutButton.setVisibility( View.INVISIBLE );
         });
     }
 
@@ -208,5 +216,17 @@ public class LoginFragment extends Fragment implements LoginFragmentPresenter.Vi
     @Override
     public void hideProgressBar() {
         MainActivity.sInstance.hideProgressBar();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if( BackgroundService.sIsRunning ){
+            mStopServiceConstLayoutButton.setVisibility( View.VISIBLE );
+        }else{
+            mStopServiceConstLayoutButton.setVisibility( View.INVISIBLE );
+        }
+
     }
 }

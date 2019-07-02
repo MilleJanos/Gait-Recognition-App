@@ -141,7 +141,7 @@ public class ManualRecorderFragment extends Fragment implements ManualRecorderFr
     public void startService(View v) {
         // If service exists then restart it, do not create a new one
 
-        if (BackgroundService.Instance == null || BackgroundService.Instance.getStoredService() == null) {
+        if (BackgroundService.sInstance == null || BackgroundService.sInstance.getStoredService() == null) {
             Thread thread = new Thread() {
                 public void start() {
                     bind();
@@ -149,8 +149,8 @@ public class ManualRecorderFragment extends Fragment implements ManualRecorderFr
             };
             thread.start();
         } else {
-            mService = BackgroundService.Instance.getStoredService();
-            if (!BackgroundService.isRunning) {
+            mService = BackgroundService.sInstance.getStoredService();
+            if (!BackgroundService.sIsRunning) {
                 mService.StartRecording(AppUtil.sUser.selected_mode, AppUtil.sTrainNewOne);
             }
         }
@@ -164,7 +164,7 @@ public class ManualRecorderFragment extends Fragment implements ManualRecorderFr
 
         // TRY TO GET mService:
 
-        if (BackgroundService.Instance != null) {
+        if (BackgroundService.sInstance != null) {
             bind();
         }
         //if(mService == null) {
@@ -179,8 +179,8 @@ public class ManualRecorderFragment extends Fragment implements ManualRecorderFr
             mService.StopService();
             getContext().unbindService(mServiceConnection);
         } else {
-            if (BackgroundService.Instance != null) {
-                BackgroundService.Instance.StopService();
+            if (BackgroundService.sInstance != null) {
+                BackgroundService.sInstance.StopService();
                 getContext().unbindService(mServiceConnection);
             }
         }
@@ -190,14 +190,14 @@ public class ManualRecorderFragment extends Fragment implements ManualRecorderFr
     //@Override
     //protected void onResume(){
     //    super.onResume();
-    //    //sharedPref//mDebugTextView.setText(isRunning(this)?"true":"false");
+    //    //sharedPref//mDebugTextView.setText(sIsRunning(this)?"true":"false");
     //}
 
     //@Override
     //protected void onStart() {
     //    super.onStart();
     //
-    //    //if(BackgroundService.sInstance != null && BackgroundService.isRunning){
+    //    //if(BackgroundService.sInstance != null && BackgroundService.sIsRunning){
     //    //    bind();
     //    //}
     //
@@ -216,14 +216,14 @@ public class ManualRecorderFragment extends Fragment implements ManualRecorderFr
             BackgroundService.LocalBinder binder = (BackgroundService.LocalBinder) service;
             mService = binder.getService();
 
-            BackgroundService.Instance.setStoredService(mService);
+            BackgroundService.sInstance.setStoredService(mService);
 
             Log.i("serviceID", "mService = " + mService);
 
             mService.onStartCommand(mServiceIntent, 0, 0);                   // TODO: is there a better way ? (with startService was called automated)
 
             //sharedPref//setRunning(true);
-            //sharedPref//mDebugTextView.setText(isRunning(sContext)?"true":"false");
+            //sharedPref//mDebugTextView.setText(sIsRunning(sContext)?"true":"false");
         }
 
         @Override
@@ -232,7 +232,7 @@ public class ManualRecorderFragment extends Fragment implements ManualRecorderFr
             int x;
 
             //sharedPref//setRunning(false);
-            //sharedPref//mDebugTextView.setText(isRunning(sContext)?"true":"false");
+            //sharedPref//mDebugTextView.setText(sIsRunning(sContext)?"true":"false");
         }
     };
 
@@ -260,7 +260,7 @@ public class ManualRecorderFragment extends Fragment implements ManualRecorderFr
 //sharedPref//    editor.apply();
 //sharedPref//}
 //sharedPref//
-//sharedPref//private static boolean isRunning(sContext sContext){
+//sharedPref//private static boolean sIsRunning(sContext sContext){
 //sharedPref//    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(sContext.getContext());
 //sharedPref//    return pref.getBoolean(PREF_IS_RUNNING,false);
 //sharedPref//}
