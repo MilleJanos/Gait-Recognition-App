@@ -103,12 +103,13 @@ public class Recorder implements IRecorder {
     private boolean mTrainNewOne = true;
     private boolean mPreprocessDismissed;
     private boolean mTrainDismissed;
+    private boolean mCollectDismissed;
     // Sound Members:
     private boolean mDebugSound = false;
     private MediaPlayer mp_bing;
+    private MediaPlayer mp_bing2;
     private MediaPlayer mp_feature;
     private MediaPlayer mp_model;
-    private MediaPlayer mp_bing2;
 
     // Constructor:
 
@@ -327,9 +328,18 @@ public class Recorder implements IRecorder {
         }
 
         if ( mMode == Mode.MODE_COLLECT_DATA ){
+            // Record until stops.
 
-            // TODO
+            // Note: Train mode will triggered processRecordedData() method in stopRecording().
 
+            if( mAccelerometerArray.size() == Integer.MAX_VALUE ){
+                mp_bing2.start();
+            }
+
+            // if the list is full, then remove first then (Circle effect):
+            if (mAccelerometerArray.size() == sMaxAccelerometerArray - 1) {
+                mAccelerometerArray.removeFirst();
+            }
         }
 
         // add to last:
@@ -400,7 +410,7 @@ public class Recorder implements IRecorder {
             }
 
             case MODE_COLLECT_DATA:{
-                // upload raw files ..........
+                // upload raw files:
                 mode_collect_data();
                 break;
             }
@@ -607,16 +617,44 @@ public class Recorder implements IRecorder {
     }
 
     private void mode_collect_data(){
+
+        mCollectDismissed = false;
+
         StorageReference ref = FirebaseUtils.firebaseStorage.getReference().child(
                 FirebaseUtils.STORAGE_DATA_KEY
                 + "/" + AppUtil.sAuth.getUid()
                 + "/" + FirebaseUtils.STORAGE_RAW_KEY
                 + "/" + AppUtil.rawdataUserFile.getName()
         );
+
+        MainActivity.sInstance.showProgressBar(new IAfter() {
+            @Override
+            public void Do() {
+                mCollectDismissed = true;
+            }
+        });
+
         FirebaseController.uploadFile(
                 ref,
                 AppUtil.rawdataUserFile,
-                null);
+                new ICallback() {
+                    @Override
+                    public void Success(Object user) {
+                        if( !mCollectDismissed ) {
+                            MainActivity.sInstance.hideProgressBar();
+                        }
+                    }
+
+                    @Override
+                    public void Failure() {
+                        Log.e(TAG, "Failure: Upload failed. ref: " + ref.toString() );
+                    }
+
+                    @Override
+                    public void Error(int error_code) {
+                        Log.e(TAG, "Error ("+error_code+"): Upload failed. ref: " + ref.toString() );
+                    }
+                });
     }
 
     private void askForRetrain(String title, String message, IAfter after){

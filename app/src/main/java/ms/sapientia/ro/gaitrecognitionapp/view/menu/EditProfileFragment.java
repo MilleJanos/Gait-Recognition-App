@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -169,26 +168,28 @@ public class EditProfileFragment extends NavigationMenuFragmentItem implements E
     }
 
     private void cancelChanges(){
-        // Ask to cancel:
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.sContext );
 
-        builder.setTitle("Confirm");
-        builder.setMessage("Are you sure you want to cancel changes?");
+        MainActivity.sInstance.onBackPressed();
 
-        builder.setPositiveButton("YES", (dialog, which) -> {
-            // Do nothing but close the dialog
-            MainActivity.sInstance.onBackPressed();
-            dialog.dismiss();
-        });
-
-        builder.setNegativeButton("NO", (dialog, which) -> {
-
-            // Do nothing
-            dialog.dismiss();
-        });
-
-        AlertDialog alert = builder.create();
-        alert.show();
+        // // Ask to cancel:
+        // AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.sContext );
+        //
+        // builder.setTitle("Confirm");
+        // builder.setMessage("Are you sure you want to cancel changes?");
+        //
+        // builder.setPositiveButton("YES", (dialog, which) -> {
+        //     // Do nothing but close the dialog
+        //     MainActivity.sInstance.onBackPressed();
+        //     dialog.dismiss();
+        // });
+        //
+        // builder.setNegativeButton("NO", (dialog, which) -> {
+        //
+        //     // Do nothing
+        //     dialog.dismiss();
+        // });
+        // AlertDialog alert = builder.create();
+        // alert.show();
     }
 
     @Override

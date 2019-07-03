@@ -210,14 +210,14 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
     /**
      * This method shows the toolbar.
      */
-    private void hideToolbar(){
+    public void hideToolbar(){
         getSupportActionBar().hide();
     }
 
     /**
      * This method hides the toolbar.
      */
-    private void showToolbar(){
+    public void showToolbar(){
         getSupportActionBar().show();
     }
 

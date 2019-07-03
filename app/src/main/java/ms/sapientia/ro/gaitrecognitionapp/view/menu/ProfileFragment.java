@@ -1,5 +1,8 @@
 package ms.sapientia.ro.gaitrecognitionapp.view.menu;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -17,22 +20,29 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.storage.StorageReference;
+
+import java.io.File;
 import java.util.Calendar;
 
 import ms.sapientia.ro.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.common.AuthScoreRecyclerViewAdapter;
+import ms.sapientia.ro.gaitrecognitionapp.common.FileUtil;
 import ms.sapientia.ro.gaitrecognitionapp.logic.FirebaseController;
+import ms.sapientia.ro.gaitrecognitionapp.logic.MyFirebaseController;
 import ms.sapientia.ro.gaitrecognitionapp.model.IAfter;
 import ms.sapientia.ro.gaitrecognitionapp.model.ICallback;
 import ms.sapientia.ro.gaitrecognitionapp.model.MyFirebaseUser;
 import ms.sapientia.ro.gaitrecognitionapp.model.NavigationMenuFragmentItem;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.menu.ProfileFragmentPresenter;
+import ms.sapientia.ro.gaitrecognitionapp.service.FirebaseUtils;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 
 public class ProfileFragment extends NavigationMenuFragmentItem implements ProfileFragmentPresenter.View {
 
     private static final String TAG = "ProfileFragment";
+    private final int GALLERY_REQUEST_CODE = 98;
     // MVP:
     private static ProfileFragmentPresenter mPresenter;
     // View members:
@@ -52,6 +62,7 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
     private FloatingActionButton mEditFloatingActionButton;
     private ImageView mHideImageView;
     private ConstraintLayout mAuthScoreWindowLinearLayout;
+    private ImageView mProfileImageView;
     // Recycler View Members:
     private static RecyclerView mRecyclerView;
     private static RecyclerView.Adapter mAdapter;
@@ -79,6 +90,9 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
         initRecyclerView(view);
 
         refreshProfileInformationsUI();
+
+        // Download and set profile:
+        loadProfilePictureFromFirebase();
     }
 
     private void initView(View view) {
@@ -98,6 +112,7 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
         mEditFloatingActionButton = view.findViewById(R.id.edit_floating_action_button);
         mHideImageView = view.findViewById(R.id.hide_image_view);
         mAuthScoreWindowLinearLayout = view.findViewById(R.id.score_container_frameLayout);
+        mProfileImageView = view.findViewById(R.id.profile_picture_imageView);
     }
 
     private void bindClickListeners() {
@@ -112,6 +127,7 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
             }
         });
         mHideImageView.setOnClickListener( v -> hideAuthScores() );
+        mProfileImageView.setOnClickListener( v -> selectImage() );
     }
 
     private void goToEditProfile() {
@@ -229,7 +245,6 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
         }
     }
 
-
     private static void refresh_sUser(IAfter afterIt){
         new FirebaseController().getUserObjectById(AppUtil.sUser.id, new ICallback<MyFirebaseUser>() {
             @Override
@@ -306,4 +321,108 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
         }
     }
 
+    private void selectImage(){
+
+        Intent intent=new Intent(Intent.ACTION_PICK);
+        intent.setType("image/*");
+        String[] mimeTypes = {"image/jpeg", "image/png"};
+        intent.putExtra(Intent.EXTRA_MIME_TYPES,mimeTypes);
+        startActivityForResult(intent,GALLERY_REQUEST_CODE);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode,int resultCode,Intent data){
+
+        if (resultCode == Activity.RESULT_OK)
+
+            switch (requestCode){
+                case GALLERY_REQUEST_CODE:
+                    // Image selected:
+
+                    Uri selectedImage = data.getData();
+
+                    // Save into file:
+                    String path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "profile.jpg";
+                    File file = new File(path);
+                    FileUtil.createFileIfNotExists(file);
+
+                    AppUtil.saveUriIntoFIle(selectedImage, path);
+
+                    // Display it:
+                    loadUrlInProfileImageView(selectedImage);
+
+                    // Save to Firebase:
+                    StorageReference ref = FirebaseUtils.firebaseStorage.getReference().child(
+                            FirebaseUtils.STORAGE_DATA_KEY
+                                    + "/" + AppUtil.sUser.id
+                                    + "/" + "profile_"+ (AppUtil.sUser.profile_picture_idx + 1) +".jpg"
+                    );
+
+                    FirebaseController.uploadFile(ref, file, new ICallback() {
+                        @Override
+                        public void Success(Object user) {
+                            // Update user object too:
+                            AppUtil.sUser.profile_picture_idx++;
+                            FirebaseController.setUserObject( AppUtil.sUser );
+                        }
+
+                        @Override
+                        public void Failure() {
+                            Log.e(TAG, "Failure: uploading profile: " + ref.toString() );
+                        }
+
+                        @Override
+                        public void Error(int error_code) {
+                            Log.e(TAG, "Error: uploading profile: " + ref.toString() );
+                        }
+                    });
+                    break;
+            }
+    }
+
+    public void loadProfilePictureFromFirebase(){
+        if( AppUtil.sUser.profile_picture_idx != -1 ) {
+            String path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "profile.jpg";
+            File file = new File(path);
+
+            StorageReference ref = FirebaseUtils.firebaseStorage.getReference().child(
+                    FirebaseUtils.STORAGE_DATA_KEY
+                    + "/" + AppUtil.sUser.id
+                    + "/" + "profile_"+ AppUtil.sUser.profile_picture_idx +".jpg"
+            );
+
+            new MyFirebaseController().downloadFile(ref, file, new ICallback<File>() {
+                @Override
+                public void Success(File user) {
+                    if (file.exists()) {
+                        loadImageFromLocalFile(file);
+                    }
+                }
+
+                @Override
+                public void Failure() {
+                    Log.e(TAG, "Failure: downloading profile: " + ref.toString() );
+                }
+
+                @Override
+                public void Error(int error_code) {
+                    Log.e(TAG, "Error: downloading profile: " + ref.toString() );
+                }
+            });
+
+
+        }
+    }
+
+    public void loadImageFromLocalFile(File file){
+        if( file.exists() ) {
+            loadUrlInProfileImageView( Uri.fromFile(file) );
+        }else{
+            Log.e(TAG,"File not exists! path:" + file.getAbsolutePath());
+        }
+    }
+
+    public void loadUrlInProfileImageView(Uri uri){
+        mProfileImageView.setImageURI(uri);
+    }
 }
