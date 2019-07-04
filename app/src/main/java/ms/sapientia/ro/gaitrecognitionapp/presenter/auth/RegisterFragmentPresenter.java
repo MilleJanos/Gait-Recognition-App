@@ -34,7 +34,7 @@ public class RegisterFragmentPresenter {
     }
 
     // Members:
-    private boolean mRegisterIsDismissed;
+    private static boolean mRegisterIsDismissed;
 
     // Methods:
 
@@ -148,7 +148,7 @@ public class RegisterFragmentPresenter {
 
                         // Registration succeed:
 
-                        if( mRegisterIsDismissed = true){
+                        if( mRegisterIsDismissed == true){
                             return;
                         }
 

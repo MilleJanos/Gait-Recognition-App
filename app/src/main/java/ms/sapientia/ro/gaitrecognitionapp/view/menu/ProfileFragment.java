@@ -116,7 +116,7 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
     }
 
     private void bindClickListeners() {
-        mRefreshButton.setOnClickListener(v -> refreshProfileInformations() );
+        mRefreshButton.setOnClickListener(v -> refreshProfileInformationsUI() );
         mClearButton.setOnClickListener(v -> resetAuthScore());
         mEditFloatingActionButton.setOnClickListener(v -> goToEditProfile());
         mAuthScoreLinearLayout.setOnClickListener( v -> {
@@ -137,7 +137,12 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
     public static void refreshProfileInformationsUI(){
         setTitleUserName( AppUtil.sUser.last_name, AppUtil.sUser.first_name);
         setTitleEmail( AppUtil.sAuth.getCurrentUser().getEmail());
-        setAuthenticationScore( AppUtil.sUser.authenticaiton_values.get(AppUtil.sUser.authenticaiton_values.size() - 1 ), true );
+        if( AppUtil.sUser.authenticaiton_values.size() > 0 ) {
+            // Set last authenticated value:
+            setAuthenticationScore(AppUtil.sUser.authenticaiton_values.get(AppUtil.sUser.authenticaiton_values.size() - 1), true);
+        }else{
+            setAuthenticationScore(-1,false);
+        }
         setCollectedDataScore( AppUtil.sUser.raw_count );
 
         setEmail( AppUtil.sAuth.getCurrentUser().getEmail() );
@@ -153,16 +158,13 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
         refreshRecycler();
     }
 
-    private void refreshProfileInformations(){
-        refresh_sUser(() -> refreshProfileInformationsUI());
-    }
-
     private void resetAuthScore(){
         AppUtil.sUser.authenticaiton_avg = 0;
         AppUtil.sUser.authenticaiton_values.clear();
         FirebaseController.setUserObject( AppUtil.sUser );
         refreshProfileInformationsUI();
         hideAuthScores();
+        Toast.makeText(MainActivity.sContext,"Authentication scores cleared.",Toast.LENGTH_LONG).show();
     }
 
     // Top part:
@@ -186,7 +188,7 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
     // Middle part:
 
     private static void setAuthenticationScore(double score, boolean usePercentage){
-        if( score != 0 ){
+        if( score > 0 ){
             if( usePercentage ){
                 int percentage = (int) Math.floor( score * 100 );
                 mAuthScore.setText ( percentage + "%" );

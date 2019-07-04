@@ -162,6 +162,7 @@ public class EditProfileFragment extends NavigationMenuFragmentItem implements E
         Toast.makeText(MainActivity.sContext,"Saved.",Toast.LENGTH_SHORT).show();
 
         new Handler().postDelayed(() -> MainActivity.sInstance.onBackPressed(),1000);
+        //new Handler().postDelayed(() -> MainActivity.sInstance.replaceFragment(new HomeFragment(),"home_fragment"),1000);
 
         // Refresh drawer
         MainActivity.sInstance.refreshNavigationMenuDraverNameAndEmail();
@@ -170,6 +171,7 @@ public class EditProfileFragment extends NavigationMenuFragmentItem implements E
     private void cancelChanges(){
 
         MainActivity.sInstance.onBackPressed();
+        //MainActivity.sInstance.replaceFragment(new HomeFragment(),"home_fragment");
 
         // // Ask to cancel:
         // AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.sContext );

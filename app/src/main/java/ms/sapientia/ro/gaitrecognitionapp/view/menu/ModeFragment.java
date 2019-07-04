@@ -99,6 +99,13 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
         if (isChecked) {
             // switch on
 
+            // Do not start auth. if no trained data.
+            if( AppUtil.sUser.selected_mode == Recorder.Mode.MODE_AUTHENTICATE && AppUtil.sUser.merged_model_count <= 0 && AppUtil.sUser.raw_count <= 0){
+                Toast.makeText(MainActivity.sContext,"Train before authentication!",Toast.LENGTH_SHORT).show();
+                mServiceSwitch.setChecked(false);
+                return;
+            }
+
             // Start Service
             mPresenter.StartServiceIfNotRunning();
         } else {

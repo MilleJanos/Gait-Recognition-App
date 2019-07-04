@@ -305,6 +305,14 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
      */
     @Override
     public void onBackPressed() {
+
+        // Close drawer menu:
+        if (mDrawer.isDrawerOpen(GravityCompat.START)) {
+            mDrawer.closeDrawer(GravityCompat.START);
+            return;
+        }
+
+        // Change fragment:
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment fragment = fragmentManager.findFragmentById(R.id.fragmentContainer);
 

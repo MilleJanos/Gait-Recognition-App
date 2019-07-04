@@ -7,6 +7,8 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.MediaPlayer;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
@@ -37,7 +39,9 @@ import ms.sapientia.ro.gaitrecognitionapp.logic.MyFirebaseController;
 import ms.sapientia.ro.gaitrecognitionapp.model.IAfter;
 import ms.sapientia.ro.gaitrecognitionapp.model.ICallback;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
+import ms.sapientia.ro.gaitrecognitionapp.view.menu.EditProfileFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.menu.ModeFragment;
+import ms.sapientia.ro.gaitrecognitionapp.view.menu.ProfileFragment;
 import ms.sapientia.ro.model_builder.GaitHelperFunctions;
 import ms.sapientia.ro.model_builder.GaitModelBuilder;
 import ms.sapientia.ro.model_builder.GaitVerification;
@@ -589,6 +593,17 @@ public class Recorder implements IRecorder {
                 AppUtil.sUser.authenticaiton_values.add( score );
                 FirebaseController.setUserObject( AppUtil.sUser );
 
+                // If Profile Page is open -> update informations:
+                FragmentManager fragmentManager = MainActivity.sInstance.getSupportFragmentManager();
+                Fragment fragment;
+                if( fragmentManager != null ){
+                    fragment = fragmentManager.findFragmentById(R.id.fragmentContainer);
+                    if( fragment != null && fragment instanceof ProfileFragment) {
+                        ProfileFragment.refreshProfileInformationsUI();
+                    }
+                }
+
+
                 // DEBUG PRINT:
                 Log.i(TAG, "Success: Files used in Authentication:\n");
                 Log.i(TAG, "Success: AppUtil.rawdataUserFile =" + AppUtil.rawdataUserFile);
@@ -643,6 +658,8 @@ public class Recorder implements IRecorder {
                         if( !mCollectDismissed ) {
                             MainActivity.sInstance.hideProgressBar();
                         }
+                        AppUtil.sUser.raw_count++;
+                        FirebaseController.setUserObject(AppUtil.sUser);
                     }
 
                     @Override

@@ -36,7 +36,7 @@ public class ModeFragmentPresenter {
         if( ! isServiceRunning(BackgroundService.NAME) ){
             StartService();
         }else{
-            Toast.makeText( MainActivity.sContext, "Service is already running", Toast.LENGTH_SHORT).show();
+            Toast.makeText( MainActivity.sContext, "Service is running.", Toast.LENGTH_SHORT).show();
         }
     }
 
