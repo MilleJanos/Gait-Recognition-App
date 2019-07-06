@@ -1,9 +1,9 @@
 package ms.sapientia.ro.gaitrecognitionapp.view.auth;
 
-
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -19,12 +19,18 @@ import ms.sapientia.ro.gaitrecognitionapp.common.Animator;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.model.IAfter;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.auth.LoginFragmentPresenter;
+import ms.sapientia.ro.gaitrecognitionapp.service.BackgroundService;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 
+/**
+ * This class is responsible for user login.
+ *
+ * @author MilleJanos
+ */
 public class LoginFragment extends Fragment implements LoginFragmentPresenter.View {
+
     // Static members:
     public static LoginFragment sInstance;
-
     // View members:
     private ImageView mIconImageView;
     private TextView mTitleTextView;
@@ -33,7 +39,7 @@ public class LoginFragment extends Fragment implements LoginFragmentPresenter.Vi
     private Button mLoginButton;
     private TextView mRegisterTextViewButton;
     private TextView mForgottPasswordTextViewButton;
-
+    private ConstraintLayout mStopServiceConstLayoutButton;
     // MVP:
     private LoginFragmentPresenter mPresenter;
 
@@ -68,6 +74,10 @@ public class LoginFragment extends Fragment implements LoginFragmentPresenter.Vi
         //endregion
     }
 
+    /**
+     * This method initiates the view elements.
+     * @param view fragment view;
+     */
     private void initView(View view){
         mIconImageView = getView().findViewById(R.id.ic_imageview);
         mTitleTextView = getView().findViewById(R.id.login_title_textview);
@@ -76,8 +86,12 @@ public class LoginFragment extends Fragment implements LoginFragmentPresenter.Vi
         mLoginButton = getView().findViewById(R.id.login_button);
         mRegisterTextViewButton = getView().findViewById(R.id.sign_up_textviewbutton);
         mForgottPasswordTextViewButton = getView().findViewById(R.id.forgot_password_textviewbutton);
+        mStopServiceConstLayoutButton = getView().findViewById(R.id.on_login_stop_service_button);
     }
 
+    /**
+     * This method binds the view elements.
+     */
     public void bindClickListeners() {
         mLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -137,8 +151,16 @@ public class LoginFragment extends Fragment implements LoginFragmentPresenter.Vi
                 return false;
             }
         });
+        mStopServiceConstLayoutButton.setOnClickListener( v -> {
+            BackgroundService.sInstance.StopService();
+            mStopServiceConstLayoutButton.setVisibility( View.INVISIBLE );
+        });
     }
 
+    /**
+     * This method verifies the inputs and tries to log in the user.
+     * @param view fragment view;
+     */
     public void loginButtonClick(View view){
 
         if( MainActivity.sIsProgressBarShown ){
@@ -152,13 +174,6 @@ public class LoginFragment extends Fragment implements LoginFragmentPresenter.Vi
         String email = mEmailEditText.getText().toString();
         String password = mPasswordEditText.getText().toString();
 
-        if(email.equals("x") && password.equals("")){       // TODO: DELETE THIS !
-            email = "millejanos31@gmail.com";
-            password = "01234567";
-            LoginFragment.sInstance.mEmailEditText.setText(email);
-            LoginFragment.sInstance.mPasswordEditText.setText(password);
-        }
-
         // Try to login:
         if( mPresenter.verifyInputs(email,password,mEmailEditText,mPasswordEditText) ) {
 
@@ -167,6 +182,10 @@ public class LoginFragment extends Fragment implements LoginFragmentPresenter.Vi
         }
     }
 
+    /**
+     * This method verifies the inputs and tries to register the user.
+     * @param view fragment view;
+     */
     public void registerButtonClick(View view){
 
         if( MainActivity.sIsProgressBarShown ){
@@ -178,6 +197,10 @@ public class LoginFragment extends Fragment implements LoginFragmentPresenter.Vi
         mPresenter.goToRegisterPage();
     }
 
+    /**
+     * This method sends reset password request to user's email.
+     * @param view fragment view;
+     */
     public void forgottPasswordClick(View view){
 
         if( MainActivity.sIsProgressBarShown ){
@@ -195,18 +218,43 @@ public class LoginFragment extends Fragment implements LoginFragmentPresenter.Vi
 
     }
 
+    /**
+     * This method shows the progress bar.
+     * @param after method which will be run if the progress bar is dismissed.
+     */
     @Override
     public void showProgressBar(IAfter after) {
         MainActivity.sInstance.showProgressBar( after );
     }
 
+    /**
+     * This method shows the progress bar.
+     */
     @Override
     public void showProgressBar() {
         MainActivity.sInstance.showProgressBar();
     }
 
+    /**
+     * This method hides the progress bar.
+     */
     @Override
     public void hideProgressBar() {
         MainActivity.sInstance.hideProgressBar();
+    }
+
+    /**
+     * This method shows the stop service button, and hides if the service is not running.
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if( BackgroundService.sIsRunning ){
+            mStopServiceConstLayoutButton.setVisibility( View.VISIBLE );
+        }else{
+            mStopServiceConstLayoutButton.setVisibility( View.INVISIBLE );
+        }
+
     }
 }

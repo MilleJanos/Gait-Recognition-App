@@ -3,6 +3,7 @@
     package="ms.sapientia.ro.gaitrecognitionapp">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
     <application
         android:name="ms.sapientia.ro.gaitrecognitionapp.service.App"

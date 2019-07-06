@@ -1,5 +1,10 @@
 package ms.sapientia.ro.gaitrecognitionapp.presenter.menu;
 
+/**
+ * This class is the presenter of the HomeFragment class.
+ *
+ * @author MilleJanos
+ */
 public class HomeFragmentPresenter {
 
     // private User user;
@@ -8,24 +13,6 @@ public class HomeFragmentPresenter {
     public HomeFragmentPresenter(View view){
         this.view = view;
     }
-
-    // Methods:
-//    public void updateEmail(String email){
-//        user.setEmail(email);
-//    }
-//
-//    public void updateFirstName(String first_name){
-//        user.setFirst_name(first_name);
-//    }
-//
-//    public void updateLastName(String last_name){
-//        user.setLast_name(last_name);
-//    }
-//
-//    public void updatePassword(String password){
-//        user.setPassword(password);
-//    }
-
 
     // Interface:
     public interface View{

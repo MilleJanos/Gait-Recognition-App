@@ -19,6 +19,11 @@ import ms.sapientia.ro.gaitrecognitionapp.model.ICallback;
 import ms.sapientia.ro.gaitrecognitionapp.model.IFirebaseUser;
 import ms.sapientia.ro.gaitrecognitionapp.model.MyFirebaseUser;
 
+/**
+ * This class contains static methods to support the application with firebase transactions.
+ *
+ * @author MilleJanos
+ */
 public class FirebaseController {
 
     private static final String TAG = "FirebaseController";

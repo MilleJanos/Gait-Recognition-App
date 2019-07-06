@@ -26,6 +26,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
+            android:id="@+id/profile_picture_imageView"
             android:layout_width="120dp"
             android:layout_height="120dp"
             android:layout_gravity="center"

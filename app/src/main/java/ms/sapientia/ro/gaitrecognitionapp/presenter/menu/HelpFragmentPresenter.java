@@ -7,26 +7,25 @@ import java.util.ArrayList;
 import ms.sapientia.ro.gaitrecognitionapp.common.TopicRecyclerViewAdapter;
 import ms.sapientia.ro.gaitrecognitionapp.model.TopicObject;
 
+/**
+ * This class is the presenter of the HelpFragment class.
+ *
+ * @author MilleJanos
+ */
 public class HelpFragmentPresenter {
 
     // Members
     private View view;
-
     // Interface:
     public interface View{
-
-
-
         void showProgressBar();
         void hideProgressBar();
     }
 
-    // Constructor
     public HelpFragmentPresenter(View view){
         this.view = view;
     }
 
-    // Methods:
 
     /**
      * This method recalculates the filter based on the string input given.

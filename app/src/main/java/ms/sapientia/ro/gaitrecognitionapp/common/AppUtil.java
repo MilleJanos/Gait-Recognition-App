@@ -1,7 +1,6 @@
 package ms.sapientia.ro.gaitrecognitionapp.common;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
@@ -19,7 +18,12 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.Date;
 import java.util.regex.Pattern;
@@ -28,33 +32,37 @@ import ms.sapientia.ro.gaitrecognitionapp.model.MyFirebaseUser;
 import ms.sapientia.ro.gaitrecognitionapp.service.Recorder;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 
+/**
+ * This class contains static field and methods, to support the entire application with
+ * common data and functions
+ *
+ * @author MilleJanos
+ */
 public class AppUtil {
 
+    // Constant members:
     private static final String TAG = "AppUtil";
-    // Firebase:
+    // Firebase members:
     public static FirebaseAuth sAuth;
     public static StorageReference sStorageRef;
     public static FirebaseStorage sStorage;
-    // Local files location:
+    // Local file storage members:
     public static File internalFilesRoot;
-    public static String customDIR = "";
-    // Local files:
+    // Local file members:
     public static File rawdataUserFile;
     public static File featureUserFile;
     public static File modelUserFile;
     public static File featureNegativeFile;
     public static File mergedFeatureFile;   // merged feature files
     public static File mergedModelFile;     // model create from merged feature files
-    // Mode:
+    // Mode member:
     //public static Recorder.Mode sMode = Recorder.Mode.MODE_TRAIN;   // Default: Train
     public static boolean sTrainNewOne = true;                      // Default: Train new one
     // Other
     public static CharSequence recordDateAndTimeFormatted = "";
-    // Logged in user informations:
+    // Logged in user information member:
     public static MyFirebaseUser sUser = null;
 
-    
-    // Static Methods
 
     /**
      * This method initiates all members of the internal storage, creates the folders and files.
@@ -202,29 +210,51 @@ public class AppUtil {
         }
     }
 
+    /**
+     * This method asks the user if really wants to reset his password.
+     * @param email user's email
+     */
     public static void requestPasswordReset(String email) {
 
         if(email.length() == 0){
             throw new InvalidParameterException("Email can't be null");
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.sInstance);
-        builder.setTitle("Confirm");
-        builder.setMessage("Are you sure you want to send password reset request?");
-        builder.setPositiveButton("YES", (dialog, which) -> {
-            AppUtil.sAuth.sendPasswordResetEmail( email )
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            Log.i(TAG, "Reset mPassword request has been sent.");
-                            Toast.makeText(MainActivity.sContext, "Reset mPassword request has been sent!", Toast.LENGTH_LONG).show();
-                        }
-                    });
-        });
-        builder.setNegativeButton("NO", (dialog, which) -> dialog.dismiss());
-        AlertDialog alert = builder.create();
-        alert.show();
+        if( ! AppUtil.requireInternetConnection() ){
+            Toast.makeText(MainActivity.sContext, "No internet connection!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        AppUtil.sAuth.sendPasswordResetEmail( email )
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Log.i(TAG, "Reset password request has been sent.");
+                        Toast.makeText(MainActivity.sContext, "Reset password request has been sent!", Toast.LENGTH_SHORT).show();
+                    }
+                });
+        //AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.sInstance);
+        //builder.setTitle("Confirm");
+        //builder.setMessage("Are you sure you want to send password reset request?");
+        //builder.setPositiveButton("YES", (dialog, which) -> {
+        //    AppUtil.sAuth.sendPasswordResetEmail( email )
+        //            .addOnCompleteListener(task -> {
+        //                if (task.isSuccessful()) {
+        //                    Log.i(TAG, "Reset mPassword request has been sent.");
+        //                    Toast.makeText(MainActivity.sContext, "Reset mPassword request has been sent!", Toast.LENGTH_LONG).show();
+        //                }
+        //            });
+        //});
+        //builder.setNegativeButton("NO", (dialog, which) -> dialog.dismiss());
+        //AlertDialog alert = builder.create();
+        //alert.show();
     }
 
+    /**
+     * This method sends email to a given email address.
+     * @param to email address
+     * @param subject email subject
+     * @param body email body
+     */
     public static void sendEmail(String to, String subject, String body){
         // Intent intent = new Intent(Intent.ACTION_SEN);
         // intent.setType("text/plain");
@@ -239,8 +269,6 @@ public class AppUtil {
         emailIntent.putExtra(Intent.EXTRA_TEXT, body);
         MainActivity.sInstance.startActivity(Intent.createChooser(emailIntent, "Send email..."));
     }
-
-
 
     /**
      * Check the email if is valid format.
@@ -311,5 +339,42 @@ public class AppUtil {
         return 0;
     }
 
+    /**
+     * This method saves Uri type files into standard file type.
+     * @param sourceUri
+     * @param destinationFilePath
+     */
+    public static void saveUriIntoFIle(Uri sourceUri, String destinationFilePath)
+    {
+        String sourceFilename= sourceUri.getPath();
+        //String destinationFilename = android.os.Environment.getExternalStorageDirectory().getPath()+File.separatorChar+"abc.mp3";
+
+        File file = new File(destinationFilePath);
+        if( ! file.exists() ){
+            FileUtil.createFileIfNotExists( file );
+        }
+
+        BufferedInputStream bis = null;
+        BufferedOutputStream bos = null;
+
+        try {
+            bis = new BufferedInputStream(new FileInputStream(sourceFilename));
+            bos = new BufferedOutputStream(new FileOutputStream(destinationFilePath, false));
+            byte[] buf = new byte[1024];
+            bis.read(buf);
+            do {
+                bos.write(buf);
+            } while(bis.read(buf) != -1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (bis != null) bis.close();
+                if (bos != null) bos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
 }

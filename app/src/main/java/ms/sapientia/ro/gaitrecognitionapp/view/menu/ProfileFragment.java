@@ -1,5 +1,8 @@
 package ms.sapientia.ro.gaitrecognitionapp.view.menu;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -17,23 +20,36 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.storage.StorageReference;
+
+import java.io.File;
 import java.util.Calendar;
 
 import ms.sapientia.ro.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.common.AuthScoreRecyclerViewAdapter;
+import ms.sapientia.ro.gaitrecognitionapp.common.FileUtil;
 import ms.sapientia.ro.gaitrecognitionapp.logic.FirebaseController;
+import ms.sapientia.ro.gaitrecognitionapp.logic.MyFirebaseController;
 import ms.sapientia.ro.gaitrecognitionapp.model.IAfter;
 import ms.sapientia.ro.gaitrecognitionapp.model.ICallback;
 import ms.sapientia.ro.gaitrecognitionapp.model.MyFirebaseUser;
 import ms.sapientia.ro.gaitrecognitionapp.model.NavigationMenuFragmentItem;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.menu.ProfileFragmentPresenter;
+import ms.sapientia.ro.gaitrecognitionapp.service.FirebaseUtils;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 
+/**
+ * This class is responsible to manage profile.
+ *
+ * @author MilleJanos
+ */
 public class ProfileFragment extends NavigationMenuFragmentItem implements ProfileFragmentPresenter.View {
 
+    // Constant members:
     private static final String TAG = "ProfileFragment";
-    // MVP:
+    private final int GALLERY_REQUEST_CODE = 98;
+    // MVP members:
     private static ProfileFragmentPresenter mPresenter;
     // View members:
     private static TextView mTitleUserName;
@@ -52,10 +68,12 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
     private FloatingActionButton mEditFloatingActionButton;
     private ImageView mHideImageView;
     private ConstraintLayout mAuthScoreWindowLinearLayout;
-    // Recycler View Members:
+    private ImageView mProfileImageView;
+    // Recycler View members:
     private static RecyclerView mRecyclerView;
     private static RecyclerView.Adapter mAdapter;
     private static RecyclerView.LayoutManager mLayoutManager;
+
 
     @Nullable
     @Override
@@ -79,8 +97,15 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
         initRecyclerView(view);
 
         refreshProfileInformationsUI();
+
+        // Download and set profile:
+        loadProfilePictureFromFirebase();
     }
 
+    /**
+     * This method bind the view elements.
+     * @param view
+     */
     private void initView(View view) {
         mTitleUserName = view.findViewById(R.id.user_name_textview);
         mTitleUserEmail = view.findViewById(R.id.user_email_textview);
@@ -98,10 +123,14 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
         mEditFloatingActionButton = view.findViewById(R.id.edit_floating_action_button);
         mHideImageView = view.findViewById(R.id.hide_image_view);
         mAuthScoreWindowLinearLayout = view.findViewById(R.id.score_container_frameLayout);
+        mProfileImageView = view.findViewById(R.id.profile_picture_imageView);
     }
 
+    /**
+     * This method binds the listeners to view elements.
+     */
     private void bindClickListeners() {
-        mRefreshButton.setOnClickListener(v -> refreshProfileInformations() );
+        mRefreshButton.setOnClickListener(v -> refreshProfileInformationsUI() );
         mClearButton.setOnClickListener(v -> resetAuthScore());
         mEditFloatingActionButton.setOnClickListener(v -> goToEditProfile());
         mAuthScoreLinearLayout.setOnClickListener( v -> {
@@ -112,16 +141,28 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
             }
         });
         mHideImageView.setOnClickListener( v -> hideAuthScores() );
+        mProfileImageView.setOnClickListener( v -> selectImage() );
     }
 
+    /**
+     * This method opens the edit profile page.
+     */
     private void goToEditProfile() {
         MainActivity.sInstance.replaceFragment(new EditProfileFragment(),"edit_profile_fragment");
     }
 
+    /**
+     * This method refreshes the profile informations on UI.
+     */
     public static void refreshProfileInformationsUI(){
         setTitleUserName( AppUtil.sUser.last_name, AppUtil.sUser.first_name);
         setTitleEmail( AppUtil.sAuth.getCurrentUser().getEmail());
-        setAuthenticationScore( AppUtil.sUser.authenticaiton_values.get(AppUtil.sUser.authenticaiton_values.size() - 1 ), true );
+        if( AppUtil.sUser.authenticaiton_values.size() > 0 ) {
+            // Set last authenticated value:
+            setAuthenticationScore(AppUtil.sUser.authenticaiton_values.get(AppUtil.sUser.authenticaiton_values.size() - 1), true);
+        }else{
+            setAuthenticationScore(-1,false);
+        }
         setCollectedDataScore( AppUtil.sUser.raw_count );
 
         setEmail( AppUtil.sAuth.getCurrentUser().getEmail() );
@@ -137,20 +178,24 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
         refreshRecycler();
     }
 
-    private void refreshProfileInformations(){
-        refresh_sUser(() -> refreshProfileInformationsUI());
-    }
-
+    /**
+     * This method resets the authentication values in the user object.
+     */
     private void resetAuthScore(){
         AppUtil.sUser.authenticaiton_avg = 0;
         AppUtil.sUser.authenticaiton_values.clear();
         FirebaseController.setUserObject( AppUtil.sUser );
         refreshProfileInformationsUI();
         hideAuthScores();
+        Toast.makeText(MainActivity.sContext,"Authentication scores cleared.",Toast.LENGTH_LONG).show();
     }
 
     // Top part:
-
+    /**
+     * This method sets the name and email on the page.
+     * @param firstName first name to set.
+     * @param lastName last name to set.
+     */
     private static void setTitleUserName(String firstName, String lastName){
         if( ! firstName.isEmpty()){
             mTitleUserName.setText( firstName + " " + lastName );
@@ -159,6 +204,10 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
         }
     }
 
+    /**
+     * This method sets the user email.
+     * @param email
+     */
     private static void setTitleEmail(String email){
         if( ! email.isEmpty()){
             mTitleUserEmail.setText( email );
@@ -168,9 +217,13 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
     }
 
     // Middle part:
-
+    /**
+     * This method sets the authentication score.
+     * @param score
+     * @param usePercentage
+     */
     private static void setAuthenticationScore(double score, boolean usePercentage){
-        if( score != 0 ){
+        if( score > 0 ){
             if( usePercentage ){
                 int percentage = (int) Math.floor( score * 100 );
                 mAuthScore.setText ( percentage + "%" );
@@ -183,12 +236,19 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
 
     }
 
+    /**
+     * This method sets the collected data count value.
+     * @param score
+     */
     private static void setCollectedDataScore(double score){
         mCollectedScore.setText ( ((int) score) + "" );
     }
 
     // Bottom part:
-
+    /**
+     * This method sets the user's email.
+     * @param email
+     */
     private static void setEmail(String email) {
         if( ! email.isEmpty() ){
             mEmailTextView.setText( email );
@@ -197,6 +257,10 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
         }
     }
 
+    /**
+     * This method sets the user's first name.
+     * @param firstName
+     */
     private static void setFirstName(String firstName) {
         if( ! firstName.isEmpty() ){
             mFirstNameTextView.setText( firstName );
@@ -205,6 +269,10 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
         }
     }
 
+    /**
+     * This method sets the user's first name.
+     * @param lastName
+     */
     private static void setLastName(String lastName) {
         if( ! lastName.isEmpty() ){
             mLastNameTextView.setText( lastName );
@@ -213,6 +281,10 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
         }
     }
 
+    /**
+     * This method sets the user's birth date.
+     * @param calendar
+     */
     private static void setBirthDate(Calendar calendar) {
         if( calendar.getTimeInMillis() != 0 ){
             mBirthDateTextView.setText( formatDate( calendar ) );
@@ -221,6 +293,10 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
         }
     }
 
+    /**
+     * This method sets the user's phone number.
+     * @param phoneNumber
+     */
     private static void setPhoneNumber(String phoneNumber) {
         if( ! phoneNumber.isEmpty() ){
             mPhoneNumberTextView.setText( phoneNumber );
@@ -229,7 +305,10 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
         }
     }
 
-
+    /**
+     * This method refreshes the user object.
+     * @param afterIt run Do() method after downloading the user object.
+     */
     private static void refresh_sUser(IAfter afterIt){
         new FirebaseController().getUserObjectById(AppUtil.sUser.id, new ICallback<MyFirebaseUser>() {
             @Override
@@ -252,6 +331,10 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
         });
     }
 
+    /**
+     * This method formats the date.
+     * @param calendar
+     */
     private static String formatDate(Calendar calendar){
         int y = calendar.get(Calendar.YEAR);
         int m = calendar.get(Calendar.MONTH) + 1;
@@ -259,27 +342,38 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
         return m +"/"+ d +"/"+ y;
     }
 
+    /**
+     * This method shows the authentication scores in recycler view.
+     */
     private void displayAuthScores(){
         mAuthScoreWindowLinearLayout.setVisibility( View.VISIBLE );
         refreshRecycler();
     }
 
+    /**
+     * This method hides the authentication scores in recycler view.
+     */
     private void hideAuthScores(){
         mAuthScoreWindowLinearLayout.setVisibility( View.INVISIBLE );
     }
 
+    /**
+     * This method shows the progress bar.
+     */
     @Override
     public void showProgressBar() {
         MainActivity.sInstance.showProgressBar();
     }
 
+    /**
+     * This method hide the progress bar.
+     */
     @Override
     public void hideProgressBar() {
         MainActivity.sInstance.hideProgressBar();
     }
 
-    // Auth Score recycler view:
-
+    // Auth Score recycler view:\
     /**
      * This method initiates the Recycler View.
      * @param view view of the fragment.
@@ -299,6 +393,9 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
         //((TopicRecyclerViewAdapter) mAdapter).deleteItem(index);
     }
 
+    /**
+     * This method refreshes the recycler view data.
+     */
     private static void refreshRecycler(){
         if( mAdapter != null && mRecyclerView != null ) {
             mAdapter = new AuthScoreRecyclerViewAdapter(mPresenter.getDataSet());
@@ -306,4 +403,122 @@ public class ProfileFragment extends NavigationMenuFragmentItem implements Profi
         }
     }
 
+    /**
+     * This method lets the user to select image from gallery.
+     */
+    private void selectImage(){
+
+        Intent intent=new Intent(Intent.ACTION_PICK);
+        intent.setType("image/*");
+        String[] mimeTypes = {"image/jpeg", "image/png"};
+        intent.putExtra(Intent.EXTRA_MIME_TYPES,mimeTypes);
+        startActivityForResult(intent,GALLERY_REQUEST_CODE);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode,int resultCode,Intent data){
+
+        if (resultCode == Activity.RESULT_OK)
+
+            switch (requestCode){
+                case GALLERY_REQUEST_CODE:
+                    // Image selected:
+
+                    Uri selectedImage = data.getData();
+
+                    // Save into file:
+                    String path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "profile.jpg";
+                    File file = new File(path);
+                    FileUtil.createFileIfNotExists(file);
+
+                    AppUtil.saveUriIntoFIle(selectedImage, path);
+
+                    // Display it:
+                    loadUrlInProfileImageView(selectedImage);
+
+                    // Save to Firebase:
+                    StorageReference ref = FirebaseUtils.firebaseStorage.getReference().child(
+                            FirebaseUtils.STORAGE_DATA_KEY
+                                    + "/" + AppUtil.sUser.id
+                                    + "/" + "profile_"+ (AppUtil.sUser.profile_picture_idx + 1) +".jpg"
+                    );
+
+                    FirebaseController.uploadFile(ref, file, new ICallback() {
+                        @Override
+                        public void Success(Object user) {
+                            // Update user object too:
+                            AppUtil.sUser.profile_picture_idx++;
+                            FirebaseController.setUserObject( AppUtil.sUser );
+                        }
+
+                        @Override
+                        public void Failure() {
+                            Log.e(TAG, "Failure: uploading profile: " + ref.toString() );
+                        }
+
+                        @Override
+                        public void Error(int error_code) {
+                            Log.e(TAG, "Error: uploading profile: " + ref.toString() );
+                        }
+                    });
+                    break;
+            }
+    }
+
+    /**
+     * This method downloads profile picture from firebase.
+     */
+    public void loadProfilePictureFromFirebase(){
+        if( AppUtil.sUser.profile_picture_idx != -1 ) {
+            String path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "profile.jpg";
+            File file = new File(path);
+
+            StorageReference ref = FirebaseUtils.firebaseStorage.getReference().child(
+                    FirebaseUtils.STORAGE_DATA_KEY
+                    + "/" + AppUtil.sUser.id
+                    + "/" + "profile_"+ AppUtil.sUser.profile_picture_idx +".jpg"
+            );
+
+            new MyFirebaseController().downloadFile(ref, file, new ICallback<File>() {
+                @Override
+                public void Success(File user) {
+                    if (file.exists()) {
+                        loadImageFromLocalFile(file);
+                    }
+                }
+
+                @Override
+                public void Failure() {
+                    Log.e(TAG, "Failure: downloading profile: " + ref.toString() );
+                }
+
+                @Override
+                public void Error(int error_code) {
+                    Log.e(TAG, "Error: downloading profile: " + ref.toString() );
+                }
+            });
+
+
+        }
+    }
+
+    /**
+     * This method loads the image from local file storage.
+     * @param file into this file.
+     */
+    public void loadImageFromLocalFile(File file){
+        if( file.exists() ) {
+            loadUrlInProfileImageView( Uri.fromFile(file) );
+        }else{
+            Log.e(TAG,"File not exists! path:" + file.getAbsolutePath());
+        }
+    }
+
+    /**
+     * This method loads the image from uri.
+     * @param uri to load.
+     */
+    public void loadUrlInProfileImageView(Uri uri){
+        mProfileImageView.setImageURI(uri);
+    }
 }

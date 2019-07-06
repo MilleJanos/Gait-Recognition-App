@@ -1,11 +1,9 @@
 package ms.sapientia.ro.gaitrecognitionapp.view.auth;
 
-import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +11,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import ms.sapientia.ro.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
@@ -21,15 +18,17 @@ import ms.sapientia.ro.gaitrecognitionapp.model.IAfter;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.auth.RegisterFragmentPresenter;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 
-
+/**
+ * This class is responsible for registration.
+ *
+ * @author MilleJanos
+ */
 public class RegisterFragment extends Fragment implements RegisterFragmentPresenter.View {
 
     // Constants:
     private static final String TAG = "RegisterFragment";
-
     // Static members:
     public static RegisterFragment sInstance;
-
     // View members:
     public EditText mEmailEditText;
     public EditText mPasswordEditText1;
@@ -37,11 +36,8 @@ public class RegisterFragment extends Fragment implements RegisterFragmentPresen
     private Button mRegisterButton;
     private TextView mLoginTextViewButton;
     private TextView mForgottPasswordTextViewButton;
-
     // MVP
     private RegisterFragmentPresenter mPresenter;
-
-
 
     @Nullable
     @Override
@@ -60,6 +56,10 @@ public class RegisterFragment extends Fragment implements RegisterFragmentPresen
         sInstance = this;
     }
 
+    /**
+     * This method initiates the view elements.
+     * @param view fragment view.
+     */
     private void initView(View view){
         mEmailEditText = view.findViewById(R.id.email_editText);
         mPasswordEditText1 = view.findViewById(R.id.password_editText_1);
@@ -69,6 +69,9 @@ public class RegisterFragment extends Fragment implements RegisterFragmentPresen
         mForgottPasswordTextViewButton = view.findViewById(R.id.forgot_password_textviewbutton);
     }
 
+    /**
+     * This method binds the view elements click listener.
+     */
     private void bindClickListeners(){
         mRegisterButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -148,6 +151,10 @@ public class RegisterFragment extends Fragment implements RegisterFragmentPresen
         });
     }
 
+    /**
+     * This method verifies the inputs then tries to register.
+     * @param view fragment.
+     */
     public void registerButtonClick(View view){
 
         if( MainActivity.sIsProgressBarShown ){
@@ -170,6 +177,10 @@ public class RegisterFragment extends Fragment implements RegisterFragmentPresen
         }
     }
 
+    /**
+     * This method will go back to login page.
+     * @param view fragment.
+     */
     public void loginButtonClick(View view){
 
         if( MainActivity.sIsProgressBarShown ){
@@ -179,6 +190,10 @@ public class RegisterFragment extends Fragment implements RegisterFragmentPresen
         mPresenter.goBackToLoginPage();
     }
 
+    /**
+     * This method sends reset password request to user's email.
+     * @param view fragment view;
+     */
     public void forgottPasswordClick(View view){
 
         if( MainActivity.sIsProgressBarShown ){
@@ -195,27 +210,29 @@ public class RegisterFragment extends Fragment implements RegisterFragmentPresen
         AppUtil.requestPasswordReset( email );
     }
 
+    /**
+     * This method shows the progress bar.
+     * @param after method which will be run if the progress bar is dismissed.
+     */
     @Override
     public void showProgressBar(IAfter after) {
         MainActivity.sInstance.showProgressBar( after );
     }
 
-
+    /**
+     * This method shows the progress bar.
+     */
     @Override
     public void showProgressBar() {
         MainActivity.sInstance.showProgressBar();
     }
 
+    /**
+     * This method hides the progress bar.
+     */
     @Override
     public void hideProgressBar() {
         MainActivity.sInstance.hideProgressBar();
     }
-
-/*
-    @Override
-    public void onClick(View v) {
-
-    }
-*/
 
 }

@@ -1,5 +1,10 @@
 package ms.sapientia.ro.gaitrecognitionapp.presenter.menu;
 
+/**
+ * This class is the presenter of the EditProfile class.
+ *
+ * @author MilleJanos
+ */
 public class EditProfileFragmentPresenter {
 
     // Members

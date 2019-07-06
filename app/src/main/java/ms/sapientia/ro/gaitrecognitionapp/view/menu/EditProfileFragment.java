@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,20 +24,25 @@ import ms.sapientia.ro.gaitrecognitionapp.model.NavigationMenuFragmentItem;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.menu.EditProfileFragmentPresenter;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 
+/**
+ * This class handles the profile editing transactions.
+ *
+ * @author MilleJanos
+ */
 public class EditProfileFragment extends NavigationMenuFragmentItem implements EditProfileFragmentPresenter.View {
 
+    // Constants members:
     private static final String TAG = "EditProfileFragment";
-
-    // MVP:
+    // MVP members:
     private EditProfileFragmentPresenter mPresenter;
-
-    // View members
+    // View members:
     private EditText mFirstNameEditText;
     private EditText mLastNameEditText;
     private EditText mPhoneNumberEditText;
     private DatePicker mBirthDateDatePicker;
     private Button mSaveButton;
     private Button mCancelButton;
+
 
     @Nullable
     @Override
@@ -60,6 +64,10 @@ public class EditProfileFragment extends NavigationMenuFragmentItem implements E
         loadCurrentUserData();
     }
 
+    /**
+     * This Method binds the view elements.
+     * @param view
+     */
     private void initView(View view) {
         mFirstNameEditText = view.findViewById(R.id.first_name_textview);
         mLastNameEditText = view.findViewById(R.id.last_name_textview);
@@ -69,6 +77,9 @@ public class EditProfileFragment extends NavigationMenuFragmentItem implements E
         mCancelButton = view.findViewById(R.id.cancel_button);
     }
 
+    /**
+     * This method binds the listeners to view elements.
+     */
     private void bindClickListeners() {
         mFirstNameEditText.setOnClickListener( v -> mFirstNameEditText.setError(null) );
         mLastNameEditText.setOnClickListener( v -> mLastNameEditText.setError(null) );
@@ -107,6 +118,9 @@ public class EditProfileFragment extends NavigationMenuFragmentItem implements E
         });
     }
 
+    /**
+     * This method loads the logged in user data into fields.
+     */
     private void loadCurrentUserData(){
         mFirstNameEditText.setText( AppUtil.sUser.first_name );
         mLastNameEditText.setText( AppUtil.sUser.last_name );
@@ -125,6 +139,9 @@ public class EditProfileFragment extends NavigationMenuFragmentItem implements E
 
     }
 
+    /**
+     * This method saves the changes to the firebase & refreshes the navigation drawer.
+     */
     private void saveChanges(){
         // Verify inputs:
         if( ! (mFirstNameEditText.length() > 1) ){
@@ -163,39 +180,52 @@ public class EditProfileFragment extends NavigationMenuFragmentItem implements E
         Toast.makeText(MainActivity.sContext,"Saved.",Toast.LENGTH_SHORT).show();
 
         new Handler().postDelayed(() -> MainActivity.sInstance.onBackPressed(),1000);
+        //new Handler().postDelayed(() -> MainActivity.sInstance.replaceFragment(new HomeFragment(),"home_fragment"),1000);
 
-        // Refresh drawer
+        // Refresh drawer:
         MainActivity.sInstance.refreshNavigationMenuDraverNameAndEmail();
     }
 
+    /**
+     * This method cancels the changes and loads the previous page.
+     */
     private void cancelChanges(){
-        // Ask to cancel:
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.sContext );
 
-        builder.setTitle("Confirm");
-        builder.setMessage("Are you sure you want to cancel changes?");
+        MainActivity.sInstance.onBackPressed();
+        //MainActivity.sInstance.replaceFragment(new HomeFragment(),"home_fragment");
 
-        builder.setPositiveButton("YES", (dialog, which) -> {
-            // Do nothing but close the dialog
-            MainActivity.sInstance.onBackPressed();
-            dialog.dismiss();
-        });
-
-        builder.setNegativeButton("NO", (dialog, which) -> {
-
-            // Do nothing
-            dialog.dismiss();
-        });
-
-        AlertDialog alert = builder.create();
-        alert.show();
+        // // Ask to cancel:
+        // AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.sContext );
+        //
+        // builder.setTitle("Confirm");
+        // builder.setMessage("Are you sure you want to cancel changes?");
+        //
+        // builder.setPositiveButton("YES", (dialog, which) -> {
+        //     // Do nothing but close the dialog
+        //     MainActivity.sInstance.onBackPressed();
+        //     dialog.dismiss();
+        // });
+        //
+        // builder.setNegativeButton("NO", (dialog, which) -> {
+        //
+        //     // Do nothing
+        //     dialog.dismiss();
+        // });
+        // AlertDialog alert = builder.create();
+        // alert.show();
     }
 
+    /**
+     * This method shows the progress bar.
+     */
     @Override
     public void showProgressBar() {
         MainActivity.sInstance.showProgressBar();
     }
 
+    /**
+     * This method hides the progress bar.
+     */
     @Override
     public void hideProgressBar() {
         MainActivity.sInstance.hideProgressBar();

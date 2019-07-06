@@ -14,18 +14,21 @@ import ms.sapientia.ro.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 
+/**
+ * This class holds the service running in background and controlling the Recorder class.
+ *
+ * @author MilleJanos
+ */
 public class BackgroundService extends Service {
 
-    // Static members
+    // Static members:
     private static final String TAG = "BackgroundService";
     public static final String NAME = "ms.sapientia.ro.gaitrecognitionapp.service.BackgroundService";
-
-    public static boolean isRunning = false;
-    public static BackgroundService Instance = null;
-    public static BackgroundService storedService = null;
-    public static Notification mNotification = null;
-
-    // Vars
+    public static boolean sIsRunning = false;
+    public static BackgroundService sInstance = null;
+    public static BackgroundService sStoredService = null;
+    public static Notification sNotification = null;
+    // Other members:
     private Recorder mRecorder;
     private boolean mCreateModel; // true= Create Model; false= Verify last created model
     private IBinder mBinder = new LocalBinder();
@@ -35,8 +38,8 @@ public class BackgroundService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        isRunning = true;
-        Instance = this;
+        sIsRunning = true;
+        sInstance = this;
     }
 
     @Override
@@ -45,16 +48,17 @@ public class BackgroundService extends Service {
         mCreateModel = intent.getBooleanExtra(RecorderUtils.INPUT_CREATE_OR_VERIFY, false);
 
         Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent,  0);
+        notificationIntent.putExtra("started_by_notification","true");  // ONLY FOR FUTURE USAGES
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent,  PendingIntent.FLAG_UPDATE_CURRENT); // PendingIntent.FLAG_UPDATE_CURRENT instead of 0 // ONLY FOR FUTURE USAGES
 
-        mNotification = new NotificationCompat.Builder(this, RecorderUtils.CHANNEL_ID_01)
+        sNotification = new NotificationCompat.Builder(this, RecorderUtils.CHANNEL_ID_01)
                 .setContentTitle("Running")
                 .setContentText("Tap to open application")
                 .setSmallIcon(R.drawable.ic_assignment)
                 .setContentIntent(pendingIntent)
                 .setSmallIcon(R.drawable.ic_gait_recognition_app)
                 .build();
-        startForeground(1, mNotification); // id >= 1
+        startForeground(1, sNotification); // id >= 1
 
         if (intent != null && intent.getAction() != null) {
             String action = intent.getAction();
@@ -66,27 +70,35 @@ public class BackgroundService extends Service {
         return START_NOT_STICKY;
     }
 
+    /**
+     * This method starts the recording.
+     * @param mode starts in mode
+     * @param train_new_one true-train new; false-train more the previous one
+     */
     public void StartRecording(Recorder.Mode mode, boolean train_new_one){
         if(mRecorder == null) {
             // Start Recorder with selected mode & train mode
             mRecorder = new Recorder(this, AppUtil.sAuth, mode, train_new_one);
         }
         mRecorder.startRecording();
-        isRunning = true;
+        sIsRunning = true;
     }
 
+    /**
+     * This method stops the recording.
+     */
     public void StopRecording(){
         if(mRecorder != null) {
             mRecorder.stopRecording();
         }
-        isRunning = false;
+        sIsRunning = false;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         StopRecording();
-        Instance = null;
+        sInstance = null;
         //mRecorder.resetRecording();
 
 }
@@ -105,6 +117,9 @@ public class BackgroundService extends Service {
 
     }
 
+    /**
+     * This method stops the service.
+     */
     public void StopService(){
         Log.i(TAG, "StopService()");
         StopRecording();
@@ -122,11 +137,19 @@ public class BackgroundService extends Service {
         super.onRebind(intent);
     }
 
+    /**
+     * This method returns the stored service value.
+     * @return stored service
+     */
     public BackgroundService getStoredService(){
-        return storedService;
+        return sStoredService;
     }
 
+    /**
+     * This method sets the stored service value.
+     * @param service stored service
+     */
     public void setStoredService(BackgroundService service){
-        storedService = service;
+        sStoredService = service;
     }
 }

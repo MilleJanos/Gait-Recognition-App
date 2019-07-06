@@ -28,6 +28,39 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@mipmap/ic_launcher_foreground_nobackground" />
 
+    <!-- Stop service button -->
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/on_login_stop_service_button"
+        android:visibility="invisible"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        app:layout_constraintBottom_toBottomOf="@+id/ic_imageview"
+        app:layout_constraintEnd_toEndOf="@+id/ic_imageview"
+        app:layout_constraintHorizontal_bias="0.8"
+        app:layout_constraintVertical_bias="0.85"
+        app:layout_constraintStart_toStartOf="@+id/ic_imageview"
+        app:layout_constraintTop_toTopOf="@+id/ic_imageview">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_round"
+            android:tint="@color/colorRed"
+            app:layout_constraintCircleRadius="10dp"
+
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="38dp" />
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_power_settings"
+            android:tint="@color/colorBlack"
+            app:layout_constraintVertical_bias="0.875" />
+
+    </android.support.constraint.ConstraintLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

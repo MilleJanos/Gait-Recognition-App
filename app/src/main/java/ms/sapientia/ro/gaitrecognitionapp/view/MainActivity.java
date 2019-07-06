@@ -2,6 +2,7 @@ package ms.sapientia.ro.gaitrecognitionapp.view;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -16,13 +17,13 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,6 +32,7 @@ import ms.sapientia.ro.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.model.IAfter;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.MainActivityPresenter;
+import ms.sapientia.ro.gaitrecognitionapp.service.BackgroundService;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.LoginFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.RegisterFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.menu.EditProfileFragment;
@@ -39,39 +41,31 @@ import ms.sapientia.ro.gaitrecognitionapp.view.menu.HomeFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.menu.ModeFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.menu.ProfileFragment;
 
-/*
-EXAMPLE HOW TO REACH DRAWER MENU HEADER ITEMS
-
-navigationMenuUserName = navigationView.getHeaderView(0).findViewById(R.id.nav_header_name);
-navigationMenuEmail =    navigationView.getHeaderView(0).findViewById(R.id.nav_header_email);
-
-OPEN NAVIGATION DRAWER
-
-DrawerLayout mDrawerLayout = (DrawerLayout) getView().findViewById(R.id.nav_view);
-mDrawerLayout.openDrawer(mDrawerLayout);
-
-*/
-
+/**
+ * This class is the main core of the application.
+ * All fragments are shown in the MainActivities FrameLayout.
+ *
+ * @author MilleJanos
+ */
 public class MainActivity extends AppCompatActivity implements MainActivityPresenter.View, NavigationView.OnNavigationItemSelectedListener{
 
-    // Constants:
+    // Constant members:
     private final String TAG = "MainActivity";
     private final String TAG_NAME_FRAGMENT = "FragmentList";
     private final String BACK_STACK_ROOT_TAG = "root_fragment";
-
     // Static members:
     public static MainActivity sInstance;
     public static Context sContext;
     public static boolean sIsProgressBarShown = false;
     public static boolean sFirstRun = false; // only run the intro animation once on login page;
-
-    // Members:
+    // View Members:
     private static MainActivityPresenter mPresenter;
     private ProgressBar mProgressBar;
     private TextView mProgressBarTextView;
     private Toolbar mToolbar;
     private DrawerLayout mDrawer;
     private FrameLayout mProgressBarDismiss;
+    // Members:
     public IAfter mOnProgressBarDismissed = null;
 
 
@@ -94,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
         mPresenter.InitFirebase();
 
         // Request internet permission
-        RequestInternetPermission();
+        mPresenter.RequestInternetPermission();
 
         // Get FragmentManager & FragmentTransaction
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -103,17 +97,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
         // Bind views and listeners
         bindViews();
         bindClickListeners();
-
-        //region OLD CODE
-        // Create LoginFragment sInstance
-        /*
-        fragmentManager
-                .beginTransaction()
-                .replace(R.id.fragmentContainer,new LoginFragment())
-                .addToBackStack(null)
-                .commit();
-         */
-        //endregion
 
         // Add Login fragment to FrameLayout
         // first stack item:
@@ -130,10 +113,38 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
         // Init Navigation Menu Drawer:
         initNavigationMenuDrawer();
 
-        // Lock navigation drawer
+        // Lock navigation drawer:
         lockNavigationDrawer();
+
+        // Check if app is started by Notification click:
+        // askForStoppingService();
     }
 
+    /**
+     * This method binds view elements
+     * to click listeners.
+     */
+    protected void bindClickListeners() {
+        mProgressBarDismiss.setOnClickListener( v -> {
+            Dismiss();
+        });
+
+        NavigationView navigationView = MainActivity.sInstance.findViewById(R.id.nav_view);
+        View headerView = navigationView.getHeaderView(0);
+
+        headerView.findViewById(R.id.nav_header_name).setOnClickListener( v -> {
+            goToEditProfile();
+        });
+
+        headerView.findViewById(R.id.nav_header_email).setOnClickListener( v -> {
+            goToEditProfile();
+        });
+
+    }
+
+    /**
+     * This method initiates the toolbar view.
+     */
     private void initToolbar(){
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
@@ -144,6 +155,9 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
         toggle.syncState();
     }
 
+    /**
+     * This method initiates the navigation drawer view.
+     */
     private void initNavigationMenuDrawer() {
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -187,7 +201,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
     public void lockNavigationDrawer(){
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-        // hide toolbar
+        // hide toolbar:
         hideToolbar();
     }
 
@@ -197,21 +211,21 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
     public void unlockNavigationDrawer(){
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-        // show toolbar
+        // show toolbar:
         showToolbar();
     }
 
     /**
      * This method shows the toolbar.
      */
-    private void hideToolbar(){
+    public void hideToolbar(){
         getSupportActionBar().hide();
     }
 
     /**
      * This method hides the toolbar.
      */
-    private void showToolbar(){
+    public void showToolbar(){
         getSupportActionBar().show();
     }
 
@@ -224,48 +238,23 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
     }
 
     /**
-     * This method binds view elements
-     * to click listeners.
+     * This method opens the edit profile page.
      */
-    protected void bindClickListeners() {
-        mProgressBarDismiss.setOnClickListener( v -> {
-            Dismiss();
-        });
-
-        NavigationView navigationView = MainActivity.sInstance.findViewById(R.id.nav_view);
-        View headerView = navigationView.getHeaderView(0);
-
-        headerView.findViewById(R.id.nav_header_name).setOnClickListener( v -> {
-            goToEditProfile();
-        });
-
-        headerView.findViewById(R.id.nav_header_email).setOnClickListener( v -> {
-            goToEditProfile();
-        });
-
-    }
-
     private void goToEditProfile(){
-        MainActivity.sInstance.replaceFragment(new EditProfileFragment(), "edit_profile_fragment");
-        ((NavigationView) MainActivity.sInstance.findViewById(R.id.nav_view)).setCheckedItem(R.id.nav_profile);
+        closeNavigationDrawer();
+        replaceFragment(new EditProfileFragment(), "edit_profile_fragment");
+        ((NavigationView) findViewById(R.id.nav_view)).setCheckedItem(R.id.nav_profile);
     }
 
+    /**
+     * This method is a custom onDismiss.
+     * It is called when the darker panel (which is filling the screen) is pressed.
+     * Runs the method specified for it.
+     */
     public void Dismiss(){
         if( mOnProgressBarDismissed != null ){
             mOnProgressBarDismissed.Do();
             hideProgressBar();
-        }
-    }
-
-    /**
-     * This method checks the permission for internet connectivity.
-     * If permission is denied then ask the user for it.
-     */
-    private void RequestInternetPermission(){
-        if (checkCallingOrSelfPermission("android.permission.INTERNET") != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.INTERNET}, 212);
-            Log.e(TAG, "No Internet Permission!");
-            Toast.makeText(MainActivity.this,"No Internet Permission!", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -280,6 +269,15 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
     }
 
     /**
+     * Removes the fragment from fragment stack.
+     * @param fragment fragment which should be removed
+     */
+    public void removeFragment(Fragment fragment){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        mPresenter.removeFragment(fragment, fragmentManager);
+    }
+
+    /**
      * This method calls the presenters method which replaces the fragment on top of the stack.
      * @param fragment new fragment
      * @param fragment_tag string tag
@@ -289,73 +287,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
         FragmentManager fragmentManager = getSupportFragmentManager();
         mPresenter.replaceFragment(fragment,fragmentManager,fragment_tag);
 
-    }
-
-    /**
-     * This method runs when the device's back button is pressed.
-     * If the user is on the login fragment or is logged in and is on the
-     * main fragmentt then only exits the app on double press.
-     * Any other cases removes the top fragment from stack.
-     */
-    @Override
-    public void onBackPressed() {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment = fragmentManager.findFragmentById(R.id.fragmentContainer);
-
-        if( fragment instanceof LoginFragment
-                || fragment instanceof RegisterFragment
-                || fragment instanceof HomeFragment ){
-
-            mPresenter.doublePressExit();
-            return;
-        }
-
-        if( fragment instanceof EditProfileFragment){
-            // if Edit Profile fragment is displayed -> open Profile
-            replaceFragment(new ProfileFragment(),"profile_fragment");
-            // set selected item: Home:
-            ((NavigationView) findViewById(R.id.nav_view)).setCheckedItem(R.id.nav_profile);
-            return;
-        }
-
-        // any other cases: Open Home
-        replaceFragment(new HomeFragment(), "home_fragment");
-        // set selected item: Home:
-        ((NavigationView) findViewById(R.id.nav_view)).setCheckedItem(R.id.nav_home);
-
-        //region OLD code
-        /*if( fragment instanceof LoginFragment){
-            // if Login fragment is displayed -> Exit app
-             mPresenter.doublePressExit();
-
-        }else{
-            if( AppUtil.sAuth != null && (fragment instanceof LoginFragment) ){
-                // if user is logged in and Main fragment is displayed --> Exit app
-                mPresenter.doublePressExit();
-
-            }else{
-                // if are fragments on top of the Login fragmen -> Remove top fragment
-                removeFragment(fragment);
-                // set selected item: Home:
-                NavigationView navigationView = findViewById(R.id.nav_view);
-                navigationView.setCheckedItem(R.id.nav_home);
-            }
-        }
-        */
-        //endregion
-    }
-
-
-
-    /**
-     * Removes the fragment from fragment stack.
-     * @param fragment fragment which should be removed
-     */
-    public void removeFragment(Fragment fragment){
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.remove(fragment);
-        fragmentTransaction.commit();
     }
 
     /**
@@ -415,6 +346,32 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
         sIsProgressBarShown = false;
     }
 
+    /**
+     * This method opens the navigation menu drawer.
+     */
+    public void openNavigationDrawer(){
+        if (mDrawer != null && ( ! mDrawer.isDrawerOpen(GravityCompat.START) ) ) {
+            mDrawer.openDrawer(GravityCompat.START);
+            return;
+        }
+    }
+
+    /**
+     * This method closes the navigation menu drawer.
+     */
+    public void closeNavigationDrawer(){
+        if (mDrawer != null && mDrawer.isDrawerOpen(GravityCompat.START)) {
+            mDrawer.closeDrawer(GravityCompat.START);
+            return;
+        }
+    }
+
+    /**
+     * This method runs when item is selected in navigation drawer.
+     * Opens the selected page.
+     * @param menuItem item clicked.
+     * @return
+     */
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
         // Handle navigation view item clicks here.
@@ -452,7 +409,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
                 break;
             }
 
-
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -465,51 +421,69 @@ public class MainActivity extends AppCompatActivity implements MainActivityPrese
 
     }
 
+    /**
+     * This method runs when the device's back button is pressed.
+     * If the user is on the login fragment or is logged in and is on the
+     * main fragmentt then only exits the app on double press.
+     * Any other cases removes the top fragment from stack.
+     */
+    @Override
+    public void onBackPressed() {
 
-    //region OLD CODE
-    /*
-        // Print fragment manager managed fragment in debug log.
-    public static void printActivityFragmentList(FragmentManager fragmentManager)
-    {
-        // Get all Fragment list.
-        List<Fragment> fragmentList = fragmentManager.getFragments();
+        // Close drawer menu:
+        closeNavigationDrawer();
 
-        if(fragmentList!=null)
-        {
-            int size = fragmentList.size();
-            for(int i=0;i<size;i++)
-            {
-                Fragment fragment = fragmentList.get(i);
-
-                if(fragment!=null) {
-                    String fragmentTag = fragment.getTag();
-                    Log.d(TAG_NAME_FRAGMENT, fragmentTag);
-                }
-            }
-
-            Log.d(TAG_NAME_FRAGMENT, "***********************************");
-        }
-    }
-
-    private void onTabSelected(int position){
-        // Pop off everythink up to and including the current tab
+        // Change fragment:
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.popBackStack(BACK_STACK_ROOT_TAG, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        Fragment fragment = fragmentManager.findFragmentById(R.id.fragmentContainer);
 
-        // Add the new tab fragment
-        /////fragmentManager.beginTransaction()
-        /////        .replace(R.id.fragmentContainer, )
+        if( fragment instanceof LoginFragment
+                || fragment instanceof RegisterFragment
+                || fragment instanceof HomeFragment ){
+
+            mPresenter.doublePressExit();
+            return;
+        }
+
+        if( fragment instanceof EditProfileFragment){
+            // if Edit Profile fragment is displayed -> open Profile
+            replaceFragment(new ProfileFragment(),"profile_fragment");
+            // set selected item: Home:
+            ((NavigationView) findViewById(R.id.nav_view)).setCheckedItem(R.id.nav_profile);
+            return;
+        }
+
+        // any other cases: Open Home
+        replaceFragment(new HomeFragment(), "home_fragment");
+        // set selected item: Home:
+        ((NavigationView) findViewById(R.id.nav_view)).setCheckedItem(R.id.nav_home);
+
     }
 
-
-    private void addFragmentOnTop(){
-        getFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragmentContainer, new RegisterFragment())
-                .addToBackStack(null)
-                .commit();
-    }
-    */
-    //endregion
+    // public static boolean sStartedFromNotification = true;
+    // /**
+    //  * This method asks the user, if he/she wants to stop the running service
+    //  */
+    // public void askForStoppingService(){
+    //     // ONLY FOR FUTURE USAGES
+    //     String boolStr = getIntent().getStringExtra("started_by_notification");
+    //     if( boolStr != null && boolStr.equals("true") ){
+    //         sStartedFromNotification = true;
+    //     }else{
+    //         sStartedFromNotification = false;
+    //     }
+    // }
 
 }
+
+/*
+EXAMPLE HOW TO REACH DRAWER MENU HEADER ITEMS
+
+navigationMenuUserName = navigationView.getHeaderView(0).findViewById(R.id.nav_header_name);
+navigationMenuEmail =    navigationView.getHeaderView(0).findViewById(R.id.nav_header_email);
+
+OPEN NAVIGATION DRAWER
+
+DrawerLayout mDrawerLayout = (DrawerLayout) getView().findViewById(R.id.nav_view);
+mDrawerLayout.openDrawer(mDrawerLayout);
+*/

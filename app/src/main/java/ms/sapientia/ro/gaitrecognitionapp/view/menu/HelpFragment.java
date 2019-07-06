@@ -20,13 +20,16 @@ import ms.sapientia.ro.gaitrecognitionapp.model.NavigationMenuFragmentItem;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.menu.HelpFragmentPresenter;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 
+/**
+ * This class is responsible to handle the help page.
+ */
 public class HelpFragment extends NavigationMenuFragmentItem implements HelpFragmentPresenter.View {
 
+    // Constants: members
     private static final String TAG = "HelpFragment";
-
-    // MVP:
+    // MVP members:
     private HelpFragmentPresenter mPresenter;
-    // Members:
+    // Members members:
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
@@ -58,12 +61,19 @@ public class HelpFragment extends NavigationMenuFragmentItem implements HelpFrag
         Animator.Slide( mFloatingActionButton, 200, 0, 0, 0 , 2000);
     }
 
+    /**
+     * This method binds the view elements.
+     * @param view fragment's view.
+     */
     private void initView(View view) {
         mRecyclerView = view.findViewById(R.id.recycler_view);
         mSearchView = view.findViewById(R.id.search_view);
         mFloatingActionButton = view.findViewById(R.id.message_floating_action_button);
     }
 
+    /**
+     * This method binds the view elements.
+     */
     private void bindClickListeners() {
 
         ((TopicRecyclerViewAdapter) mAdapter).setOnItemClickListener(new TopicRecyclerViewAdapter.MyClickListener() {
@@ -113,13 +123,6 @@ public class HelpFragment extends NavigationMenuFragmentItem implements HelpFrag
 
     }
 
-    public static String userIdShortConverter(String user_id){
-        return
-                user_id.substring(4,4)
-                + user_id.substring(8,8)
-                + user_id.substring(16,16);
-    }
-
     /**
      * This method initiates the Recycler View.
      * @param view view of the fragment.
@@ -139,14 +142,17 @@ public class HelpFragment extends NavigationMenuFragmentItem implements HelpFrag
         //((TopicRecyclerViewAdapter) mAdapter).deleteItem(index);
     }
 
-
-
-
+    /**
+     * This method shows the progress bar.
+     */
     @Override
     public void showProgressBar() {
         MainActivity.sInstance.showProgressBar();
     }
 
+    /**
+     * This method hides the progress bar.
+     */
     @Override
     public void hideProgressBar() {
         MainActivity.sInstance.hideProgressBar();

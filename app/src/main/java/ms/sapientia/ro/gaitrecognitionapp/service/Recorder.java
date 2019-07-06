@@ -7,6 +7,8 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.MediaPlayer;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
@@ -37,7 +39,9 @@ import ms.sapientia.ro.gaitrecognitionapp.logic.MyFirebaseController;
 import ms.sapientia.ro.gaitrecognitionapp.model.IAfter;
 import ms.sapientia.ro.gaitrecognitionapp.model.ICallback;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
+import ms.sapientia.ro.gaitrecognitionapp.view.menu.EditProfileFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.menu.ModeFragment;
+import ms.sapientia.ro.gaitrecognitionapp.view.menu.ProfileFragment;
 import ms.sapientia.ro.model_builder.GaitHelperFunctions;
 import ms.sapientia.ro.model_builder.GaitModelBuilder;
 import ms.sapientia.ro.model_builder.GaitVerification;
@@ -46,6 +50,11 @@ import ms.sapientia.ro.model_builder.IGaitVerification;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
 
+/**
+ * This class is responsible to record the 3 types of mode.
+ *
+ * @author MilleJanos
+ */
 public class Recorder implements IRecorder {
 
     // Tag:
@@ -103,14 +112,13 @@ public class Recorder implements IRecorder {
     private boolean mTrainNewOne = true;
     private boolean mPreprocessDismissed;
     private boolean mTrainDismissed;
+    private boolean mCollectDismissed;
     // Sound Members:
     private boolean mDebugSound = false;
     private MediaPlayer mp_bing;
+    private MediaPlayer mp_bing2;
     private MediaPlayer mp_feature;
     private MediaPlayer mp_model;
-    private MediaPlayer mp_bing2;
-
-    // Constructor:
 
     public Recorder(Context context, FirebaseAuth auth, Mode mode, boolean  train_new_one) {
 
@@ -153,19 +161,14 @@ public class Recorder implements IRecorder {
         initSound();
 
         mCanRecord = true;
-        //if( mMode == Mode.MODE_TRAIN ) {
-        //    mCanRecord = true;
-        //    mCanRecord = false;     // initTrainFiles will modofy this value
-        //    initTrainFiles_OLD(mTrainNewOne);
-        //}else{
-        //    // Auth & Data collect
-        //    mCanRecord = true;
-        //}
 
     }
 
     // Init. methods:
 
+    /**
+     * This method inits the devault values.
+     */
     private void initDefaultValues(){
         sMaxAccelerometerArray = DEFAULT_MAX_ACCELEROMETER_ARRAY;
         sIntervalBetweenTests = DEFAULT_INTERVAL_BETWEEN_TESTS;
@@ -173,6 +176,9 @@ public class Recorder implements IRecorder {
         sFilesCountBetweenModelGenerating = DEFAULT_FILES_COUNT_BEFORE_MODEL_GENERATING;
     }
 
+    /**
+     * This method inits the sound values.
+     */
     private void initSound() {
         mp_bing = MediaPlayer.create(mContext, R.raw.relentless);
         mp_bing2 = MediaPlayer.create(mContext, R.raw.open_ended);
@@ -180,66 +186,11 @@ public class Recorder implements IRecorder {
         mp_model = MediaPlayer.create(mContext, R.raw.model);
     }
 
-    private void initTrainFiles_OLD(boolean train_new_one){
-        String path;
-
-        if( train_new_one ){
-            // Train new file:
-
-            // int tf_count = AppUtil.sUser.merged_feature_count;
-            // int tm_count = AppUtil.sUser.merged_model_count;
-            //
-            // path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "merged" + "/" + "mergedModel_" + AppUtil.sUser.id + "_" + tf_count + ".mdl";
-            // AppUtil.mergedModelFile = new File(path);
-            // FileUtil.createFileIfNotExists(AppUtil.mergedModelFile);
-            //
-            // path = AppUtil.internalFilesRoot.getAbsolutePath() + "/" + "merged" + "/" + "mergedFeature_" + AppUtil.sUser.id + "_" + tm_count + ".arff";
-            // AppUtil.mergedFeatureFile = new File(path);
-            // FileUtil.createFileIfNotExists(AppUtil.mergedFeatureFile);
-
-            // // Increase number of feature and model count:
-            // AppUtil.sUser.merged_feature_count++;
-            // AppUtil.sUser.merged_model_count++;
-            //
-            // // Save numbers to firebase:
-            // FirebaseController.setUserObject(AppUtil.sUser);
-
-            mCanRecord = true;
-
-        }else {
-            // Train with last merged file:
-            /*
-            downloadLastMergedFeature(AppUtil.sUser.id, new IFileCallback(){
-
-                @Override
-                public void Success(File file) {
-                    mCanRecord = true;
-                    hideProgressBar();
-                }
-
-                @Override
-                public void Failure() {
-                    mCanRecord = false;
-                    Toast.makeText(MainActivity.sContext,"Error: downloading last train!",Toast.LENGTH_LONG).show();
-                    hideProgressBar();
-                }
-
-                @Override
-                public void Error(int error_code) {
-                    mCanRecord = false;
-                    Toast.makeText(MainActivity.sContext,"Error: downloading last train!",Toast.LENGTH_LONG).show();
-                    hideProgressBar();
-                }
-            });
-            */
-
-        }
-
-
-    }
-
     // Start / Stop / Resume / Reset:
 
+    /**
+     * This method starts recording.
+     */
     public void startRecording(){
         if(mIsRecording == false){
             resetRecording();
@@ -248,6 +199,9 @@ public class Recorder implements IRecorder {
         }
     }
 
+    /**
+     * This method stops recording.
+     */
     public void stopRecording(){
         if(mIsRecording == true) {
             mSensorManager.unregisterListener(mAccelerometerEventListener);
@@ -267,12 +221,18 @@ public class Recorder implements IRecorder {
         }
     }
 
+    /**
+     * This method resumes recording.
+     */
     public void resumeRecording(){
         if( !mIsRecording){
             mIsRecording = true;
         }
     }
 
+    /**
+     * This method resets recording.
+     */
     public void resetRecording(){
         if( !mIsRecording){
             mCurrentRecordCount = 0;
@@ -282,12 +242,23 @@ public class Recorder implements IRecorder {
 
     // State info. methods:
 
+    /**
+     * Returns the running state.
+     * @return running state of the Recorder
+     */
     public boolean isRecording(){
         return mIsRecording;
     }
 
     // Sensor on changed method:
 
+    /**
+     * This method processes the raw accelerometer data.
+     * @param timeStamp from accelerometer
+     * @param x from accelerometer
+     * @param y from accelerometer
+     * @param z from accelerometer
+     */
     private void sensorChanged(long timeStamp, float x, float y, float z) {
 
         if ( mMode == Mode.MODE_TRAIN ) {
@@ -327,9 +298,18 @@ public class Recorder implements IRecorder {
         }
 
         if ( mMode == Mode.MODE_COLLECT_DATA ){
+            // Record until stops.
 
-            // TODO
+            // Note: Train mode will triggered processRecordedData() method in stopRecording().
 
+            if( mAccelerometerArray.size() == Integer.MAX_VALUE ){
+                mp_bing2.start();
+            }
+
+            // if the list is full, then remove first then (Circle effect):
+            if (mAccelerometerArray.size() == sMaxAccelerometerArray - 1) {
+                mAccelerometerArray.removeFirst();
+            }
         }
 
         // add to last:
@@ -338,6 +318,9 @@ public class Recorder implements IRecorder {
 
     }
 
+    /**
+     * This method processes the data recorder.
+     */
     private void processRecordedData(){
 
         // show progress bar:
@@ -400,7 +383,7 @@ public class Recorder implements IRecorder {
             }
 
             case MODE_COLLECT_DATA:{
-                // upload raw files ..........
+                // upload raw files:
                 mode_collect_data();
                 break;
             }
@@ -534,6 +517,10 @@ public class Recorder implements IRecorder {
         //*//}
     }
 
+    /**
+     * This method calculates the similarities between last trained model and the fresh recorded
+     * raw data from the user.
+     */
     private void mode_authenticate(){
 
         // Stop recording while processing:
@@ -579,6 +566,17 @@ public class Recorder implements IRecorder {
                 AppUtil.sUser.authenticaiton_values.add( score );
                 FirebaseController.setUserObject( AppUtil.sUser );
 
+                // If Profile Page is open -> update informations:
+                FragmentManager fragmentManager = MainActivity.sInstance.getSupportFragmentManager();
+                Fragment fragment;
+                if( fragmentManager != null ){
+                    fragment = fragmentManager.findFragmentById(R.id.fragmentContainer);
+                    if( fragment != null && fragment instanceof ProfileFragment) {
+                        ProfileFragment.refreshProfileInformationsUI();
+                    }
+                }
+
+
                 // DEBUG PRINT:
                 Log.i(TAG, "Success: Files used in Authentication:\n");
                 Log.i(TAG, "Success: AppUtil.rawdataUserFile =" + AppUtil.rawdataUserFile);
@@ -606,19 +604,58 @@ public class Recorder implements IRecorder {
 
     }
 
+    /**
+     * This method uploads raw data to Firebase.
+     */
     private void mode_collect_data(){
+
+        mCollectDismissed = false;
+
         StorageReference ref = FirebaseUtils.firebaseStorage.getReference().child(
                 FirebaseUtils.STORAGE_DATA_KEY
                 + "/" + AppUtil.sAuth.getUid()
                 + "/" + FirebaseUtils.STORAGE_RAW_KEY
                 + "/" + AppUtil.rawdataUserFile.getName()
         );
+
+        MainActivity.sInstance.showProgressBar(new IAfter() {
+            @Override
+            public void Do() {
+                mCollectDismissed = true;
+            }
+        });
+
         FirebaseController.uploadFile(
                 ref,
                 AppUtil.rawdataUserFile,
-                null);
+                new ICallback() {
+                    @Override
+                    public void Success(Object user) {
+                        if( !mCollectDismissed ) {
+                            MainActivity.sInstance.hideProgressBar();
+                        }
+                        AppUtil.sUser.raw_count++;
+                        FirebaseController.setUserObject(AppUtil.sUser);
+                    }
+
+                    @Override
+                    public void Failure() {
+                        Log.e(TAG, "Failure: Upload failed. ref: " + ref.toString() );
+                    }
+
+                    @Override
+                    public void Error(int error_code) {
+                        Log.e(TAG, "Error ("+error_code+"): Upload failed. ref: " + ref.toString() );
+                    }
+                });
     }
 
+    /**
+     * This method asks for retrain if train failed.
+     * @param title box's title
+     * @param message box's message
+     * @param after on dismiss function
+     */
     private void askForRetrain(String title, String message, IAfter after){
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.sContext);
 
@@ -938,6 +975,15 @@ public class Recorder implements IRecorder {
         }
     }
 
+    /**
+     * This method calculates the authentication value from model (mergedFeature-->model)
+     * and raw data
+     * @param mergedFeature
+     * @param toVerifyRaw
+     * @param userId
+     * @param doIt function to run it after calculations
+     * @return authentication value
+     */
     private double calculateAuthenticationValue( File mergedFeature, File toVerifyRaw, String userId, IAfter doIt){
         double percentage = -1;
 
@@ -971,6 +1017,10 @@ public class Recorder implements IRecorder {
         return percentage;
     }
 
+    /**
+     * Returns the accelerometer data.
+     * @return
+     */
     public ArrayDeque<Accelerometer> getAcceleromerList(){
         return mAccelerometerArray;
     }
@@ -1093,20 +1143,34 @@ public class Recorder implements IRecorder {
 
     // Progress bar controller methods:
 
+    /**
+     * This method shows the progress bar and sets function to on dismiss.
+     * @param after call this method when on dismiss
+     */
     private void showProgressBar(IAfter after){
         MainActivity.sInstance.showProgressBar(after);
     }
 
+    /**
+     * This method shows the progress bar.
+     */
     private void showProgressBar(){
         MainActivity.sInstance.showProgressBar();
     }
 
+    /**
+     * This method hides the progress bar.
+     */
     private void hideProgressBar(){
         MainActivity.sInstance.hideProgressBar();
     }
 
     // Debug print methods:
 
+    /**
+     * This method prints the accelerometer data.
+     * @param list accelerometer data
+     */
     private void printAccelerometerList(ArrayDeque<Accelerometer> list){
         int idx = 0;
         for(Accelerometer a : list){
@@ -1121,6 +1185,11 @@ public class Recorder implements IRecorder {
         Log.i(TAG, "AccelerometerList: end");
     }
 
+    /**
+     * This method prints the processed and unprocessed data.
+     * @param list
+     * @param preprocessedList
+     */
     private void Print_UnPreprocessed_and_Preprocessed_array(List<Accelerometer> list, List<Accelerometer> preprocessedList){
         GraphView graph1 = ModeFragment.sInstance.getView().findViewById(R.id.graph_view_1);
         graph1.setVisibility(View.VISIBLE);

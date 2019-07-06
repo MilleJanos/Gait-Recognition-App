@@ -5,63 +5,25 @@ import android.content.Context;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.storage.FirebaseStorage;
 
+/**
+ * This class
+ */
 public class FirebaseUtils {
 
+    // Constant members:
     private static final String TAG = "FirebaseUtils";
+    // FireStore (Cloud Firestore) members:
+    public static final String USER_COLLECTION_KEY = "user";
+    // Storage (Files) members:
+    public static final String STORAGE_DATA_KEY = "data";
+    public static final String STORAGE_RAW_KEY = "raw";
+    public static final String STORAGE_FEATURE_KEY = "feature";
+    public static final String STORAGE_MODEL_KEY = "model";
+    public static final String STORAGE_OTHER_KEY = "other";
+    public static final String STORAGE_MERGED_KEY = "merged";
 
     private FirebaseUtils(){
     }
-
-    //
-    // Firebase Keys
-    //
-    // FireStore (Cloud Firestore)
-    public static final String USER_COLLECTION_KEY = "user";
-        /* <user_id> */
-
-
-
-    //public static final String USER_RECORDS_OLD_KEY = "user_records";
-    //public static final String USER_RECORDS_NEW_KEY = "user_records_2";
-    //public static final String USER_RECORDS_DEBUG_KEY = "user_records_debug";
-    //    /* <user_id> */
-    //        /* <device_id> */
-    //            /* <random_id> */
-    //                public static final String DATE_KEY = "date";                   // they will be used more
-    //                public static final String FILE_ID_KEY = "fileId";              // often in UserRecordObject
-    //                public static final String DOWNLOAD_URL_KEY = "downloadUrl";    // class
-    //                public static final String USER_DATA_KEY = "user_data";
-    ///* <user_id> */
-    //public static final String USER_DATE_KEY = "date";                   // they will be used more
-    //public static final String USER_FILE_ID_KEY = "fileId";              // often in UserRecordObject
-    //public static final String USER_DOWNLOAD_URL_KEY = "downloadUrl";    // class
-    // Storage (Files)
-    public static final String STORAGE_DATA_KEY = "data";
-        /* <user_id> */
-            public static final String STORAGE_RAW_KEY = "raw";
-            public static final String STORAGE_FEATURE_KEY = "feature";
-            public static final String STORAGE_MODEL_KEY = "model";
-            public static final String STORAGE_OTHER_KEY = "other";
-            public static final String STORAGE_MERGED_KEY = "merged";
-
-    //public static final String STORAGE_FEATURES_KEY = "features";
-    //public static final String STORAGE_FILES_KEY = "files";
-    //public static final String STORAGE_FILES_METADATA_KEY = "files_metadata";
-    //public static final String STORAGE_MODELS_KEY = "models";
-    //public static final String STORAGE_FEATURES_DEBUG_KEY = "features_debug";
-    //public static final String STORAGE_FILES_DEBUG_KEY = "files_debug";
-    //public static final String STORAGE_MODELS_DEBUG_KEY = "models_debug";
-    /**
-     * A constant that contains the name of the Firebase/Firestore collection where user statistics
-     * are stored
-     *
-     * @author Krisztian-Miklos Nemeth
-     */
-    public static final String FIRESTORE_STATS_NODE = "user_stats";
-
-    //
-    // Static variables
-    //
 
     public static FirebaseStorage firebaseStorage;
     //public static StorageReference storageReference;
@@ -69,10 +31,10 @@ public class FirebaseUtils {
     // Negative Dummy Name (in STORAGE_FEATURES_KEY)
     public static final String negativeFeatureFileName = "features_negative.arff";
 
-    //
-    // Methods:
-    //
-
+    /**
+     * This method initiates the Firebase.
+     * @param context
+     */
     public static void Init(Context context){
         FirebaseApp.initializeApp(context);
         firebaseStorage = FirebaseStorage.getInstance();

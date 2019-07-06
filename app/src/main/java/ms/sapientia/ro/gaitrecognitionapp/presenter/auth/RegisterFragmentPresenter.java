@@ -15,28 +15,26 @@ import ms.sapientia.ro.gaitrecognitionapp.view.auth.LoginFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.RegisterFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.menu.HomeFragment;
 
+/**
+ * this class is the presenter of the RegisterFragment class.
+ */
 public class RegisterFragmentPresenter {
 
-    // Members
+    // Constants
     private static final String TAG = "RegisterFragmentPresent";
-    private View view;
-
     // Interface:
+    private View view;
     public interface View{
         void showProgressBar(IAfter after);
         void showProgressBar();
         void hideProgressBar();
     }
-
     // Constructor:
     public RegisterFragmentPresenter(View view){
         this.view = view;
     }
-
     // Members:
-    private boolean mRegisterIsDismissed;
-
-    // Methods:
+    private static boolean mRegisterIsDismissed;
 
     /**
      * Register using email and password
@@ -148,7 +146,7 @@ public class RegisterFragmentPresenter {
 
                         // Registration succeed:
 
-                        if( mRegisterIsDismissed = true){
+                        if( mRegisterIsDismissed == true){
                             return;
                         }
 
@@ -161,14 +159,14 @@ public class RegisterFragmentPresenter {
                         // Remove Register fragment:
                         //goBackToLoginPage(); // Remove Register fragment before going to Main fragment
 
-                        // Refresh navigation menu drawer userinfo:
-                        MainActivity.sInstance.refreshNavigationMenuDraverNameAndEmail();
-
                         // Set user object as app member:
                         AppUtil.sUser = user;
 
                         // Save into app member:
                         FirebaseController.setUserObject( user );
+
+                        // Refresh navigation menu drawer userinfo:
+                        MainActivity.sInstance.refreshNavigationMenuDraverNameAndEmail();
 
                         // Hide progress bar:
                         view.hideProgressBar();
@@ -297,10 +295,14 @@ public class RegisterFragmentPresenter {
         }
     }
 
+    /**
+     * This method resets the errors on EditText view elements.
+     * @param email_edit_text
+     * @param password_edit_text_1
+     * @param password_edit_text_2
+     */
     public void resetErrors(EditText email_edit_text, EditText password_edit_text_1, EditText password_edit_text_2){
         setErrors(null,null,null);
     }
-
-
 
 }
