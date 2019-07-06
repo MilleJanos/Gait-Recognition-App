@@ -16,24 +16,26 @@ import ms.sapientia.ro.gaitrecognitionapp.view.auth.LoginFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.auth.RegisterFragment;
 import ms.sapientia.ro.gaitrecognitionapp.view.menu.HomeFragment;
 
+/**
+ * This class is the presenter of the LoginFragment class.
+ *
+ * @author MilleJános
+ */
 public class LoginFragmentPresenter {
 
     // Members
     private static final String TAG = "LoginFragmentPresenter";
     private View view;
-
     // Interface:
     public interface View{
         void showProgressBar(IAfter after);
         void showProgressBar();
         void hideProgressBar();
     }
-
     // Constructor
     public LoginFragmentPresenter(View view) {
         this.view = view;
     }
-
     // Methods:
     private boolean mLoginIsDismissed;
 

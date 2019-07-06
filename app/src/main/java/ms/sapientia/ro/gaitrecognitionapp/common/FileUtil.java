@@ -9,6 +9,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+/**
+ * This class contains static methods, to support the entire application with
+ * common functions refered to file operations.
+ *
+ * @author MilleJanos
+ */
 public class FileUtil {
 
     private static final String TAG = "FileUtils";

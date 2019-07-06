@@ -26,29 +26,33 @@ import ms.sapientia.ro.gaitrecognitionapp.service.BackgroundService;
 import ms.sapientia.ro.gaitrecognitionapp.service.Recorder;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 
-
+/**
+ * This class is responsible for Training, Authentication, Data Collection and
+ * manages the BackgroundService.
+ *
+ * @author Mille Janos
+ */
 public class ModeFragment extends NavigationMenuFragmentItem implements ModeFragmentPresenter.View {
 
+    // Constant members:
     private static final String TAG = "ModeFragment";
+    // Static members:
     public static ModeFragment sInstance;
-
-    // View members:
-    Switch mServiceSwitch;
-    LinearLayout mTrainSection;
-    LinearLayout mAuthenticationSection;
-    LinearLayout mCollectDataSection;
-    CheckBox mTrainNewOneCheckBox;
-
-    // MVP:
+    // MVP member:
     private ModeFragmentPresenter mPresenter;
-
+    // Final members:
+    private final int selectedColor = Color.BLACK;
+    private final int notSelectedColor = Color.DKGRAY;
+    private final int selectedDescriptionColor = Color.BLACK;
+    private final int notSelectedDescriptionColor = Color.DKGRAY;
+    // View members:
+    private Switch mServiceSwitch;
+    private LinearLayout mTrainSection;
+    private LinearLayout mAuthenticationSection;
+    private LinearLayout mCollectDataSection;
+    private CheckBox mTrainNewOneCheckBox;
     // Private members:
     private MyFirebaseUser auxUser;
-    // Colors:
-    private int selectedColor = Color.BLACK;
-    private int notSelectedColor = Color.DKGRAY;
-    private int selectedDescriptionColor = Color.BLACK;
-    private int notSelectedDescriptionColor = Color.DKGRAY;
 
 
     @Nullable
@@ -79,6 +83,10 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
 
     }
 
+    /**
+     * This method binds the view elements.
+     * @param view
+     */
     private void initView(View view) {
         mServiceSwitch = view.findViewById(R.id.service_switch);
         mTrainSection = view.findViewById(R.id.item_train);
@@ -87,6 +95,9 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
         mTrainNewOneCheckBox = view.findViewById(R.id.train_new_switch);
     }
 
+    /**
+     * This method binds the listeners to view elements.
+     */
     private void bindClickListeners() {
         mServiceSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> click_switch(buttonView,isChecked) );
         mTrainSection.setOnClickListener(v -> click_train()) ;
@@ -95,6 +106,11 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
         mTrainNewOneCheckBox.setOnClickListener(v -> click_train_new_switch(v));
     }
 
+    /**
+     * This method binds handles the switch click events.
+     * @param buttonView
+     * @param isChecked
+     */
     public void click_switch(View buttonView, boolean isChecked){
         if (isChecked) {
             // switch on
@@ -116,6 +132,9 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
         }
     }
 
+    /**
+     * This method sets the service mode to train.
+     */
     public void click_train(){
         if( mPresenter.isServiceRunning(BackgroundService.NAME) ){
             Toast.makeText(MainActivity.sContext, "Turn off the service before!", Toast.LENGTH_SHORT).show();
@@ -124,6 +143,9 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
         saveSelectedMode( Recorder.Mode.MODE_TRAIN );
     }
 
+    /**
+     * This method sets the service mode to authentication.
+     */
     public void click_authenticate(){
         if( mPresenter.isServiceRunning(BackgroundService.NAME) ){
             Toast.makeText(MainActivity.sContext, "Turn off the service before!", Toast.LENGTH_SHORT).show();
@@ -132,6 +154,9 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
         saveSelectedMode( Recorder.Mode.MODE_AUTHENTICATE );
     }
 
+    /**
+     * This method sets the service mode to collect data.
+     */
     public void click_collect(){
         if( mPresenter.isServiceRunning(BackgroundService.NAME) ){
             Toast.makeText(MainActivity.sContext, "Turn off the service before!", Toast.LENGTH_SHORT).show();
@@ -140,6 +165,12 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
         saveSelectedMode( Recorder.Mode.MODE_COLLECT_DATA );
     }
 
+    /**
+     * This method handles the two train mode.
+     * - Train new one.
+     * - Train the last trained.
+     * (Future plans)
+     */
     public void click_train_new_switch(View view){
         if( mPresenter.isServiceRunning(BackgroundService.NAME) ){
             Toast.makeText(MainActivity.sContext, "Turn off the service before!", Toast.LENGTH_SHORT).show();
@@ -150,6 +181,10 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
         AppUtil.sTrainNewOne = ((CheckBox) view).isChecked();
     }
 
+    /**
+     * This method saves the selected mode to firebase.
+     * @param mode
+     */
     public void saveSelectedMode(Recorder.Mode mode){
         // Save changes local;
         AppUtil.sUser.selected_mode = mode;
@@ -159,12 +194,18 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
         selectMode(mode);
     }
 
+    /**
+     * This method refreshes the selection on UI.
+     */
     public void selectMode(Recorder.Mode mode){
         resetSelection();
         AppUtil.sUser.selected_mode = mode;
         setSelection(mode);
     }
 
+    /**
+     * This method resets the selection on UI.
+     */
     @SuppressLint("ResourceAsColor")
     private void resetSelection(){
         // Set Titles color:
@@ -181,6 +222,10 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
         ((TextView)((LinearLayout) mCollectDataSection.getChildAt(1)).getChildAt(1)).setTextColor( notSelectedDescriptionColor );
     }
 
+    /**
+     * This method sets the selected item on UI.
+     * @param mode
+     */
     private void setSelection(Recorder.Mode mode){
 
        if( mode == Recorder.Mode.MODE_TRAIN){
@@ -211,6 +256,9 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
         }
     }
 
+    /**
+     * This method loads the selected mode from user object.
+     */
     private void restoreLastState(){
         boolean checked = mPresenter.isServiceRunning(BackgroundService.NAME);
         mServiceSwitch.setChecked(checked);
@@ -228,12 +276,17 @@ public class ModeFragment extends NavigationMenuFragmentItem implements ModeFrag
         hideProgressBar();
     }
 
-
+    /**
+     * This method shows the progress bar.
+     */
     @Override
     public void showProgressBar() {
         MainActivity.sInstance.showProgressBar();
     }
 
+    /**
+     * This method hides the progress bar.
+     */
     @Override
     public void hideProgressBar() {
         MainActivity.sInstance.hideProgressBar();

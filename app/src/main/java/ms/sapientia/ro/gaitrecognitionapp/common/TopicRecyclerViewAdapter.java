@@ -12,10 +12,20 @@ import java.util.ArrayList;
 import ms.sapientia.ro.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.model.TopicObject;
 
+/**
+ * This class is adapter of the Recycler View found on Help page.
+ *
+ * @author MilleJanos
+ */
 public class TopicRecyclerViewAdapter extends RecyclerView.Adapter<TopicRecyclerViewAdapter.TopicObjectHolder> {
 
+    // Constant members:
     private static String TAG = "MyRecyclerViewAdapter";
+    private final String INDEX_START_CHARACTER = "Q";
+    private final int INDEX_PADDING = 4;
+    // View members:
     private ArrayList<TopicObject> mDataset;
+    // Listener member:
     private static MyClickListener myClickListener;
 
     public static class TopicObjectHolder extends RecyclerView.ViewHolder
@@ -49,8 +59,7 @@ public class TopicRecyclerViewAdapter extends RecyclerView.Adapter<TopicRecycler
     }
 
     @Override
-    public TopicObjectHolder onCreateViewHolder(ViewGroup parent,
-                                               int viewType) {
+    public TopicObjectHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.card_view, parent, false);
 
@@ -65,16 +74,29 @@ public class TopicRecyclerViewAdapter extends RecyclerView.Adapter<TopicRecycler
         holder.answerTextView.setText( mDataset.get(position).getAnswer() );
     }
 
+    /**
+     * This method adds a new TopicObject item to the Recycler view.
+     * @param dataObj to add
+     * @param index his index
+     */
     public void addItem(TopicObject dataObj, int index) {
         mDataset.add(index, dataObj);
         notifyItemInserted(index);
     }
 
+    /**
+     * This method removes the TopicObject item at the given index.
+     * @param index to remove
+     */
     public void deleteItem(int index) {
         mDataset.remove(index);
         notifyItemRemoved(index);
     }
 
+    /**
+     * This method returns the item count of the Recycler View.
+     * @return item count of the Recycler View
+     */
     @Override
     public int getItemCount() {
         return mDataset.size();
@@ -84,9 +106,14 @@ public class TopicRecyclerViewAdapter extends RecyclerView.Adapter<TopicRecycler
         public void onItemClick(int position, View v);
     }
 
+    /**
+     * This method formats the id into custom question format.
+     * @param id to format
+     * @return the formatted id in string
+     */
     public String toTopicIdFormat(int id){
-        String preChar = "Q";
-        int padding = 4;
+        String preChar = INDEX_START_CHARACTER;
+        int padding = INDEX_PADDING;
         String returnStr = preChar;
         String numStr = Integer.toString(id);
 

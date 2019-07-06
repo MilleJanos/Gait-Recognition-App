@@ -9,6 +9,11 @@ import android.view.animation.TranslateAnimation;
 
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 
+/**
+ * This class contains static methods to create simple animations.
+ *
+ * @author MilleJanos
+ */
 public class Animator {
 
     public static long ANIMATION_DURATION = 300; // milliseconds
@@ -24,6 +29,10 @@ public class Animator {
     public static int TO_BOTTOM = 7;
 
 
+    /**
+     * This method adds logo intro animation to view_item.
+     * @param view_item to animate
+     */
     public static void LogoIntro(View view_item){
         float distanceY = TypedValue.applyDimension(         // dip to pixels
                 TypedValue.COMPLEX_UNIT_DIP, 45,
@@ -51,11 +60,29 @@ public class Animator {
         view_item.setAnimation(as);
     }
 
-
+    /**
+     * This method adds a simple slide animation to the view_item, 'from' and 'to' the given parameter.
+     * Animation duration = {@value ANIMATION_DURATION}
+     * @param view_item to animate
+     * @param fromXDelta from X relative coordinate
+     * @param toXDelta to X relative coordinate
+     * @param fromYDelta from Y relative coordinate
+     * @param toYDelta to Y relative coordinate
+     */
     public static void Slide(View view_item, float fromXDelta, float toXDelta, float fromYDelta, float toYDelta ){
          Slide(view_item,  fromXDelta,  toXDelta,  fromYDelta,  toYDelta, ANIMATION_DURATION);
     }
 
+    /**
+     * This method adds a simple slide animation to the view_item, 'from' and 'to' the given parameter.
+     * Duration of the animation can be set.
+     * @param view_item to animate
+     * @param fromXDelta from X relative coordinate
+     * @param toXDelta to X relative coordinate
+     * @param fromYDelta from Y relative coordinate
+     * @param toYDelta to Y relative coordinate
+     * @param duration animation duration (ms)
+     */
     public static void Slide(View view_item, float fromXDelta, float toXDelta, float fromYDelta, float toYDelta, long duration){
 
         // Convert DPI to Pixels
@@ -77,11 +104,15 @@ public class Animator {
         view_item.setAnimation(as);
     }
 
-
-    public static float DpiToPixelConverter(float value){
+    /**
+     * This method converts DPI value to pixels.
+     * @param dpi_value in DPI
+     * @return DPI value in pixels
+     */
+    public static float DpiToPixelConverter(float dpi_value){
 
         return TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP, value,
+                TypedValue.COMPLEX_UNIT_DIP, dpi_value,
                 MainActivity.sInstance.getResources().getDisplayMetrics()
         );
     }

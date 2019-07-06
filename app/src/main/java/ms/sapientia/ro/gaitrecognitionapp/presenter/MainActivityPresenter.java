@@ -1,15 +1,17 @@
 package ms.sapientia.ro.gaitrecognitionapp.presenter;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
-
-import java.util.ArrayList;
 
 import ms.sapientia.ro.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
@@ -18,12 +20,11 @@ import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 
 public class MainActivityPresenter {
 
-    // Members:
+    // Constant members:
+    private static final String TAG = "MainActivityPresenter";
+    // Member members:
     public View mView;
     private boolean mDoubleBackToExitPressedOnce = false;
-    private ArrayList<Fragment> mFragmentStack = new ArrayList<>();
-
-
     // Interface:
     public interface View{
         void initProgressBar();
@@ -31,7 +32,7 @@ public class MainActivityPresenter {
         void hideProgressBar();
     }
 
-    // Constructor:
+
     public MainActivityPresenter(View view) {
         this.mView = view;
     }
@@ -44,8 +45,8 @@ public class MainActivityPresenter {
         FirebaseUtils.Init( MainActivity.sInstance);
 
         AppUtil.sAuth = FirebaseAuth.getInstance();
-        //sFirestore = FirebaseStorage.getInstance();
-        //sStorageReference = sFirestore.getReference();
+        // sFirestore = FirebaseStorage.getInstance();
+        // sStorageReference = sFirestore.getReference();
     }
 
     /**
@@ -63,22 +64,22 @@ public class MainActivityPresenter {
     }
 
     /**
+     * Removes the fragment from fragment stack.
+     * @param fragment fragment which should be removed
+     */
+    public void removeFragment(Fragment fragment, FragmentManager fragmentManager){
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.remove(fragment);
+        fragmentTransaction.commit();
+    }
+
+    /**
      * This method replaces fragment on top of the stack.
      * @param fragment new fragment
      * @param fragmentManager application's fragment manager
      * @param fragment_tag string tag
      */
     public void replaceFragment(Fragment fragment, FragmentManager fragmentManager, String fragment_tag){
-        /*
-        Fragment fragmentTwo = FragmentUtil.getFragmentByTagName(fragmentManager, "Fragment Two");
-
-        // Because fragment two has been popup from the back stack, so it must be null.
-        if(fragmentTwo==null)
-        {
-            fragmentTwo = new FragmentTwo();
-        }
-        */
-
         Fragment topFragment = fragmentManager.findFragmentById(R.id.fragmentContainer);
         if( topFragment == null ){
             // if there is nothing to replace, then add a new one:
@@ -91,10 +92,6 @@ public class MainActivityPresenter {
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
         }
-
-        //MainActivity.printActivityFragmentList(fragmentManager);
-
-
     }
 
     /**
@@ -116,5 +113,17 @@ public class MainActivityPresenter {
                 mDoubleBackToExitPressedOnce = false;
             }
         }, 2000);
+    }
+
+    /**
+     * This method checks the permission for internet connectivity.
+     * If permission is denied then ask the user for it.
+     */
+    public void RequestInternetPermission(){
+        if (MainActivity.sInstance.checkCallingOrSelfPermission("android.permission.INTERNET") != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.sInstance, new String[]{Manifest.permission.INTERNET}, 212);
+            Log.e(TAG, "No Internet Permission!");
+            Toast.makeText(MainActivity.sContext,"No Internet Permission!", Toast.LENGTH_LONG).show();
+        }
     }
 }

@@ -5,6 +5,11 @@ import java.util.ArrayList;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.model.AuthScoreObject;
 
+/**
+ * This class is the presenter of the ProfileFragment class.
+ *
+ * @author MilleJanos
+ */
 public class ProfileFragmentPresenter {
 
     // Members
@@ -14,6 +19,10 @@ public class ProfileFragmentPresenter {
         this.view = view;
     }
 
+    /**
+     * This method returns the dataset.
+     * @return
+     */
     public ArrayList<AuthScoreObject> getDataSet() {
 
         ArrayList<AuthScoreObject> retArray = new ArrayList<>();

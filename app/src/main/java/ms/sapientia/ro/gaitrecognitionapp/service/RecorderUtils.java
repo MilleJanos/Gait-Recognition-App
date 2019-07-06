@@ -1,38 +1,28 @@
 package ms.sapientia.ro.gaitrecognitionapp.service;
 
-import android.app.Activity;
+
 import android.text.format.DateFormat;
 import android.util.Log;
-import android.view.View;
-import android.view.inputmethod.InputMethodManager;
+
 
 import java.io.File;
-import java.io.FileInputStream;
+
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import ms.sapientia.ro.commonclasses.Accelerometer;
-import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
-import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
-import ms.sapientia.ro.model_builder.GaitHelperFunctions;
-import ms.sapientia.ro.model_builder.GaitModelBuilder;
-import ms.sapientia.ro.model_builder.GaitVerification;
-import ms.sapientia.ro.model_builder.IGaitModelBuilder;
-import ms.sapientia.ro.model_builder.IGaitVerification;
-import weka.classifiers.Classifier;
-import weka.classifiers.trees.RandomForest;
-import weka.core.Attribute;
-import weka.core.SerializationHelper;
 
+/**
+ * This class contains utility methods for the Recorder class.
+ *
+ * @author MilleJanos
+ */
 public class RecorderUtils {
 
     private RecorderUtils() {
@@ -71,7 +61,7 @@ public class RecorderUtils {
      * 1 if there occurred an error
      */
     public static short saveRawAccelerometerDataIntoCsvFile(ArrayDeque<Accelerometer> array, File file, String headerStr) {
-        String TAG = "saveRawAccelerometerDataIntoCsvFile";
+        String TAG = "saveRawAcc.IntoCsvFile";
         Log.d(TAG, ">>>RUN>>>savingAccArrayIntoCSV()");
 
         if (!file.exists()) {
@@ -111,84 +101,28 @@ public class RecorderUtils {
         return 0;
     }
 
+    /**
+     * This method returns the current date in yyyyMMdd_HHmmss format.
+     * @return formatted date
+     */
     public static String getCurrentDateFormatted(){
         Date date = new Date();
         lastUsedDate = date;
-        return DateFormat.format("yyyyMMdd_HHmmss", date.getTime()).toString();
+        return formatDate( date );
     }
 
+    /**
+     * This method converts the date to yyyyMMdd_HHmmss format.
+     * @return formatted date
+     */
     public static String formatDate(Date date){
         return DateFormat.format("yyyyMMdd_HHmmss", date.getTime()).toString();
     }
 
-
-//    // Initial Files
-//    public static void initInternalFiles(){
-//
-//        // Create folder if not exists:
-//        File myInternalFilesRoot = new File(RecorderUtils.internalFilesRoot.getAbsolutePath() /*+ customDIR*/);
-//        if (!myInternalFilesRoot.exists()) {
-//            myInternalFilesRoot.mkdirs();
-//            Log.i(TAG, "Path not exists (" + myInternalFilesRoot.getAbsolutePath() + ") --> .mkdirs()");
-//        }
-//
-//        // Creating user's raw data file path:
-//        RecorderUtils.rawdata_user_path = RecorderUtils.internalFilesRoot.getAbsolutePath() + RecorderUtils.appCustomDIR + "/" + getCurrentDateFormatted() + "/rawdata" + /*"_" + getCurrentDateFormatted +*/ ".csv";
-//        RecorderUtils.feature_user_path = RecorderUtils.internalFilesRoot.getAbsolutePath() + RecorderUtils.appCustomDIR + "/" + getCurrentDateFormatted() + "/feature" + /*"_" + getCurrentDateFormatted +*/ ".arff";
-//        RecorderUtils.model_user_path =   RecorderUtils.internalFilesRoot.getAbsolutePath() + RecorderUtils.appCustomDIR + "/" + getCurrentDateFormatted() + "/model"   + /*"_" + getCurrentDateFormatted +*/ ".mdl";
-//        RecorderUtils.feature_negative_dummy_path = RecorderUtils.internalFilesRoot.getAbsolutePath() + RecorderUtils.appCustomDIR + "/feature_negative.arff";
-//        //region Print this 4 paths
-//        Log.i(TAG, "PATH: RecorderUtils.feature_dummy_path = " + RecorderUtils.feature_negative_dummy_path);
-//        Log.i(TAG, "PATH: RecorderUtils.rawdata_user_path  = " + RecorderUtils.rawdata_user_path);
-//        Log.i(TAG, "PATH: RecorderUtils.feature_user_path  = " + RecorderUtils.feature_user_path);
-//        Log.i(TAG, "PATH: RecorderUtils.model_user_path    = " + RecorderUtils.model_user_path);
-//        //endregion                                                   //*//
-//
-//        // internal files as File type:
-//        featureNegativeDummyFile = new File(RecorderUtils.feature_negative_dummy_path);
-//        rawdataUserFile = new File(RecorderUtils.rawdata_user_path);
-//        featureUserFile = new File(RecorderUtils.feature_user_path);
-//        modelUserFile = new File(RecorderUtils.model_user_path);
-//
-//        //*//
-//        // Creating user's raw data file (if not exists):
-//        if (!RecorderUtils.rawdataUserFile.exists()) {
-//            try {
-//                RecorderUtils.rawdataUserFile.createNewFile();
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                Log.e(TAG, "File can't be created: " + RecorderUtils.rawdata_user_path);
-//            }
-//        }
-//        // Creating user's feature file (if not exists):
-//        if (!RecorderUtils.featureUserFile.exists()) {
-//            try {
-//                RecorderUtils.featureUserFile.createNewFile();
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                Log.e(TAG, "File can't be created: " + RecorderUtils.feature_user_path);
-//            }
-//        }
-//        // Creating user's model file (if not exists):
-//        if (!modelUserFile.exists()) {
-//            try {
-//                modelUserFile.createNewFile();
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                Log.e(TAG, "File can't be created: " + RecorderUtils.model_user_path);
-//            }
-//        }
-//        // Creating dummy's(negative data) feature file (if not exists):
-//        if ( ! featureNegativeDummyFile.exists()) {
-//            try {
-//                featureNegativeDummyFile.createNewFile();
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                Log.e(TAG, "File can't be created: " + RecorderUtils.feature_negative_dummy_path);
-//            }
-//        }
-//    }
-
+    /**
+     * This method returns the current time in timestamp.
+     * @return current time in timestamp
+     */
     public static String getCurrentTimeStamp(){
         try {
 
@@ -203,6 +137,11 @@ public class RecorderUtils {
         }
     }
 
+    /**
+     * This method converts List into ArrayDeque.
+     * @param list
+     * @return
+     */
     public static ArrayDeque<Accelerometer> listToArrayDeque(List<Accelerometer> list){
         ArrayDeque<Accelerometer> ad = new ArrayDeque<>();
 
@@ -212,47 +151,5 @@ public class RecorderUtils {
 
         return ad;
     }
-
-    public static double checkUserInPercentage_OLD(/*Activity activity, String userRawDataFilePath, String userFeatureFilePath, String dummyFeatureFilePath, String userModelFilePath, String userId*/) {
-
-        double percentage = -1;
-
-        IGaitModelBuilder builder = new GaitModelBuilder();
-        Classifier classifier;
-        try {
-            classifier = (RandomForest) SerializationHelper.read(new FileInputStream( AppUtil.modelUserFile.getAbsolutePath() )); //new RandomForest();
-
-            //GaitHelperFunctions.createFeaturesFileFromRawFile(
-            //        RecorderUtils.rawdataUserFile.getAbsolutePath(),
-            //        RecorderUtils.featureUserFile.getAbsolutePath().substring(0, RecorderUtils.featureUserFile.getAbsolutePath().length() - (".arff").length()), "userId");
-
-
-            // features_dummy + features_user
-            GaitHelperFunctions.mergeEquallyArffFiles(
-                    AppUtil.featureNegativeFile.getAbsolutePath(),
-                    RecorderUtils.featureUserFile_Copy.getAbsolutePath());
-
-            ArrayList<Attribute> attributes = builder.getAttributes( RecorderUtils.featureUserFile_Copy.getAbsolutePath() ); ///feature (mar letezo)
-
-            IGaitVerification verifier = new GaitVerification();
-            //percentage = verifier.verifyUser(classifier, attributes, FRESH_RAWDATA_WAITING_TO_TEST ); // 3. param - user raw data
-            percentage = verifier.verifyUser(classifier, attributes, AppUtil.featureNegativeFile.getAbsolutePath(), "NOPE");
-
-            // percentage = Integer.parseInt( ((percentage * 100) + "").substring(0, 2) );
-
-        } catch (FileNotFoundException e) {
-            Log.e(TAG, "*********File not found!");
-            e.printStackTrace();
-        } catch (Exception e) {
-            Log.e(TAG, "*********Error!");
-            e.printStackTrace();
-        }
-
-        return percentage;
-    }
-
-
-
-
 
 }

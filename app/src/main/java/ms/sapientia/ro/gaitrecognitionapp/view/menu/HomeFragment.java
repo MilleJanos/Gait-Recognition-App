@@ -18,21 +18,23 @@ import ms.sapientia.ro.gaitrecognitionapp.model.NavigationMenuFragmentItem;
 import ms.sapientia.ro.gaitrecognitionapp.presenter.menu.HomeFragmentPresenter;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 
+/**
+ * This class is responsible to help navigat the user.
+ *
+ * @author MilleJanos
+ */
 public class HomeFragment extends NavigationMenuFragmentItem implements HomeFragmentPresenter.View {
 
-
-
-    // Constants:
+    // Constants members:
     private static final String TAG = "HomeFragment";
-
+    // MVP members:
+    private HomeFragmentPresenter mPresenter;
     // View members:
     private TextView mHelpTextViewButton;
     private ImageView mOpenDrawerHelpImageViewButton;
     private ImageView mOpenDrawerHelpImageView;
     private boolean mAnimationLock; // to prevent spamming the mOpenDrawerHelpImageViewButton button
 
-    // MVP
-    private HomeFragmentPresenter mPresenter;
 
     @Nullable
     @Override
@@ -59,6 +61,10 @@ public class HomeFragment extends NavigationMenuFragmentItem implements HomeFrag
 
     }
 
+    /**
+     * This method initiates the view elements.
+     * @param view fragments view.
+     */
     private void initView(View view) {
         mHelpTextViewButton = view.findViewById(R.id.help_textviewbutton);
         mOpenDrawerHelpImageViewButton = view.findViewById(R.id.open_drawer_help_button);
@@ -66,6 +72,9 @@ public class HomeFragment extends NavigationMenuFragmentItem implements HomeFrag
         mOpenDrawerHelpImageView.setVisibility( View.INVISIBLE );
     }
 
+    /**
+     * This method binds the listeners to the view elements.
+     */
     private void bindClickListeners() {
         mHelpTextViewButton.setOnClickListener(v -> goToHelpPage());
 
@@ -93,16 +102,25 @@ public class HomeFragment extends NavigationMenuFragmentItem implements HomeFrag
 
     }
 
+    /**
+     * This method opens the help page.
+     */
     private void goToHelpPage(){
         MainActivity.sInstance.replaceFragment(new HelpFragment(), "help_fragment");
         ((NavigationView) MainActivity.sInstance.findViewById(R.id.nav_view)).setCheckedItem(R.id.nav_help);
     }
 
+    /**
+     * This method shows the progress bar.
+     */
     @Override
     public void showProgressBar() {
         MainActivity.sInstance.showProgressBar();
     }
 
+    /**
+     * This method hides the progress bar.
+     */
     @Override
     public void hideProgressBar() {
         MainActivity.sInstance.hideProgressBar();

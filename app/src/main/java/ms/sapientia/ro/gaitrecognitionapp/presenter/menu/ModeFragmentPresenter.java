@@ -10,24 +10,24 @@ import java.util.List;
 import ms.sapientia.ro.gaitrecognitionapp.service.BackgroundService;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 
+/**
+ * This class is the presenter of the ModeFragment.
+ *
+ * @author MilleJanos
+ */
 public class ModeFragmentPresenter {
 
     // Members
     private View view;
-
     // Interface:
     public interface View{
         void showProgressBar();
         void hideProgressBar();
     }
-
     // Constructor
     public ModeFragmentPresenter(View view){
         this.view = view;
     }
-
-
-    // Methods:
 
     /**
      * This method starts the service if is not running.

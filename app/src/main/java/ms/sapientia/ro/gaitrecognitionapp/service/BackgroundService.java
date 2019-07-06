@@ -14,18 +14,21 @@ import ms.sapientia.ro.gaitrecognitionapp.R;
 import ms.sapientia.ro.gaitrecognitionapp.common.AppUtil;
 import ms.sapientia.ro.gaitrecognitionapp.view.MainActivity;
 
+/**
+ * This class holds the service running in background and controlling the Recorder class.
+ *
+ * @author MilleJanos
+ */
 public class BackgroundService extends Service {
 
-    // Static members
+    // Static members:
     private static final String TAG = "BackgroundService";
     public static final String NAME = "ms.sapientia.ro.gaitrecognitionapp.service.BackgroundService";
-
     public static boolean sIsRunning = false;
     public static BackgroundService sInstance = null;
     public static BackgroundService sStoredService = null;
     public static Notification sNotification = null;
-
-    // Vars
+    // Other members:
     private Recorder mRecorder;
     private boolean mCreateModel; // true= Create Model; false= Verify last created model
     private IBinder mBinder = new LocalBinder();
@@ -67,6 +70,11 @@ public class BackgroundService extends Service {
         return START_NOT_STICKY;
     }
 
+    /**
+     * This method starts the recording.
+     * @param mode starts in mode
+     * @param train_new_one true-train new; false-train more the previous one
+     */
     public void StartRecording(Recorder.Mode mode, boolean train_new_one){
         if(mRecorder == null) {
             // Start Recorder with selected mode & train mode
@@ -76,6 +84,9 @@ public class BackgroundService extends Service {
         sIsRunning = true;
     }
 
+    /**
+     * This method stops the recording.
+     */
     public void StopRecording(){
         if(mRecorder != null) {
             mRecorder.stopRecording();
@@ -106,6 +117,9 @@ public class BackgroundService extends Service {
 
     }
 
+    /**
+     * This method stops the service.
+     */
     public void StopService(){
         Log.i(TAG, "StopService()");
         StopRecording();
@@ -123,10 +137,18 @@ public class BackgroundService extends Service {
         super.onRebind(intent);
     }
 
+    /**
+     * This method returns the stored service value.
+     * @return stored service
+     */
     public BackgroundService getStoredService(){
         return sStoredService;
     }
 
+    /**
+     * This method sets the stored service value.
+     * @param service stored service
+     */
     public void setStoredService(BackgroundService service){
         sStoredService = service;
     }
